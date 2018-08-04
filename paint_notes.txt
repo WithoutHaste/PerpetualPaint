@@ -1,0 +1,56 @@
+possible names
+================
+Simply Colors (not original)
+95 Paint (sounds too like Windows)
+top notch paint (not original)
+rabbit paint
+rabbit patch paint (rabbit patch is a restaurant in Texas)
+alleged paint
+tangle paint (zentangle paint is a free app for coloring in pre-existing patterns, 150 color limit)
+comic paint
+perpetual paint (perpetual painting is a business on facebook)
+
+Perpetual Paint
+
+
+patreon
+==============
+set up a donations page for this (not project based, just support)
+
+
+
+
+features
+======================
+Designed for black and white outline images, like a coloring book. Minor gray-scale supported.
+
+1. Open bitmap/png image as bitmap. Display image on screen with zoom in/out options.
+
+2. Program can identify different coloring sections, based on contiguous white/gray space
+	a space is first identified by a y-by-y square of white pixels
+	space expands outward in all directions until it is hemmed in by absolute black
+	
+3. Display color palette
+	start with at least one default palette (maybe easter pastels)
+	
+4. Select color in palette, apply color to any part of the image
+	click on absolute black is ignored (minor error noise)
+	click on anything else will fill that section with the color
+	white is replaced with true color
+	grays are replaced with grayed-color
+	
+5. Re-color a colored section
+	Result should be as if you had applied color over white
+	
+6. Build your own palette and save it
+
+7. Swap colors in the image - like swap all color x sections with color y
+
+8. Build a project of multiple images
+	save a config file with all image locations so they can be opened as one project
+	save a palette filename with the project
+	see all images at once as thumbnails
+	focus on one image to see it big
+	color swaps can affect all images in the project at once
+	
+9. Save the resulting image(s)
