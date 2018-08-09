@@ -39,7 +39,9 @@ namespace PerpetualPaint
 		private void InitImage()
 		{
 			pictureBox = new PictureBox();
+			pictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 			pictureBox.Dock = DockStyle.Fill;
+			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
 
 			this.Controls.Add(pictureBox);
 		}
