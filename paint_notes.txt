@@ -54,3 +54,48 @@ Designed for black and white outline images, like a coloring book. Minor gray-sc
 	color swaps can affect all images in the project at once
 	
 9. Save the resulting image(s)
+
+
+
+
+
+
+design
+==================================
+C# Windows App
+using multiple windows
+first window shows one image, zoom in and out, scroll around, apply colors
+second (optional) windows is for projects, shows small versions of every image in project, can select one from there to focus on in main window
+
+version 1 will just be the first window
+open one image, edit it, save it
+support as many save formats as C# easily allows - should be at least bitmap, png, jpg
+create and save custom palettes
+
+black is an unchangeable constant value - it is the boundary between coloring areas
+when image is opened, auto-detect areas
+	based on a 9x9 pixel area of solid non-black, expanding outward
+		or find the black edges and work inward
+	can probably save complete lists of bits in the image - a set of bits for each section
+	and one set for all the black
+view: all the black as black, and everything else as white - to verify sections
+show image as big as possible
+	zoom in and out
+	scroll horizontal and vertical
+display default palette along one side - it gets its own vertical scroll bar
+	you can't save over the default palette
+	but you can edit it and save as a custom palette
+		add and remove colors (no upper limit on color count)
+			no duplicate colors allowed
+		edit colors
+			color picker
+			rgb or hex or hue/saturation/lightness
+		auto-sort options
+			by hue, saturation, lightness
+			by hex value
+			whatever makes sense
+		drag and drop re-order option?
+select color from palette
+	click on section of image to see it updated
+undo, redo on both palettes and images
+
