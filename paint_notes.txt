@@ -57,7 +57,10 @@ Designed for black and white outline images, like a coloring book. Minor gray-sc
 
 
 
-
+resources
+==================================
+drawing and downloading 32x32 pixel icons
+	https://www.pixilart.com/draw
 
 
 design

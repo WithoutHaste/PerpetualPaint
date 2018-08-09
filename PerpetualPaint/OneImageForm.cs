@@ -12,10 +12,15 @@ namespace PerpetualPaint
 	public class OneImageForm : Form
 	{
 		private ToolStrip toolStrip;
+		private PictureBox pictureBox;
 
 		private string saveFullFilename;
 		private Bitmap masterImage;
-		private PictureBox pictureBox;
+		private Bitmap zoomedImage;
+		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
+		private double zoomUnits = 0.2; //this is the percentage of change
+
+		private bool HasImage { get { return masterImage != null; } }
 
 		public OneImageForm()
 		{
@@ -33,7 +38,7 @@ namespace PerpetualPaint
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			fileMenu.MenuItems.Add("Open", new EventHandler(OpenFile));
+			fileMenu.MenuItems.Add("Open", new EventHandler(OnOpenFile));
 
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
@@ -43,9 +48,9 @@ namespace PerpetualPaint
 		{
 			toolStrip = new ToolStrip();
 			toolStrip.Dock = DockStyle.Top;
-			toolStrip.Items.Add("Fit");
-			toolStrip.Items.Add("Zoom In");
-			toolStrip.Items.Add("Zoom Out");
+			toolStrip.Items.Add("Fit", Image.FromFile("resources/icons/icon_fit.png"), OnFit);
+			toolStrip.Items.Add("Zoom In", Image.FromFile("resources/icons/icon_plus.png"), OnZoomIn);
+			toolStrip.Items.Add("Zoom Out", Image.FromFile("resources/icons/icon_minus.png"), OnZoomOut);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -61,11 +66,24 @@ namespace PerpetualPaint
 			this.Controls.Add(pictureBox);
 		}
 
+		/// <summary>
+		/// Start zoom based on the current zoom level of the picture box.
+		/// </summary>
+		private void InitZoom()
+		{
+			if(!this.HasImage) return;
+			if(pictureBox.SizeMode != PictureBoxSizeMode.Zoom) return;
+
+			double widthScale = (double)pictureBox.DisplayRectangle.Width / (double)masterImage.Width;
+			double heightScale = (double)pictureBox.DisplayRectangle.Height / (double)masterImage.Height;
+			imageScale = Math.Min(widthScale, heightScale);
+		}
+
 		#endregion
 
 		#region Event Handlers
 
-		private void OpenFile(object sender, EventArgs e)
+		private void OnOpenFile(object sender, EventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			openFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
@@ -77,7 +95,7 @@ namespace PerpetualPaint
 			}
 			try
 			{
-				UpdateImage(openFileDialog.FileName);
+				UpdateMasterImage(openFileDialog.FileName);
 			}
 			catch(FileNotFoundException exception)
 			{
@@ -85,13 +103,58 @@ namespace PerpetualPaint
 			}
 		}
 
+		private void OnFit(object sender, EventArgs e)
+		{
+			if(!this.HasImage) return;
+
+			imageScale = 1;
+			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+			UpdateZoomedImage();
+		}
+
+		private void OnZoomIn(object sender, EventArgs e)
+		{
+			if(!this.HasImage) return;
+
+			InitZoom();
+			imageScale *= (1 + zoomUnits);
+			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+			UpdateZoomedImage();
+		}
+
+		private void OnZoomOut(object sender, EventArgs e)
+		{
+			if(!this.HasImage) return;
+
+			InitZoom();
+			imageScale = Math.Max(zoomUnits, imageScale * (1 - zoomUnits));
+			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+			UpdateZoomedImage();
+		}
+
 		#endregion
 
-		private void UpdateImage(string fullFilename)
+		private void UpdateMasterImage(string fullFilename)
 		{
 			saveFullFilename = fullFilename;
 			masterImage = (Bitmap)Image.FromFile(fullFilename);
-			pictureBox.Image = masterImage;
+			UpdateZoomedImage();
+		}
+
+		private void UpdateZoomedImage()
+		{
+			this.SuspendLayout();
+
+			int zoomedWidth = (int)(masterImage.Width * imageScale);
+			int zoomedHeight = (int)(masterImage.Height * imageScale);
+			zoomedImage = new Bitmap(zoomedWidth, zoomedHeight);
+			using(Graphics graphics = Graphics.FromImage(zoomedImage))
+			{
+				graphics.DrawImage(masterImage, new Rectangle(0, 0, zoomedWidth, zoomedHeight));
+			}
+			pictureBox.Image = zoomedImage;
+
+			this.ResumeLayout();
 		}
 
 		private void HandleError(string userMessage, Exception e)
