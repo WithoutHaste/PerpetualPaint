@@ -11,6 +11,8 @@ namespace PerpetualPaint
 {
 	public class OneImageForm : Form
 	{
+		private ToolStrip toolStrip;
+
 		private string saveFullFilename;
 		private Bitmap masterImage;
 		private PictureBox pictureBox;
@@ -22,6 +24,7 @@ namespace PerpetualPaint
 			this.Height = 600;
 
 			InitMenus();
+			InitTools();
 			InitImage();
 		}
 
@@ -36,11 +39,23 @@ namespace PerpetualPaint
 			this.Menu.MenuItems.Add(fileMenu);
 		}
 
+		private void InitTools()
+		{
+			toolStrip = new ToolStrip();
+			toolStrip.Dock = DockStyle.Top;
+			toolStrip.Items.Add("Fit");
+			toolStrip.Items.Add("Zoom In");
+			toolStrip.Items.Add("Zoom Out");
+
+			this.Controls.Add(toolStrip);
+		}
+
 		private void InitImage()
 		{
 			pictureBox = new PictureBox();
-			pictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-			pictureBox.Dock = DockStyle.Fill;
+			pictureBox.Location = new Point(0, toolStrip.Location.Y + toolStrip.Height);
+			pictureBox.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - toolStrip.Height);
+			pictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
 
 			this.Controls.Add(pictureBox);
