@@ -16,6 +16,8 @@ namespace PerpetualPaint
 		private Panel scrollPanel;
 		private PictureBox pictureBox;
 
+		private const int SCALE_FIT = -1;
+
 		private string saveFullFilename;
 		private Bitmap masterImage;
 		private Bitmap zoomedImage;
@@ -31,21 +33,12 @@ namespace PerpetualPaint
 					(0 - pictureBox.Location.Y) + (scrollPanel.ClientSize.Height / 2)
 					);
 			}
-			set {
-			/*	pictureBox.Location = new Point(
-					0 - (value.X - (scrollPanel.ClientSize.Width / 2)),
-					0 - (value.Y - (scrollPanel.ClientSize.Height / 2))
-					);*/
-			}
 		}
 
 		private Point MasterImageVisibleCenterPoint {
 			get {
 				Point centerPoint = PictureBoxVisibleCenterPoint;
 				return new Point((int)(centerPoint.X / imageScale), (int)(centerPoint.Y / imageScale));
-			}
-			set {
-				PictureBoxVisibleCenterPoint = new Point((int)(value.X * imageScale), (int)(value.Y * imageScale));
 			}
 		}
 
@@ -111,7 +104,7 @@ namespace PerpetualPaint
 		{
 			if(!this.HasImage) throw new Exception("Should not be able to InitZoom before image is loaded.");
 
-			if(pictureBox.SizeMode != PictureBoxSizeMode.Zoom) return;
+			if(imageScale != SCALE_FIT) return;
 
 			double widthScale = (double)pictureBox.DisplayRectangle.Width / (double)masterImage.Width;
 			double heightScale = (double)pictureBox.DisplayRectangle.Height / (double)masterImage.Height;
@@ -146,14 +139,7 @@ namespace PerpetualPaint
 		{
 			if(!this.HasImage) return;
 
-			Fit();
-			UpdateZoomedImage();
-		}
-		private void Fit()
-		{
-			imageScale = 1;
-			pictureBox.Dock = DockStyle.Fill;
-			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+			UpdateZoomedImage(SCALE_FIT);
 		}
 
 		private void Image_OnZoomIn(object sender, EventArgs e)
@@ -161,11 +147,8 @@ namespace PerpetualPaint
 			if(!this.HasImage) return;
 
 			InitZoom();
-			Point centerPoint = MasterImageVisibleCenterPoint;
-			imageScale *= (1 + zoomUnits);
-			pictureBox.Dock = DockStyle.None;
-			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-			UpdateZoomedImage(centerPoint);
+			double newImageScale = imageScale * (1 + zoomUnits);
+			UpdateZoomedImage(newImageScale);
 		}
 
 		private void Image_OnZoomOut(object sender, EventArgs e)
@@ -173,11 +156,8 @@ namespace PerpetualPaint
 			if(!this.HasImage) return;
 
 			InitZoom();
-			Point centerPoint = MasterImageVisibleCenterPoint;
-			imageScale = Math.Max(zoomUnits, imageScale * (1 - zoomUnits));
-			pictureBox.Dock = DockStyle.None;
-			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-			UpdateZoomedImage(centerPoint);
+			double newImageScale = Math.Max(zoomUnits, imageScale * (1 - zoomUnits));
+			UpdateZoomedImage(newImageScale);
 		}
 
 #if DEBUG
@@ -200,16 +180,31 @@ namespace PerpetualPaint
 		{
 			saveFullFilename = fullFilename;
 			masterImage = (Bitmap)Image.FromFile(fullFilename);
-			Fit();
-			UpdateZoomedImage();
+			UpdateZoomedImage(SCALE_FIT);
 		}
 
-		private void UpdateZoomedImage(Point? centerPoint = null)
+		private void UpdateZoomedImage(double newImageScale)
 		{
 			this.SuspendLayout();
 
-			int zoomedWidth = (int)(masterImage.Width * imageScale);
-			int zoomedHeight = (int)(masterImage.Height * imageScale);
+			int zoomedWidth = masterImage.Width;
+			int zoomedHeight = masterImage.Height;
+			Point centerPoint = MasterImageVisibleCenterPoint;
+			imageScale = newImageScale;
+			if(imageScale == SCALE_FIT)
+			{
+				pictureBox.Dock = DockStyle.Fill;
+				pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+			}
+			else
+			{
+				pictureBox.Dock = DockStyle.None;
+				pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+
+				zoomedWidth = (int)(masterImage.Width * imageScale);
+				zoomedHeight = (int)(masterImage.Height * imageScale);
+			}
+
 			zoomedImage = new Bitmap(zoomedWidth, zoomedHeight);
 			using(Graphics graphics = Graphics.FromImage(zoomedImage))
 			{
@@ -218,23 +213,19 @@ namespace PerpetualPaint
 			pictureBox.Size = new Size(zoomedImage.Width, zoomedImage.Height);
 			pictureBox.Image = zoomedImage;
 
-			UpdateScrollBars(centerPoint);
+			if(imageScale != SCALE_FIT)
+			{
+				UpdateScrollBars(centerPoint);
+			}
 
 			this.ResumeLayout();
 		}
 
-		private void UpdateScrollBars(Point? centerPoint)
+		private void UpdateScrollBars(Point masterImageCenterPoint)
 		{
-			if(pictureBox.SizeMode == PictureBoxSizeMode.Zoom)
-			{
-				return;
-			}
-
-			if(centerPoint == null) throw new ArgumentException("CenterPoint required for zoom mode.");
-
 			scrollPanel.AutoScrollPosition = new Point(
-				(int)((centerPoint.Value.X * imageScale) - (scrollPanel.ClientSize.Width / 2)),
-				(int)((centerPoint.Value.Y * imageScale) - (scrollPanel.ClientSize.Height / 2))
+				(int)((masterImageCenterPoint.X * imageScale) - (scrollPanel.ClientSize.Width / 2)),
+				(int)((masterImageCenterPoint.Y * imageScale) - (scrollPanel.ClientSize.Height / 2))
 				);
 		}
 
