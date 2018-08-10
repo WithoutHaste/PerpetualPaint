@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WinFormsExtensions;
 
 namespace PerpetualPaint
 {
@@ -47,9 +48,9 @@ namespace PerpetualPaint
 			okButton.Click += new EventHandler(OkButton_OnClick);
 
 			TextBox textBox = new TextBox();
-			textBox.Size = new Size(this.ClientSize.Width - (2 * margin), this.ClientSize.Height - (2 * margin) - okButton.Height);
 			textBox.Location = new Point(margin, margin);
-			textBox.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
+			textBox.Size = LayoutHelper.FillAbove(this, okButton, margin);
+			textBox.Anchor = LayoutHelper.AnchorAll;
 			textBox.Multiline = true;
 			textBox.WordWrap = true;
 			textBox.ReadOnly = true;

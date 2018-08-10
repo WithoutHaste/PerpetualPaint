@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WinFormsExtensions;
 
 namespace PerpetualPaint
 {
@@ -33,24 +34,30 @@ namespace PerpetualPaint
 			InitImage();
 		}
 
-		#region Init
+#region Init
 
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			fileMenu.MenuItems.Add("Open", new EventHandler(OnOpenFile));
+			fileMenu.MenuItems.Add("Open", new EventHandler(Form_OnOpenFile));
 
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
+
+#if DEBUG
+			MenuItem debugMenu = new MenuItem("Debug");
+			debugMenu.MenuItems.Add("Show Error Message", new EventHandler(Debug_OnShowErrorMessage));
+			this.Menu.MenuItems.Add(debugMenu);
+#endif
 		}
 
 		private void InitTools()
 		{
 			toolStrip = new ToolStrip();
 			toolStrip.Dock = DockStyle.Top;
-			toolStrip.Items.Add("Fit", Image.FromFile("resources/icons/icon_fit.png"), OnFit);
-			toolStrip.Items.Add("Zoom In", Image.FromFile("resources/icons/icon_plus.png"), OnZoomIn);
-			toolStrip.Items.Add("Zoom Out", Image.FromFile("resources/icons/icon_minus.png"), OnZoomOut);
+			toolStrip.Items.Add("Fit", Image.FromFile("resources/icons/icon_fit.png"), Image_OnFit);
+			toolStrip.Items.Add("Zoom In", Image.FromFile("resources/icons/icon_plus.png"), Image_OnZoomIn);
+			toolStrip.Items.Add("Zoom Out", Image.FromFile("resources/icons/icon_minus.png"), Image_OnZoomOut);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -58,9 +65,9 @@ namespace PerpetualPaint
 		private void InitImage()
 		{
 			pictureBox = new PictureBox();
-			pictureBox.Location = new Point(0, toolStrip.Location.Y + toolStrip.Height);
-			pictureBox.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - toolStrip.Height);
-			pictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			pictureBox.Location = LayoutHelper.PlaceBelow(toolStrip);
+			pictureBox.Size = LayoutHelper.FillBelow(this, toolStrip);
+			pictureBox.Anchor = LayoutHelper.AnchorAll;
 			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
 
 			this.Controls.Add(pictureBox);
@@ -79,11 +86,11 @@ namespace PerpetualPaint
 			imageScale = Math.Min(widthScale, heightScale);
 		}
 
-		#endregion
+#endregion
 
-		#region Event Handlers
+#region Event Handlers
 
-		private void OnOpenFile(object sender, EventArgs e)
+		private void Form_OnOpenFile(object sender, EventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			openFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
@@ -103,7 +110,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		private void OnFit(object sender, EventArgs e)
+		private void Image_OnFit(object sender, EventArgs e)
 		{
 			if(!this.HasImage) return;
 
@@ -112,7 +119,7 @@ namespace PerpetualPaint
 			UpdateZoomedImage();
 		}
 
-		private void OnZoomIn(object sender, EventArgs e)
+		private void Image_OnZoomIn(object sender, EventArgs e)
 		{
 			if(!this.HasImage) return;
 
@@ -122,7 +129,7 @@ namespace PerpetualPaint
 			UpdateZoomedImage();
 		}
 
-		private void OnZoomOut(object sender, EventArgs e)
+		private void Image_OnZoomOut(object sender, EventArgs e)
 		{
 			if(!this.HasImage) return;
 
@@ -132,7 +139,21 @@ namespace PerpetualPaint
 			UpdateZoomedImage();
 		}
 
-		#endregion
+#if DEBUG
+		private void Debug_OnShowErrorMessage(object sender, EventArgs e)
+		{
+			try
+			{
+				throw new Exception("More detailed error message.");
+			}
+			catch(Exception exception)
+			{
+				HandleError("Summary for user.", exception);
+			}
+		}
+#endif
+
+#endregion
 
 		private void UpdateMasterImage(string fullFilename)
 		{
