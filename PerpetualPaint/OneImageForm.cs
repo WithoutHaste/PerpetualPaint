@@ -17,6 +17,7 @@ namespace PerpetualPaint
 		private PictureBox pictureBox;
 
 		private const int SCALE_FIT = -1;
+		private const int MAX_IMAGE_DIMENSION = 9000;
 
 		private string saveFullFilename;
 		private Bitmap masterImage;
@@ -187,6 +188,8 @@ namespace PerpetualPaint
 		{
 			this.SuspendLayout();
 
+			double previousImageScale = imageScale;
+
 			int zoomedWidth = masterImage.Width;
 			int zoomedHeight = masterImage.Height;
 			Point centerPoint = MasterImageVisibleCenterPoint;
@@ -201,11 +204,28 @@ namespace PerpetualPaint
 				pictureBox.Dock = DockStyle.None;
 				pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
 
+				//todo: refactor options?
 				zoomedWidth = (int)(masterImage.Width * imageScale);
 				zoomedHeight = (int)(masterImage.Height * imageScale);
+				if(zoomedWidth > MAX_IMAGE_DIMENSION || zoomedHeight > MAX_IMAGE_DIMENSION)
+				{
+					double recalculateImageScale = Math.Min(MAX_IMAGE_DIMENSION / masterImage.Width, MAX_IMAGE_DIMENSION / masterImage.Height);
+					imageScale = recalculateImageScale;
+					zoomedWidth = (int)(masterImage.Width * imageScale);
+					zoomedHeight = (int)(masterImage.Height * imageScale);
+				}
 			}
 
-			zoomedImage = new Bitmap(zoomedWidth, zoomedHeight);
+			try
+			{
+				zoomedImage = new Bitmap(zoomedWidth, zoomedHeight);
+			}
+			catch(ArgumentException exception)
+			{
+				HandleError("Error resizing image.", exception);
+				UpdateZoomedImage(previousImageScale);
+			}
+
 			using(Graphics graphics = Graphics.FromImage(zoomedImage))
 			{
 				graphics.DrawImage(masterImage, new Rectangle(0, 0, zoomedWidth, zoomedHeight));
