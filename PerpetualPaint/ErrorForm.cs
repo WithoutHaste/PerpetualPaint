@@ -9,11 +9,10 @@ using WinFormsExtensions;
 
 namespace PerpetualPaint
 {
-	/// <summary>
-	/// Use "\r\n" for line breaks.
-	/// </summary>
 	public class ErrorForm : Form
 	{
+		public const string LineBreak = "\r\n";
+
 		private Button okButton;
 
 		public ErrorForm(string title, string message)
@@ -23,7 +22,7 @@ namespace PerpetualPaint
 
 		public ErrorForm(string title, string[] message)
 		{
-			InitForm(title, String.Join("\r\n", message));
+			InitForm(title, String.Join(LineBreak, message));
 		}
 
 		private void InitForm(string title, string message)
@@ -32,6 +31,7 @@ namespace PerpetualPaint
 			this.Width = 400;
 			this.Height = 300;
 			this.Icon = SystemIcons.Error;
+			this.MinimizeBox = false;
 
 			this.Shown += new EventHandler(Form_OnShown);
 
