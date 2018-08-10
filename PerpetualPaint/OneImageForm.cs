@@ -159,8 +159,11 @@ namespace PerpetualPaint
 
 		private void HandleError(string userMessage, Exception e)
 		{
-			string formattedMessage = String.Format("{0}\n\n{1}\n\n{2}", userMessage, e.Message, e.StackTrace);
-			MessageBox.Show(formattedMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			string[] message = new string[] { userMessage, "", "Exception:", e.Message, "", "Stack Trace:", e.StackTrace };
+			using(ErrorForm form = new ErrorForm("Error", message))
+			{
+				form.ShowDialog();
+			}
 		}
 	}
 }
