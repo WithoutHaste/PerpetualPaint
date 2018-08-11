@@ -24,6 +24,8 @@ namespace PerpetualPaint
 		private const int DEFAULT_SWATCHES_PER_ROW = 3;
 		private const int MIN_SWATCHES_PER_ROW = 3;
 		private const int MAX_SWATCHES_PER_ROW = 12;
+		
+		private readonly Image IMAGE_SELECTED_COLOR = Image.FromFile("resources/icons/icon_selector.png");
 
 		private string saveImageFullFilename;
 		private Bitmap masterImage;
@@ -43,6 +45,7 @@ namespace PerpetualPaint
 
 		private int swatchWidth = 25;
 		private int palettePadding = 15;
+		private Color? selectedColor;
 
 		private string saveColorPaletteFullFilename = "resources/palettes/Bright-colors.aco";
 		private ColorPalette colorPalette;
@@ -219,6 +222,25 @@ namespace PerpetualPaint
 			ArrangePalette();
 		}
 
+		private void Form_OnClickColor(object sender, EventArgs e)
+		{
+			Panel colorPanel = sender as Panel;
+			selectedColor = colorPanel.BackColor;
+
+			foreach(Control child in swatchPanel.Controls)
+			{
+				if(child.BackColor == selectedColor)
+				{
+					child.BackgroundImage = IMAGE_SELECTED_COLOR;
+					child.BackgroundImageLayout = ImageLayout.Stretch;
+				}
+				else
+				{
+					child.BackgroundImage = null;
+				}
+			}
+		}
+
 		private void Image_OnFit(object sender, EventArgs e)
 		{
 			if(!this.HasImage) return;
@@ -358,6 +380,14 @@ namespace PerpetualPaint
 				colorPanel.Location = new Point(rowCount * swatchWidth, colCount * swatchWidth);
 				colorPanel.Size = new Size(swatchWidth, swatchWidth);
 				colorPanel.BackColor = color;
+				if(color == selectedColor)
+				{
+					//todo: duplicate code
+					colorPanel.BackgroundImage = IMAGE_SELECTED_COLOR;
+					colorPanel.BackgroundImageLayout = ImageLayout.Stretch;
+				}
+				colorPanel.Cursor = Cursors.Hand;
+				colorPanel.Click += new EventHandler(Form_OnClickColor);
 				swatchPanel.Controls.Add(colorPanel);
 
 				rowCount++;
