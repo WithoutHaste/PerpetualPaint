@@ -7,23 +7,34 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WinFormsExtensions;
+using WithoutHaste.Drawing.ColorPalette;
 
 namespace PerpetualPaint
 {
 	public class OneImageForm : Form
 	{
 		private ToolStrip toolStrip;
+		private Panel palettePanel;
+		private Panel swatchPanel;
 		private Panel scrollPanel;
 		private PictureBox pictureBox;
 
 		private const int SCALE_FIT = -1;
 		private const int MAX_IMAGE_DIMENSION = 9000;
 
-		private string saveFullFilename;
+		private string saveImageFullFilename;
 		private Bitmap masterImage;
 		private Bitmap zoomedImage;
 		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
 		private double zoomUnits = 0.2; //this is the percentage of change
+
+		private int minSwatchesPerRow = 3;
+		private int swatchesPerRow = 3;
+		private int swatchWidth = 25;
+		private int palettePadding = 15;
+
+		private string saveColorPaletteFullFilename = "resources/palettes/Bright-colors.aco";
+		private ColorPalette colorPalette;
 
 		private bool HasImage { get { return masterImage != null; } }
 
@@ -51,7 +62,10 @@ namespace PerpetualPaint
 
 			InitMenus();
 			InitTools();
+			InitPalette();
 			InitImage();
+
+			LoadPalette(saveColorPaletteFullFilename);
 		}
 
 #region Init
@@ -82,13 +96,35 @@ namespace PerpetualPaint
 			this.Controls.Add(toolStrip);
 		}
 
+		private void InitPalette()
+		{
+			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
+			int paletteWidth =  (swatchesPerRow * swatchWidth) + (2 * palettePadding) + scrollBarBuffer;
+
+			palettePanel = new Panel();
+			palettePanel.Location = LayoutHelper.PlaceBelow(toolStrip);
+			palettePanel.Size = LayoutHelper.FillBelow(this, toolStrip, paletteWidth);
+			palettePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+
+			swatchPanel = new Panel();
+			swatchPanel.AutoScroll = true;
+			swatchPanel.Location = new Point(palettePadding, 0);
+			swatchPanel.Size = new Size((swatchWidth * swatchesPerRow) + scrollBarBuffer, (int)(palettePanel.ClientSize.Height * 0.75));
+			swatchPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+			swatchPanel.BorderStyle = BorderStyle.Fixed3D;
+
+			palettePanel.Controls.Add(swatchPanel);
+			this.Controls.Add(palettePanel);
+		}
+
 		private void InitImage()
 		{
 			scrollPanel = new Panel();
 			scrollPanel.AutoScroll = true;
-			scrollPanel.Location = LayoutHelper.PlaceBelow(toolStrip);
-			scrollPanel.Size = LayoutHelper.FillBelow(this, toolStrip);
+			scrollPanel.Location = LayoutHelper.PlaceRight(palettePanel);
+			scrollPanel.Size = LayoutHelper.FillFromLocation(this, scrollPanel.Location);
 			scrollPanel.Anchor = LayoutHelper.AnchorAll;
+			scrollPanel.BorderStyle = BorderStyle.Fixed3D;
 
 			pictureBox = new PictureBox();
 			pictureBox.Dock = DockStyle.Fill;
@@ -179,7 +215,7 @@ namespace PerpetualPaint
 
 		private void UpdateMasterImage(string fullFilename)
 		{
-			saveFullFilename = fullFilename;
+			saveImageFullFilename = fullFilename;
 			masterImage = (Bitmap)Image.FromFile(fullFilename);
 			UpdateZoomedImage(SCALE_FIT);
 		}
@@ -247,6 +283,29 @@ namespace PerpetualPaint
 				(int)((masterImageCenterPoint.X * imageScale) - (scrollPanel.ClientSize.Width / 2)),
 				(int)((masterImageCenterPoint.Y * imageScale) - (scrollPanel.ClientSize.Height / 2))
 				);
+		}
+
+		private void LoadPalette(string fullFilename)
+		{
+			colorPalette = API.LoadACO(saveColorPaletteFullFilename);
+			swatchPanel.Controls.Clear();
+			int rowCount = 0;
+			int colCount = 0;
+			foreach(Color color in colorPalette.Colors)
+			{
+				Panel colorPanel = new Panel();
+				colorPanel.Location = new Point(rowCount * swatchWidth, colCount * swatchWidth);
+				colorPanel.Size = new Size(swatchWidth, swatchWidth);
+				colorPanel.BackColor = color;
+				swatchPanel.Controls.Add(colorPanel);
+
+				rowCount++;
+				if(rowCount >= swatchesPerRow)
+				{
+					rowCount = 0;
+					colCount++;
+				}
+			}
 		}
 
 		private void HandleError(string userMessage, Exception e)
