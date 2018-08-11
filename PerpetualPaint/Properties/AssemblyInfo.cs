@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PerpetualPaint")]
-[assembly: AssemblyDescription("Color in black and white outlines without losing shading.")]
+[assembly: AssemblyTitle("Perpetual Paint")]
+[assembly: AssemblyDescription("Color in black and white outline images without losing shading.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Without Haste, LLC")]
-[assembly: AssemblyProduct("PerpetualPaint")]
-[assembly: AssemblyCopyright("Copyright ©  2018 Without Haste, LLC")]
+[assembly: AssemblyProduct("Perpetual Paint")]
+[assembly: AssemblyCopyright("Copyright © 2018 Without Haste, LLC")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -21,6 +21,9 @@ namespace PerpetualPaint
 
 		private const int SCALE_FIT = -1;
 		private const int MAX_IMAGE_DIMENSION = 9000;
+		private const int DEFAULT_SWATCHES_PER_ROW = 3;
+		private const int MIN_SWATCHES_PER_ROW = 3;
+		private const int MAX_SWATCHES_PER_ROW = 12;
 
 		private string saveImageFullFilename;
 		private Bitmap masterImage;
@@ -28,9 +31,16 @@ namespace PerpetualPaint
 		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
 		private double zoomUnits = 0.2; //this is the percentage of change
 
-		private int minSwatchesPerRow = 3;
-		private int maxSwatchesPerRow = 12;
-		private int swatchesPerRow = 3;
+		private int SwatchesPerRow {
+			get {
+				return Properties.Settings.Default.SwatchesPerRow;
+			}
+			set {
+				Properties.Settings.Default.SwatchesPerRow = value;
+				Properties.Settings.Default.Save();
+			}
+		}
+
 		private int swatchWidth = 25;
 		private int palettePadding = 15;
 
@@ -101,7 +111,7 @@ namespace PerpetualPaint
 		private void InitPalette()
 		{
 			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int swatchesWidth = (swatchWidth * swatchesPerRow) + scrollBarBuffer;
+			int swatchesWidth = (swatchWidth * SwatchesPerRow) + scrollBarBuffer;
 			int paletteWidth =  swatchesWidth + (2 * palettePadding);
 
 			palettePanel = new Panel();
@@ -195,17 +205,17 @@ namespace PerpetualPaint
 
 		private void Form_OnNarrowPalette(object sender, EventArgs e)
 		{
-			if(swatchesPerRow == minSwatchesPerRow) return;
+			if(SwatchesPerRow == MIN_SWATCHES_PER_ROW) return;
 
-			swatchesPerRow--;
+			SwatchesPerRow--;
 			ArrangePalette();
 		}
 
 		private void Form_OnWidenPalette(object sender, EventArgs e)
 		{
-			if(swatchesPerRow == maxSwatchesPerRow) return;
+			if(SwatchesPerRow == MAX_SWATCHES_PER_ROW) return;
 
-			swatchesPerRow++;
+			SwatchesPerRow++;
 			ArrangePalette();
 		}
 
@@ -334,10 +344,10 @@ namespace PerpetualPaint
 
 			//todo: duplicate code
 			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int paletteWidth = (swatchesPerRow * swatchWidth) + (2 * palettePadding) + scrollBarBuffer;
+			int paletteWidth = (SwatchesPerRow * swatchWidth) + (2 * palettePadding) + scrollBarBuffer;
 
 			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
-			swatchPanel.Size = new Size((swatchesPerRow * swatchWidth) + scrollBarBuffer, swatchPanel.Size.Height);
+			swatchPanel.Size = new Size((SwatchesPerRow * swatchWidth) + scrollBarBuffer, swatchPanel.Size.Height);
 
 			swatchPanel.Controls.Clear();
 			int rowCount = 0;
@@ -351,7 +361,7 @@ namespace PerpetualPaint
 				swatchPanel.Controls.Add(colorPanel);
 
 				rowCount++;
-				if(rowCount >= swatchesPerRow)
+				if(rowCount >= SwatchesPerRow)
 				{
 					rowCount = 0;
 					colCount++;
