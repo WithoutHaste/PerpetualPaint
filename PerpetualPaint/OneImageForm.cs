@@ -29,6 +29,7 @@ namespace PerpetualPaint
 		private double zoomUnits = 0.2; //this is the percentage of change
 
 		private int minSwatchesPerRow = 3;
+		private int maxSwatchesPerRow = 12;
 		private int swatchesPerRow = 3;
 		private int swatchWidth = 25;
 		private int palettePadding = 15;
@@ -96,24 +97,44 @@ namespace PerpetualPaint
 			this.Controls.Add(toolStrip);
 		}
 
+		//todo: possibly move palettePanel into its own Panel class with all behavior
 		private void InitPalette()
 		{
 			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int paletteWidth =  (swatchesPerRow * swatchWidth) + (2 * palettePadding) + scrollBarBuffer;
+			int swatchesWidth = (swatchWidth * swatchesPerRow) + scrollBarBuffer;
+			int paletteWidth =  swatchesWidth + (2 * palettePadding);
 
 			palettePanel = new Panel();
 			palettePanel.Location = LayoutHelper.PlaceBelow(toolStrip);
 			palettePanel.Size = LayoutHelper.FillBelow(this, toolStrip, paletteWidth);
 			palettePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 
+			Button narrowPaletteButton = new Button();
+			narrowPaletteButton.Text = "<<";
+			narrowPaletteButton.Size = new Size(swatchWidth, swatchWidth);
+			narrowPaletteButton.Location = LayoutHelper.PlaceBottomLeft(palettePanel, narrowPaletteButton, palettePadding);
+			narrowPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			narrowPaletteButton.Click += new EventHandler(Form_OnNarrowPalette);
+
+			Button widenPaletteButton = new Button();
+			widenPaletteButton.Text = ">>";
+			widenPaletteButton.Size = new Size(swatchesWidth - narrowPaletteButton.Width, swatchWidth);
+			widenPaletteButton.Location = LayoutHelper.PlaceBottomRight(palettePanel, widenPaletteButton, palettePadding);
+			widenPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			widenPaletteButton.Click += new EventHandler(Form_OnWidenPalette);
+
+			//todo: some formalizatio of layout helper options
+			//like how to handle swatchPanel as a FillAbove(narrowPaletteButton)
 			swatchPanel = new Panel();
 			swatchPanel.AutoScroll = true;
 			swatchPanel.Location = new Point(palettePadding, 0);
-			swatchPanel.Size = new Size((swatchWidth * swatchesPerRow) + scrollBarBuffer, (int)(palettePanel.ClientSize.Height * 0.75));
-			swatchPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+			swatchPanel.Size = new Size(swatchesWidth, narrowPaletteButton.Location.Y - palettePadding);
+			swatchPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 			swatchPanel.BorderStyle = BorderStyle.Fixed3D;
 
 			palettePanel.Controls.Add(swatchPanel);
+			palettePanel.Controls.Add(narrowPaletteButton);
+			palettePanel.Controls.Add(widenPaletteButton);
 			this.Controls.Add(palettePanel);
 		}
 
@@ -170,6 +191,22 @@ namespace PerpetualPaint
 			{
 				HandleError("Failed to open file.", exception);
 			}
+		}
+
+		private void Form_OnNarrowPalette(object sender, EventArgs e)
+		{
+			if(swatchesPerRow == minSwatchesPerRow) return;
+
+			swatchesPerRow--;
+			ArrangePalette();
+		}
+
+		private void Form_OnWidenPalette(object sender, EventArgs e)
+		{
+			if(swatchesPerRow == maxSwatchesPerRow) return;
+
+			swatchesPerRow++;
+			ArrangePalette();
 		}
 
 		private void Image_OnFit(object sender, EventArgs e)
@@ -288,6 +325,20 @@ namespace PerpetualPaint
 		private void LoadPalette(string fullFilename)
 		{
 			colorPalette = API.LoadACO(saveColorPaletteFullFilename);
+			ArrangePalette();
+		}
+
+		private void ArrangePalette()
+		{
+			this.SuspendLayout();
+
+			//todo: duplicate code
+			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
+			int paletteWidth = (swatchesPerRow * swatchWidth) + (2 * palettePadding) + scrollBarBuffer;
+
+			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
+			swatchPanel.Size = new Size((swatchesPerRow * swatchWidth) + scrollBarBuffer, swatchPanel.Size.Height);
+
 			swatchPanel.Controls.Clear();
 			int rowCount = 0;
 			int colCount = 0;
@@ -306,6 +357,8 @@ namespace PerpetualPaint
 					colCount++;
 				}
 			}
+
+			this.ResumeLayout();
 		}
 
 		private void HandleError(string userMessage, Exception e)
