@@ -102,3 +102,22 @@ select color from palette
 	click on section of image to see it updated
 undo, redo on both palettes and images
 
+
+
+palette file formats
+=========================
+Adobe Color: *.aco
+	https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577411_pgfId-1055819 (Adobe's specification)
+	http://www.nomodes.com/aco.html (explanation)
+	https://www.cyotek.com/blog/reading-photoshop-color-swatch-aco-files-using-csharp (reading in C#)
+	https://www.cyotek.com/blog/writing-photoshop-color-swatch-aco-files-using-csharp (writing in C#)
+	http://www.tigercolor.com/color-lab/Palette-collections/color-palettes.htm (download examples)
+hmm, ACO also stands for Ant Colony Optimization, a common problem on Github
+not finding a c# solution on Github, so I'll roll my own
+new repository - name? ColorPalettes? another library file
+	
+Paint Shop Pro: *.pal
+	http://www.tigercolor.com/color-lab/Palette-collections/color-palettes.htm (download examples)
+
+GIMP: *.gpl
+	??
