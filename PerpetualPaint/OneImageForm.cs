@@ -358,16 +358,23 @@ namespace PerpetualPaint
 			return (point.X >= 0 && point.X < masterImage.Width && point.Y >= 0 && point.Y < masterImage.Height);
 		}
 		//todo: allow variable tolerance with demo of pure white/black image
+		private bool ColorIsClear(Color color)
+		{
+			return (color.A == 0);
+		}
 		private bool ColorIsBlack(Color color)
 		{
-			return (ColorIsGrayscale(color) && color.R < 100);
+			if(ColorIsClear(color)) return false;
+			return (ColorIsGrayscale(color) && color.R < 50);
 		}
 		private bool ColorIsGrayscale(Color color)
 		{
+			if(ColorIsClear(color)) return true;
 			return (color.R == color.G && color.G == color.B);
 		}
 		private bool ColorIsWhite(Color color)
 		{
+			if(ColorIsClear(color)) return true;
 			return (ColorIsGrayscale(color) && color.R > 230);
 		}
 
