@@ -32,8 +32,8 @@ namespace PerpetualPaint
 		private Bitmap zoomedImage;
 		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
 		private double zoomUnits = 0.2; //this is the percentage of change
-		private List<Point> blackPixelSet;
-		private List<List<Point>> pixelSets;
+		private HashSet<Point> blackPixelSet;
+		private List<HashSet<Point>> pixelSets;
 
 		private int SwatchesPerRow {
 			get {
@@ -308,6 +308,7 @@ namespace PerpetualPaint
 
 		private void ColorPixel(Point point, Color color)
 		{
+			//todo: support color over color instead of just color over grayscale
 			List<Point> todo = new List<Point>() { point };
 			while(todo.Count > 0)
 			{
@@ -318,15 +319,35 @@ namespace PerpetualPaint
 					continue;
 				if(!ColorIsGrayscale(oldColor))
 					continue;
+
+				if(ColorIsWhite(oldColor))
+				{
+					masterImage.SetPixel(p.X, p.Y, color);
+				}
+				else
+				{
+					//how to apply value to color that has value of its own? in a fully reversible way?
+					//todo: how to make this part easy to test?
+					HSV oldHSV = WithoutHaste.Drawing.ColorPalette.Utilities.HSVFromColor(oldColor);
+					//treating newColor is "white", adjust underlying value on range from newWhite to black
+					HSV newWhite = WithoutHaste.Drawing.ColorPalette.Utilities.HSVFromColor(color);
+					//todo: document that coloring in with black and other very dark color will destroy some of your grayscale gradient
+					//todo: may need to change HSV ranges in library to ints 0-360 and 0-100, since that seems to be how online tools handle it
+					float adjustedValue = oldHSV.Value * newWhite.Value;
+					HSV adjustedHSV = new HSV(newWhite.Hue, newWhite.Saturation, adjustedValue);
+					Color adjustedColor = WithoutHaste.Drawing.ColorPalette.Utilities.ColorFromHSV(adjustedHSV);
+					masterImage.SetPixel(p.X, p.Y, adjustedColor);
+				}
+
 				masterImage.SetPixel(p.X, p.Y, color); //todo: keep value
 				Point left = new Point(p.X - 1, p.Y);
 				Point right = new Point(p.X + 1, p.Y);
 				Point up = new Point(p.X, p.Y - 1);
 				Point down = new Point(p.X, p.Y + 1);
-				if(PointInRange(left) && !PointInSet(todo, left)) todo.Add(left);
-				if(PointInRange(right) && !PointInSet(todo, right)) todo.Add(right);
-				if(PointInRange(up) && !PointInSet(todo, up)) todo.Add(up);
-				if(PointInRange(down) && !PointInSet(todo, down)) todo.Add(down);
+				if(PointInRange(left) && !PointInList(todo, left)) todo.Add(left);
+				if(PointInRange(right) && !PointInList(todo, right)) todo.Add(right);
+				if(PointInRange(up) && !PointInList(todo, up)) todo.Add(up);
+				if(PointInRange(down) && !PointInList(todo, down)) todo.Add(down);
 
 				if(todo.Count > 1000)
 					return;
@@ -344,6 +365,10 @@ namespace PerpetualPaint
 		private bool ColorIsGrayscale(Color color)
 		{
 			return (color.R == color.G && color.G == color.B);
+		}
+		private bool ColorIsWhite(Color color)
+		{
+			return (ColorIsGrayscale(color) && color.R > 230);
 		}
 
 		private void OpenFile()
@@ -371,7 +396,7 @@ namespace PerpetualPaint
 			saveImageFullFilename = fullFilename;
 			masterImage = (Bitmap)Image.FromFile(fullFilename);
 			//CalculateValues();
-			//CalculatePixelSets();
+			//CalculatePixelSets(); //too slow even with hashsets
 			UpdateZoomedImage(SCALE_FIT);
 		}
 
@@ -440,93 +465,93 @@ namespace PerpetualPaint
 				);
 		}
 
-		private void CalculateValues()
-		{
-			HashSet<Color> colors = new HashSet<Color>();
-			for(int x = 0; x < masterImage.Width; x++)
-			{
-				for(int y = 0; y < masterImage.Height; y++)
-				{
-					colors.Add(masterImage.GetPixel(x, y));
-				}
-			}
-		}
+		//private void CalculateValues()
+		//{
+		//	HashSet<Color> colors = new HashSet<Color>();
+		//	for(int x = 0; x < masterImage.Width; x++)
+		//	{
+		//		for(int y = 0; y < masterImage.Height; y++)
+		//		{
+		//			colors.Add(masterImage.GetPixel(x, y));
+		//		}
+		//	}
+		//}
 
-		//todo: move pixel sets into their own object
-		private void CalculatePixelSets()
-		{
-			blackPixelSet = new List<Point>();
-			List<Point> otherPixelSet = new List<Point>();
-			
-			for(int x = 0; x < masterImage.Width; x++)
-			{
-				for(int y = 0; y < masterImage.Height; y++)
-				{
-					Color pixelColor = masterImage.GetPixel(x, y);
-					Point point = new Point(x, y);
-					if(pixelColor == Color.Black)
-					{
-						blackPixelSet.Add(point);
-						continue;
-					}
-					otherPixelSet.Add(point);
-					//if(PointInSets(pixelSets, point))
-					//{
-					//	continue;
-					//}
-					//pixelSets.Add(FindPixelSet(point));
-				}
-			}
+		//		//todo: move pixel sets into their own object?
+		//		private void CalculatePixelSets()
+		//		{
+		//			blackPixelSet = new HashSet<Point>();
+		//			HashSet<Point> otherPixelSet = new HashSet<Point>();
 
-			pixelSets = DividePixelSets(otherPixelSet);
-		}
+		//			for(int x = 0; x < masterImage.Width; x++)
+		//			{
+		//				for(int y = 0; y < masterImage.Height; y++)
+		//				{
+		//					Color pixelColor = masterImage.GetPixel(x, y);
+		//					Point point = new Point(x, y);
+		//					if(ColorIsBlack(pixelColor))
+		//					{
+		//						blackPixelSet.Add(point);
+		//						continue;
+		//					}
+		//					otherPixelSet.Add(point);
+		//					//if(PointInSets(pixelSets, point))
+		//					//{
+		//					//	continue;
+		//					//}
+		//					//pixelSets.Add(FindPixelSet(point));
+		//				}
+		//			}
 
-		private List<List<Point>> DividePixelSets(List<Point> pixels)
-		{
-			List<List<Point>> sets = new List<List<Point>>();
-			foreach(Point point in pixels)
-			{
-				AddPixelToSet(sets, point);
-			}
-			return sets;
-		}
-		private void AddPixelToSet(List<List<Point>> sets, Point point)
-		{
-			foreach(List<Point> set in sets)
-			{
-				foreach(Point setPoint in set)
-				{
-					if(PointsAdjacent(setPoint, point))
-					{
-						set.Add(point);
-						return;
-					}
-				}
-			}
-			sets.Add(new List<Point>() { point });
-		}
-		private bool PointsAdjacent(Point a, Point b)
-		{
-			if(a.X == b.X && (a.Y == b.Y - 1 || a.Y == b.Y + 1))
-				return true;
-			if(a.Y == b.Y && (a.X == b.X - 1 || a.X == b.X + 1))
-				return true;
-			return false;
-		}
+		////			pixelSets = DividePixelSets(otherPixelSet);
+		//		}
 
-		private bool PointInSets(List<List<Point>> sets, Point point)
-		{
-			foreach(List<Point> set in sets)
-			{
-				if(PointInSet(set, point))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
+		//		private List<List<Point>> DividePixelSets(List<Point> pixels)
+		//		{
+		//			List<List<Point>> sets = new List<List<Point>>();
+		//			foreach(Point point in pixels)
+		//			{
+		//				AddPixelToSet(sets, point);
+		//			}
+		//			return sets;
+		//		}
+		//		private void AddPixelToSet(List<List<Point>> sets, Point point)
+		//		{
+		//			foreach(List<Point> set in sets)
+		//			{
+		//				foreach(Point setPoint in set)
+		//				{
+		//					if(PointsAdjacent(setPoint, point))
+		//					{
+		//						set.Add(point);
+		//						return;
+		//					}
+		//				}
+		//			}
+		//			sets.Add(new List<Point>() { point });
+		//		}
+		//		private bool PointsAdjacent(Point a, Point b)
+		//		{
+		//			if(a.X == b.X && (a.Y == b.Y - 1 || a.Y == b.Y + 1))
+		//				return true;
+		//			if(a.Y == b.Y && (a.X == b.X - 1 || a.X == b.X + 1))
+		//				return true;
+		//			return false;
+		//		}
 
-		private bool PointInSet(List<Point> set, Point point)
+		//		private bool PointInSets(List<List<Point>> sets, Point point)
+		//		{
+		//			foreach(List<Point> set in sets)
+		//			{
+		//				if(PointInSet(set, point))
+		//				{
+		//					return true;
+		//				}
+		//			}
+		//			return false;
+		//		}
+
+		private bool PointInList(List<Point> set, Point point)
 		{
 			foreach(Point p in set)
 			{
@@ -538,31 +563,31 @@ namespace PerpetualPaint
 			return false;
 		}
 
-		/// <summary>
-		/// Find black-bounded set of pixels starting with point.
-		/// </summary>
-		private List<Point> FindPixelSet(Point point)
-		{
-			List<Point> set = new List<Point>() { point };
-			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
-			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
-			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
-			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
-			return set;
-		}
+			//		/// <summary>
+			//		/// Find black-bounded set of pixels starting with point.
+			//		/// </summary>
+			//		private List<Point> FindPixelSet(Point point)
+			//		{
+			//			List<Point> set = new List<Point>() { point };
+			//			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
+			//			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
+			//			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
+			//			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
+			//			return set;
+			//		}
 
-		private void ExtendPixelSet(List<Point> set, Point point)
-		{
-			if(point.X < 0 || point.X >= masterImage.Width) return;
-			if(point.Y < 0 || point.Y >= masterImage.Height) return;
-			if(masterImage.GetPixel(point.X, point.Y) == Color.Black) return;
-			if(PointInSet(set, point)) return;
-			set.Add(point);
-			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
-			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
-			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
-			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
-		}
+			//		private void ExtendPixelSet(List<Point> set, Point point)
+			//		{
+			//			if(point.X < 0 || point.X >= masterImage.Width) return;
+			//			if(point.Y < 0 || point.Y >= masterImage.Height) return;
+			//			if(masterImage.GetPixel(point.X, point.Y) == Color.Black) return;
+			//			if(PointInSet(set, point)) return;
+			//			set.Add(point);
+			//			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
+			//			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
+			//			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
+			//			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
+			//		}
 
 		private void LoadPalette(string fullFilename)
 		{
