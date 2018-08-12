@@ -32,6 +32,8 @@ namespace PerpetualPaint
 		private Bitmap zoomedImage;
 		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
 		private double zoomUnits = 0.2; //this is the percentage of change
+		private List<Point> blackPixelSet;
+		private List<List<Point>> pixelSets;
 
 		private int SwatchesPerRow {
 			get {
@@ -163,6 +165,8 @@ namespace PerpetualPaint
 			pictureBox = new PictureBox();
 			pictureBox.Dock = DockStyle.Fill;
 			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+			pictureBox.Cursor = Cursors.Hand;
+			pictureBox.Click += new EventHandler(Image_OnClick);
 
 			scrollPanel.Controls.Add(pictureBox);
 			this.Controls.Add(scrollPanel);
@@ -188,22 +192,7 @@ namespace PerpetualPaint
 
 		private void Form_OnOpenFile(object sender, EventArgs e)
 		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
-			openFileDialog.Title = "Select an Image File";
-
-			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-			{
-				return;
-			}
-			try
-			{
-				UpdateMasterImage(openFileDialog.FileName);
-			}
-			catch(FileNotFoundException exception)
-			{
-				HandleError("Failed to open file.", exception);
-			}
+			OpenFile();
 		}
 
 		private void Form_OnNarrowPalette(object sender, EventArgs e)
@@ -266,6 +255,41 @@ namespace PerpetualPaint
 			UpdateZoomedImage(newImageScale);
 		}
 
+		private void Image_OnClick(object sender, EventArgs e)
+		{
+			if(selectedColor == null) return;
+
+			if(HasImage)
+			{
+				Point pictureBoxPoint = pictureBox.PointToClient(new Point(MousePosition.X, MousePosition.Y));
+				if(pictureBox.SizeMode == PictureBoxSizeMode.Zoom)
+				{
+					float widthScale = (float)pictureBox.Width / (float)masterImage.Width;
+					float heightScale = (float)pictureBox.Height / (float)masterImage.Height;
+					float scale = Math.Min(widthScale, heightScale);
+					int widthDisplay = (int)(masterImage.Width * scale);
+					int heightDisplay = (int)(masterImage.Height * scale);
+					Point displayOriginPoint = new Point((pictureBox.Width - widthDisplay) / 2, (pictureBox.Height - heightDisplay) / 2); //point of image relative to picturebox
+					Point displayPoint = new Point(pictureBoxPoint.X - displayOriginPoint.X, pictureBoxPoint.Y - displayOriginPoint.Y);
+
+					Point masterImagePoint = new Point((int)(displayPoint.X / scale), (int)(displayPoint.Y / scale));
+					if(masterImagePoint.X < 0 || masterImagePoint.X >= masterImage.Width) return;
+					if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
+
+					//masterImage.SetPixel(masterImagePoint.X, masterImagePoint.Y, selectedColor.Value);
+					ColorPixel(masterImagePoint, selectedColor.Value);
+					UpdateZoomedImage(SCALE_FIT);
+				}
+				else
+				{
+				}
+			}
+			else
+			{
+				OpenFile();
+			}
+		}
+
 #if DEBUG
 		private void Debug_OnShowErrorMessage(object sender, EventArgs e)
 		{
@@ -280,12 +304,74 @@ namespace PerpetualPaint
 		}
 #endif
 
-#endregion
+		#endregion
+
+		private void ColorPixel(Point point, Color color)
+		{
+			List<Point> todo = new List<Point>() { point };
+			while(todo.Count > 0)
+			{
+				Point p = todo.First();
+				todo.RemoveAt(0);
+				Color oldColor = masterImage.GetPixel(p.X, p.Y);
+				if(ColorIsBlack(oldColor))
+					continue;
+				if(!ColorIsGrayscale(oldColor))
+					continue;
+				masterImage.SetPixel(p.X, p.Y, color); //todo: keep value
+				Point left = new Point(p.X - 1, p.Y);
+				Point right = new Point(p.X + 1, p.Y);
+				Point up = new Point(p.X, p.Y - 1);
+				Point down = new Point(p.X, p.Y + 1);
+				if(PointInRange(left) && !PointInSet(todo, left)) todo.Add(left);
+				if(PointInRange(right) && !PointInSet(todo, right)) todo.Add(right);
+				if(PointInRange(up) && !PointInSet(todo, up)) todo.Add(up);
+				if(PointInRange(down) && !PointInSet(todo, down)) todo.Add(down);
+
+				if(todo.Count > 1000)
+					return;
+			}
+		}
+		private bool PointInRange(Point point)
+		{
+			return (point.X >= 0 && point.X < masterImage.Width && point.Y >= 0 && point.Y < masterImage.Height);
+		}
+		//todo: allow variable tolerance with demo of pure white/black image
+		private bool ColorIsBlack(Color color)
+		{
+			return (ColorIsGrayscale(color) && color.R < 100);
+		}
+		private bool ColorIsGrayscale(Color color)
+		{
+			return (color.R == color.G && color.G == color.B);
+		}
+
+		private void OpenFile()
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
+			openFileDialog.Title = "Select an Image File";
+
+			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+			try
+			{
+				UpdateMasterImage(openFileDialog.FileName);
+			}
+			catch(FileNotFoundException exception)
+			{
+				HandleError("Failed to open file.", exception);
+			}
+		}
 
 		private void UpdateMasterImage(string fullFilename)
 		{
 			saveImageFullFilename = fullFilename;
 			masterImage = (Bitmap)Image.FromFile(fullFilename);
+			//CalculateValues();
+			//CalculatePixelSets();
 			UpdateZoomedImage(SCALE_FIT);
 		}
 
@@ -354,6 +440,130 @@ namespace PerpetualPaint
 				);
 		}
 
+		private void CalculateValues()
+		{
+			HashSet<Color> colors = new HashSet<Color>();
+			for(int x = 0; x < masterImage.Width; x++)
+			{
+				for(int y = 0; y < masterImage.Height; y++)
+				{
+					colors.Add(masterImage.GetPixel(x, y));
+				}
+			}
+		}
+
+		//todo: move pixel sets into their own object
+		private void CalculatePixelSets()
+		{
+			blackPixelSet = new List<Point>();
+			List<Point> otherPixelSet = new List<Point>();
+			
+			for(int x = 0; x < masterImage.Width; x++)
+			{
+				for(int y = 0; y < masterImage.Height; y++)
+				{
+					Color pixelColor = masterImage.GetPixel(x, y);
+					Point point = new Point(x, y);
+					if(pixelColor == Color.Black)
+					{
+						blackPixelSet.Add(point);
+						continue;
+					}
+					otherPixelSet.Add(point);
+					//if(PointInSets(pixelSets, point))
+					//{
+					//	continue;
+					//}
+					//pixelSets.Add(FindPixelSet(point));
+				}
+			}
+
+			pixelSets = DividePixelSets(otherPixelSet);
+		}
+
+		private List<List<Point>> DividePixelSets(List<Point> pixels)
+		{
+			List<List<Point>> sets = new List<List<Point>>();
+			foreach(Point point in pixels)
+			{
+				AddPixelToSet(sets, point);
+			}
+			return sets;
+		}
+		private void AddPixelToSet(List<List<Point>> sets, Point point)
+		{
+			foreach(List<Point> set in sets)
+			{
+				foreach(Point setPoint in set)
+				{
+					if(PointsAdjacent(setPoint, point))
+					{
+						set.Add(point);
+						return;
+					}
+				}
+			}
+			sets.Add(new List<Point>() { point });
+		}
+		private bool PointsAdjacent(Point a, Point b)
+		{
+			if(a.X == b.X && (a.Y == b.Y - 1 || a.Y == b.Y + 1))
+				return true;
+			if(a.Y == b.Y && (a.X == b.X - 1 || a.X == b.X + 1))
+				return true;
+			return false;
+		}
+
+		private bool PointInSets(List<List<Point>> sets, Point point)
+		{
+			foreach(List<Point> set in sets)
+			{
+				if(PointInSet(set, point))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private bool PointInSet(List<Point> set, Point point)
+		{
+			foreach(Point p in set)
+			{
+				if(p.X == point.X && p.Y == point.Y)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// Find black-bounded set of pixels starting with point.
+		/// </summary>
+		private List<Point> FindPixelSet(Point point)
+		{
+			List<Point> set = new List<Point>() { point };
+			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
+			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
+			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
+			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
+			return set;
+		}
+
+		private void ExtendPixelSet(List<Point> set, Point point)
+		{
+			if(point.X < 0 || point.X >= masterImage.Width) return;
+			if(point.Y < 0 || point.Y >= masterImage.Height) return;
+			if(masterImage.GetPixel(point.X, point.Y) == Color.Black) return;
+			if(PointInSet(set, point)) return;
+			set.Add(point);
+			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
+			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
+			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
+			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
+		}
+
 		private void LoadPalette(string fullFilename)
 		{
 			colorPalette = API.LoadACO(saveColorPaletteFullFilename);
@@ -376,6 +586,11 @@ namespace PerpetualPaint
 			int colCount = 0;
 			foreach(Color color in colorPalette.Colors)
 			{
+				if(selectedColor == null)
+				{
+					selectedColor = color;
+				}
+
 				Panel colorPanel = new Panel();
 				colorPanel.Location = new Point(rowCount * swatchWidth, colCount * swatchWidth);
 				colorPanel.Size = new Size(swatchWidth, swatchWidth);
