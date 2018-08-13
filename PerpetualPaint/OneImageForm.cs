@@ -326,6 +326,10 @@ namespace PerpetualPaint
 				}
 				else
 				{
+					if(ColorIsPartiallyClear(oldColor))
+					{
+						oldColor = ConvertPartiallyClearToGray(oldColor);
+					}
 					//how to apply value to color that has value of its own? in a fully reversible way?
 					//todo: how to make this part easy to test?
 					HSV oldHSV = WithoutHaste.Drawing.ColorPalette.Utilities.HSVFromColor(oldColor);
@@ -362,20 +366,29 @@ namespace PerpetualPaint
 		{
 			return (color.A == 0);
 		}
+		private bool ColorIsPartiallyClear(Color color)
+		{
+			return (color.A < 255);
+		}
 		private bool ColorIsBlack(Color color)
 		{
-			if(ColorIsClear(color)) return false;
+			if(ColorIsPartiallyClear(color)) return false;
 			return (ColorIsGrayscale(color) && color.R < 50);
 		}
 		private bool ColorIsGrayscale(Color color)
 		{
-			if(ColorIsClear(color)) return true;
+			if(ColorIsPartiallyClear(color)) return true;
 			return (color.R == color.G && color.G == color.B);
 		}
 		private bool ColorIsWhite(Color color)
 		{
 			if(ColorIsClear(color)) return true;
 			return (ColorIsGrayscale(color) && color.R > 230);
+		}
+		private Color ConvertPartiallyClearToGray(Color oldColor)
+		{
+			//25% solid => 75% gray
+			return WithoutHaste.Drawing.ColorPalette.Utilities.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f); 
 		}
 
 		private void OpenFile()
@@ -472,17 +485,17 @@ namespace PerpetualPaint
 				);
 		}
 
-		//private void CalculateValues()
-		//{
-		//	HashSet<Color> colors = new HashSet<Color>();
-		//	for(int x = 0; x < masterImage.Width; x++)
-		//	{
-		//		for(int y = 0; y < masterImage.Height; y++)
-		//		{
-		//			colors.Add(masterImage.GetPixel(x, y));
-		//		}
-		//	}
-		//}
+		private void CalculateValues()
+		{
+			HashSet<Color> colors = new HashSet<Color>();
+			for(int x = 0; x < masterImage.Width; x++)
+			{
+				for(int y = 0; y < masterImage.Height; y++)
+				{
+					colors.Add(masterImage.GetPixel(x, y));
+				}
+			}
+		}
 
 		//		//todo: move pixel sets into their own object?
 		//		private void CalculatePixelSets()
