@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -50,7 +51,7 @@ namespace PerpetualPaint
 		private Color? selectedColor;
 
 		private string saveColorPaletteFullFilename = "resources/palettes/Bright-colors.aco";
-		private ColorPalette colorPalette;
+		private WithoutHaste.Drawing.ColorPalette.ColorPalette colorPalette;
 
 		private bool HasImage { get { return masterImage != null; } }
 
@@ -90,6 +91,7 @@ namespace PerpetualPaint
 		{
 			MenuItem fileMenu = new MenuItem("File");
 			fileMenu.MenuItems.Add("Open", new EventHandler(Form_OnOpenFile));
+			fileMenu.MenuItems.Add("Save As", new EventHandler(Form_OnSaveAs));
 
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
@@ -195,6 +197,11 @@ namespace PerpetualPaint
 			OpenFile();
 		}
 
+		private void Form_OnSaveAs(object sender, EventArgs e)
+		{
+			SaveAs();
+		}
+
 		private void Form_OnNarrowPalette(object sender, EventArgs e)
 		{
 			if(SwatchesPerRow == MIN_SWATCHES_PER_ROW) return;
@@ -282,6 +289,7 @@ namespace PerpetualPaint
 				}
 				else
 				{
+					//todo: support coloring zoomed image
 				}
 			}
 			else
@@ -309,11 +317,23 @@ namespace PerpetualPaint
 		private void ColorPixel(Point point, Color color)
 		{
 			//todo: support color over color instead of just color over grayscale
+			HashSet<HSV> oldHSVFound = new HashSet<HSV>();
+			HashSet<Color> oldColorsFound = new HashSet<Color>();
+			HashSet<Color> colorsUsed = new HashSet<Color>();
+			Dictionary<Point, Color> pointToColorUsed = new Dictionary<Point, Color>();
+
+			HashSet<Point> done = new HashSet<Point>();
 			List<Point> todo = new List<Point>() { point };
 			while(todo.Count > 0)
 			{
 				Point p = todo.First();
 				todo.RemoveAt(0);
+				if(done.Contains(p))
+				{
+					continue;
+				}
+				done.Add(p);
+
 				Color oldColor = masterImage.GetPixel(p.X, p.Y);
 				if(ColorIsBlack(oldColor))
 					continue;
@@ -338,12 +358,30 @@ namespace PerpetualPaint
 					//todo: document that coloring in with black and other very dark color will destroy some of your grayscale gradient
 					//todo: may need to change HSV ranges in library to ints 0-360 and 0-100, since that seems to be how online tools handle it
 					float adjustedValue = oldHSV.Value * newWhite.Value;
-					HSV adjustedHSV = new HSV(newWhite.Hue, newWhite.Saturation, adjustedValue);
+					float adjustedSaturation = oldHSV.Value * newWhite.Saturation;
+					//trying logarithmic scale 0-100 based on ).7 multiplier
+					/*
+					float[] logarithmicScale = new float[] { 0.7f, 0.49f, 0.34f, 0.24f, 0.17f, 0.12f, 0.08f, 0.06f, 0.04f, 0.03f, 0.02f, 0.01f, 0f };
+					for(int i = 0; i < logarithmicScale.Length; i++)
+					{
+						if(oldHSV.Value > logarithmicScale[i])
+						{
+							adjustedValue = logarithmicScale[i];
+							adjustedSaturation = logarithmicScale[Math.Min(i+1, logarithmicScale.Length-1)];
+							break;
+						}
+					}
+					*/
+					HSV adjustedHSV = new HSV(newWhite.Hue, adjustedSaturation, adjustedValue);
 					Color adjustedColor = WithoutHaste.Drawing.ColorPalette.Utilities.ColorFromHSV(adjustedHSV);
 					masterImage.SetPixel(p.X, p.Y, adjustedColor);
+
+					oldColorsFound.Add(oldColor);
+					colorsUsed.Add(adjustedColor);
+					oldHSVFound.Add(oldHSV);
+					pointToColorUsed[p] = adjustedColor;
 				}
 
-				masterImage.SetPixel(p.X, p.Y, color); //todo: keep value
 				Point left = new Point(p.X - 1, p.Y);
 				Point right = new Point(p.X + 1, p.Y);
 				Point up = new Point(p.X, p.Y - 1);
@@ -352,9 +390,6 @@ namespace PerpetualPaint
 				if(PointInRange(right) && !PointInList(todo, right)) todo.Add(right);
 				if(PointInRange(up) && !PointInList(todo, up)) todo.Add(up);
 				if(PointInRange(down) && !PointInList(todo, down)) todo.Add(down);
-
-				if(todo.Count > 1000)
-					return;
 			}
 		}
 		private bool PointInRange(Point point)
@@ -408,6 +443,37 @@ namespace PerpetualPaint
 			catch(FileNotFoundException exception)
 			{
 				HandleError("Failed to open file.", exception);
+			}
+		}
+
+		private void SaveAs()
+		{
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
+			saveFileDialog.Title = "Select an Image File";
+
+			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+			try
+			{
+				string extension = Path.GetExtension(saveFileDialog.FileName);
+				switch(extension)
+				{
+					case ".bmp": masterImage.Save(saveFileDialog.FileName, ImageFormat.Bmp); break;
+					case ".gif": masterImage.Save(saveFileDialog.FileName, ImageFormat.Gif); break;
+					case ".jpg":
+					case ".jpeg":
+						masterImage.Save(saveFileDialog.FileName, ImageFormat.Jpeg); break;
+					case ".png": masterImage.Save(saveFileDialog.FileName, ImageFormat.Png); break;
+					case ".tiff": masterImage.Save(saveFileDialog.FileName, ImageFormat.Tiff); break;
+					default: throw new Exception("File extension not supported: " + extension);
+				}
+			}
+			catch(Exception exception)
+			{
+				HandleError("Failed to save file.", exception);
 			}
 		}
 
