@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace PerpetualPaint
 		private Panel palettePanel;
 		private Panel swatchPanel;
 		private Panel scrollPanel;
-		private PictureBox pictureBox;
+		private PixelPictureBox pictureBox;
 
 		private const int SCALE_FIT = -1;
 		private const int MAX_IMAGE_DIMENSION = 9000;
@@ -164,7 +165,7 @@ namespace PerpetualPaint
 			scrollPanel.Anchor = LayoutHelper.AnchorAll;
 			scrollPanel.BorderStyle = BorderStyle.Fixed3D;
 
-			pictureBox = new PictureBox();
+			pictureBox = new PixelPictureBox();
 			pictureBox.Dock = DockStyle.Fill;
 			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
 			pictureBox.Cursor = Cursors.Hand;
@@ -530,6 +531,11 @@ namespace PerpetualPaint
 
 			using(Graphics graphics = Graphics.FromImage(zoomedImage))
 			{
+				if(imageScale != SCALE_FIT && imageScale > 1)
+				{
+					graphics.SmoothingMode = SmoothingMode.None;
+					graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+				}
 				graphics.DrawImage(masterImage, new Rectangle(0, 0, zoomedWidth, zoomedHeight));
 			}
 			pictureBox.Size = new Size(zoomedImage.Width, zoomedImage.Height);
