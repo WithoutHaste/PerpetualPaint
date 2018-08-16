@@ -360,15 +360,15 @@ namespace PerpetualPaint
 					}
 					//how to apply value to color that has value of its own? in a fully reversible way?
 					//todo: how to make this part easy to test?
-					HSV oldHSV = Utilities.HSVFromColor(oldColor);
+					HSV oldHSV = ConvertColors.HSVFromColor(oldColor);
 					//treating newColor is "white", adjust underlying value on range from newWhite to black
-					HSV newWhite = Utilities.HSVFromColor(color);
+					HSV newWhite = ConvertColors.HSVFromColor(color);
 					//todo: document that coloring in with black and other very dark color will destroy some of your grayscale gradient
 					//todo: may need to change HSV ranges in library to ints 0-360 and 0-100, since that seems to be how online tools handle it
 					float adjustedValue = oldHSV.Value * newWhite.Value;
 					float adjustedSaturation = oldHSV.Value * newWhite.Saturation;
 					HSV adjustedHSV = new HSV(newWhite.Hue, adjustedSaturation, adjustedValue);
-					Color adjustedColor = Utilities.ColorFromHSV(adjustedHSV);
+					Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
 					masterImage.SetPixel(p.X, p.Y, adjustedColor);
 				}
 
@@ -413,7 +413,7 @@ namespace PerpetualPaint
 		private Color ConvertPartiallyClearToGray(Color oldColor)
 		{
 			//25% solid => 75% gray
-			return Utilities.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f); 
+			return ConvertColors.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f); 
 		}
 
 		private void OpenFile()
@@ -672,7 +672,7 @@ namespace PerpetualPaint
 
 		private void LoadPalette(string fullFilename)
 		{
-			colorPalette = API.LoadACO(saveColorPaletteFullFilename);
+			colorPalette = FormatACO.Load(saveColorPaletteFullFilename);
 			ArrangePalette();
 		}
 

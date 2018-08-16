@@ -102,6 +102,11 @@ select color from palette
 	click on section of image to see it updated
 undo, redo on both palettes and images
 
+Considered updating Colors library to return System.Drawing.Imaging.ColorPalette object
+	but you can't instantiate your own ColorPalette
+		you can only get Image.Palette
+	and you cannot change the length of a ColorPalette
+	so sticking with my own
 
 
 palette file formats
