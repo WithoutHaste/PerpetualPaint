@@ -365,8 +365,8 @@ namespace PerpetualPaint
 					HSV newWhite = ConvertColors.HSVFromColor(color);
 					//todo: document that coloring in with black and other very dark color will destroy some of your grayscale gradient
 					//todo: may need to change HSV ranges in library to ints 0-360 and 0-100, since that seems to be how online tools handle it
-					float adjustedValue = oldHSV.Value * newWhite.Value;
-					float adjustedSaturation = oldHSV.Value * newWhite.Saturation;
+					float adjustedValue = oldHSV.Value * newWhite.Value * 0.5f;
+					float adjustedSaturation = oldHSV.Value * newWhite.Saturation * 0.5f; //cut adjusted saturation in half to force it into the gray range
 					HSV adjustedHSV = new HSV(newWhite.Hue, adjustedSaturation, adjustedValue);
 					Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
 					masterImage.SetPixel(p.X, p.Y, adjustedColor);
