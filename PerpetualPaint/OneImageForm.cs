@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WinFormsExtensions;
-using WithoutHaste.Drawing.ColorPalette;
+using WithoutHaste.Drawing.Colors;
 
 namespace PerpetualPaint
 {
@@ -52,7 +52,7 @@ namespace PerpetualPaint
 		private Color? selectedColor;
 
 		private string saveColorPaletteFullFilename = "resources/palettes/Bright-colors.aco";
-		private WithoutHaste.Drawing.ColorPalette.ColorPalette colorPalette;
+		private WithoutHaste.Drawing.Colors.ColorPalette colorPalette;
 
 		private bool HasImage { get { return masterImage != null; } }
 
@@ -284,8 +284,15 @@ namespace PerpetualPaint
 					if(masterImagePoint.X < 0 || masterImagePoint.X >= masterImage.Width) return;
 					if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
 
-					//masterImage.SetPixel(masterImagePoint.X, masterImagePoint.Y, selectedColor.Value);
-					ColorPixel(masterImagePoint, selectedColor.Value);
+					Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
+					if(ColorIsGrayscale(currentColor))
+					{
+						ColorPixel(masterImagePoint, selectedColor.Value);
+					}
+					else
+					{
+						GrayscalePixel(masterImagePoint);
+					}
 					UpdateZoomedImage(SCALE_FIT);
 				}
 				else
@@ -315,14 +322,14 @@ namespace PerpetualPaint
 
 		#endregion
 
+		private void GrayscalePixel(Point point)
+		{
+			//todo
+			//how to determine "white"?
+		}
+
 		private void ColorPixel(Point point, Color color)
 		{
-			//todo: support color over color instead of just color over grayscale
-			HashSet<HSV> oldHSVFound = new HashSet<HSV>();
-			HashSet<Color> oldColorsFound = new HashSet<Color>();
-			HashSet<Color> colorsUsed = new HashSet<Color>();
-			Dictionary<Point, Color> pointToColorUsed = new Dictionary<Point, Color>();
-
 			HashSet<Point> done = new HashSet<Point>();
 			List<Point> todo = new List<Point>() { point };
 			while(todo.Count > 0)
@@ -353,34 +360,16 @@ namespace PerpetualPaint
 					}
 					//how to apply value to color that has value of its own? in a fully reversible way?
 					//todo: how to make this part easy to test?
-					HSV oldHSV = WithoutHaste.Drawing.ColorPalette.Utilities.HSVFromColor(oldColor);
+					HSV oldHSV = Utilities.HSVFromColor(oldColor);
 					//treating newColor is "white", adjust underlying value on range from newWhite to black
-					HSV newWhite = WithoutHaste.Drawing.ColorPalette.Utilities.HSVFromColor(color);
+					HSV newWhite = Utilities.HSVFromColor(color);
 					//todo: document that coloring in with black and other very dark color will destroy some of your grayscale gradient
 					//todo: may need to change HSV ranges in library to ints 0-360 and 0-100, since that seems to be how online tools handle it
 					float adjustedValue = oldHSV.Value * newWhite.Value;
 					float adjustedSaturation = oldHSV.Value * newWhite.Saturation;
-					//trying logarithmic scale 0-100 based on ).7 multiplier
-					/*
-					float[] logarithmicScale = new float[] { 0.7f, 0.49f, 0.34f, 0.24f, 0.17f, 0.12f, 0.08f, 0.06f, 0.04f, 0.03f, 0.02f, 0.01f, 0f };
-					for(int i = 0; i < logarithmicScale.Length; i++)
-					{
-						if(oldHSV.Value > logarithmicScale[i])
-						{
-							adjustedValue = logarithmicScale[i];
-							adjustedSaturation = logarithmicScale[Math.Min(i+1, logarithmicScale.Length-1)];
-							break;
-						}
-					}
-					*/
 					HSV adjustedHSV = new HSV(newWhite.Hue, adjustedSaturation, adjustedValue);
-					Color adjustedColor = WithoutHaste.Drawing.ColorPalette.Utilities.ColorFromHSV(adjustedHSV);
+					Color adjustedColor = Utilities.ColorFromHSV(adjustedHSV);
 					masterImage.SetPixel(p.X, p.Y, adjustedColor);
-
-					oldColorsFound.Add(oldColor);
-					colorsUsed.Add(adjustedColor);
-					oldHSVFound.Add(oldHSV);
-					pointToColorUsed[p] = adjustedColor;
 				}
 
 				Point left = new Point(p.X - 1, p.Y);
@@ -424,7 +413,7 @@ namespace PerpetualPaint
 		private Color ConvertPartiallyClearToGray(Color oldColor)
 		{
 			//25% solid => 75% gray
-			return WithoutHaste.Drawing.ColorPalette.Utilities.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f); 
+			return Utilities.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f); 
 		}
 
 		private void OpenFile()

@@ -62,8 +62,8 @@
     <Reference Include="WinFormsExtensions">
       <HintPath>..\..\WinFormsExtensions\WinFormsExtensions\bin\Release\WinFormsExtensions.dll</HintPath>
     </Reference>
-    <Reference Include="WithoutHaste.Drawing.ColorPalette">
-      <HintPath>..\..\ColorPalette\ColorPalette\bin\Release\WithoutHaste.Drawing.ColorPalette.dll</HintPath>
+    <Reference Include="WithoutHaste.Drawing.Colors">
+      <HintPath>..\..\WithoutHaste.Drawing.Colors\Colors\bin\Debug\WithoutHaste.Drawing.Colors.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -74,7 +74,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="PerpetualPaint.cs" />
-    <Compile Include="AdjustablePictureBox.cs">
+    <Compile Include="PixelPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
