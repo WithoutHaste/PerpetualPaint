@@ -59,11 +59,11 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="WinFormsExtensions">
-      <HintPath>..\..\WinFormsExtensions\WinFormsExtensions\bin\Release\WinFormsExtensions.dll</HintPath>
-    </Reference>
     <Reference Include="WithoutHaste.Drawing.Colors">
       <HintPath>..\..\WithoutHaste.Drawing.Colors\Colors\bin\Debug\WithoutHaste.Drawing.Colors.dll</HintPath>
+    </Reference>
+    <Reference Include="WithoutHaste.Windows.GUI">
+      <HintPath>..\..\WinFormsExtensions\WinFormsExtensions\bin\Release\WithoutHaste.Windows.GUI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
