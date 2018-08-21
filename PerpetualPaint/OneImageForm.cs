@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -46,10 +47,12 @@ namespace PerpetualPaint
 				Properties.Settings.Default.Save();
 			}
 		}
-
 		private int swatchWidth = 25;
 		private int palettePadding = 15;
 		private Color? selectedColor;
+
+		private Queue<RequestColor> requestColorQueue = new Queue<RequestColor>();
+		private RequestColorWorker requestColorWorker;
 
 		private string saveColorPaletteFullFilename = "resources/palettes/Bright-colors.aco";
 		private WithoutHaste.Drawing.Colors.ColorPalette colorPalette;
@@ -71,6 +74,8 @@ namespace PerpetualPaint
 				return new Point((int)(centerPoint.X / imageScale), (int)(centerPoint.Y / imageScale));
 			}
 		}
+
+		//--------------------------------------------------
 
 		public OneImageForm()
 		{
@@ -100,6 +105,7 @@ namespace PerpetualPaint
 #if DEBUG
 			MenuItem debugMenu = new MenuItem("Debug");
 			debugMenu.MenuItems.Add("Show Error Message", new EventHandler(Debug_OnShowErrorMessage));
+			debugMenu.MenuItems.Add("Show Wait Message", new EventHandler(Debug_OnShowWaitMessage));
 			this.Menu.MenuItems.Add(debugMenu);
 #endif
 		}
@@ -282,9 +288,10 @@ namespace PerpetualPaint
 					if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
 
 					Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
-					if(ColorIsGrayscale(currentColor))
+					if(RequestColorWorker.ColorIsGrayscale(currentColor))
 					{
-						ColorPixel(masterImagePoint, selectedColor.Value);
+						requestColorQueue.Enqueue(new RequestColor(selectedColor.Value, masterImagePoint));
+						RunColorRequest();
 					}
 					else
 					{
@@ -315,102 +322,36 @@ namespace PerpetualPaint
 				HandleError("Summary for user.", exception);
 			}
 		}
-#endif
 
+		private void Debug_OnShowWaitMessage(object sender, EventArgs e)
+		{
+			ShowWaitMessage("Processing request...");
+		}
+#endif
 		#endregion
+
+		private void RunColorRequest()
+		{
+			if(requestColorWorker == null)
+			{
+				requestColorWorker = new RequestColorWorker(requestColorQueue, masterImage, OnRequestColorCompleted);
+			}
+			else if(!requestColorWorker.IsBusy)
+			{
+				requestColorWorker.Run(masterImage);
+			}
+		}
+
+		private void OnRequestColorCompleted(object sender, RunWorkerCompletedEventArgs e)
+		{
+			masterImage = (Bitmap)e.Result;
+			UpdateZoomedImage(imageScale);
+		}
 
 		private void GrayscalePixel(Point point)
 		{
 			//todo
 			//how to determine "white"?
-		}
-
-		private void ColorPixel(Point point, Color color)
-		{
-			HashSet<Point> done = new HashSet<Point>();
-			List<Point> todo = new List<Point>() { point };
-			while(todo.Count > 0)
-			{
-				Point p = todo.First();
-				todo.RemoveAt(0);
-				if(done.Contains(p))
-				{
-					continue;
-				}
-				done.Add(p);
-
-				Color oldColor = masterImage.GetPixel(p.X, p.Y);
-				if(ColorIsBlack(oldColor))
-					continue;
-				if(!ColorIsGrayscale(oldColor))
-					continue;
-
-				if(ColorIsWhite(oldColor))
-				{
-					masterImage.SetPixel(p.X, p.Y, color);
-				}
-				else
-				{
-					if(ColorIsPartiallyClear(oldColor))
-					{
-						oldColor = ConvertPartiallyClearToGray(oldColor);
-					}
-					//how to apply value to color that has value of its own? in a fully reversible way?
-					//todo: how to make this part easy to test?
-					HSV oldHSV = ConvertColors.HSVFromColor(oldColor);
-					//treating newColor is "white", adjust underlying value on range from newWhite to black
-					HSV newWhite = ConvertColors.HSVFromColor(color);
-					//todo: document that coloring in with black and other very dark color will destroy some of your grayscale gradient
-					//todo: may need to change HSV ranges in library to ints 0-360 and 0-100, since that seems to be how online tools handle it
-					float adjustedValue = oldHSV.Value * newWhite.Value * 0.5f;
-					float adjustedSaturation = oldHSV.Value * newWhite.Saturation * 0.5f; //cut adjusted saturation in half to force it into the gray range
-					HSV adjustedHSV = new HSV(newWhite.Hue, adjustedSaturation, adjustedValue);
-					Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
-					masterImage.SetPixel(p.X, p.Y, adjustedColor);
-				}
-
-				Point left = new Point(p.X - 1, p.Y);
-				Point right = new Point(p.X + 1, p.Y);
-				Point up = new Point(p.X, p.Y - 1);
-				Point down = new Point(p.X, p.Y + 1);
-				if(PointInRange(left) && !PointInList(todo, left)) todo.Add(left);
-				if(PointInRange(right) && !PointInList(todo, right)) todo.Add(right);
-				if(PointInRange(up) && !PointInList(todo, up)) todo.Add(up);
-				if(PointInRange(down) && !PointInList(todo, down)) todo.Add(down);
-			}
-		}
-		private bool PointInRange(Point point)
-		{
-			return (point.X >= 0 && point.X < masterImage.Width && point.Y >= 0 && point.Y < masterImage.Height);
-		}
-		//todo: allow variable tolerance with demo of pure white/black image
-		private bool ColorIsClear(Color color)
-		{
-			return (color.A == 0);
-		}
-		private bool ColorIsPartiallyClear(Color color)
-		{
-			return (color.A < 255);
-		}
-		private bool ColorIsBlack(Color color)
-		{
-			if(ColorIsPartiallyClear(color)) return false;
-			return (ColorIsGrayscale(color) && color.R < 50);
-		}
-		private bool ColorIsGrayscale(Color color)
-		{
-			if(ColorIsPartiallyClear(color)) return true;
-			return (color.R == color.G && color.G == color.B);
-		}
-		private bool ColorIsWhite(Color color)
-		{
-			if(ColorIsClear(color)) return true;
-			return (ColorIsGrayscale(color) && color.R > 230);
-		}
-		private Color ConvertPartiallyClearToGray(Color oldColor)
-		{
-			//25% solid => 75% gray
-			return ConvertColors.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f); 
 		}
 
 		private void OpenFile()
@@ -555,118 +496,6 @@ namespace PerpetualPaint
 			}
 		}
 
-		//		//todo: move pixel sets into their own object?
-		//		private void CalculatePixelSets()
-		//		{
-		//			blackPixelSet = new HashSet<Point>();
-		//			HashSet<Point> otherPixelSet = new HashSet<Point>();
-
-		//			for(int x = 0; x < masterImage.Width; x++)
-		//			{
-		//				for(int y = 0; y < masterImage.Height; y++)
-		//				{
-		//					Color pixelColor = masterImage.GetPixel(x, y);
-		//					Point point = new Point(x, y);
-		//					if(ColorIsBlack(pixelColor))
-		//					{
-		//						blackPixelSet.Add(point);
-		//						continue;
-		//					}
-		//					otherPixelSet.Add(point);
-		//					//if(PointInSets(pixelSets, point))
-		//					//{
-		//					//	continue;
-		//					//}
-		//					//pixelSets.Add(FindPixelSet(point));
-		//				}
-		//			}
-
-		////			pixelSets = DividePixelSets(otherPixelSet);
-		//		}
-
-		//		private List<List<Point>> DividePixelSets(List<Point> pixels)
-		//		{
-		//			List<List<Point>> sets = new List<List<Point>>();
-		//			foreach(Point point in pixels)
-		//			{
-		//				AddPixelToSet(sets, point);
-		//			}
-		//			return sets;
-		//		}
-		//		private void AddPixelToSet(List<List<Point>> sets, Point point)
-		//		{
-		//			foreach(List<Point> set in sets)
-		//			{
-		//				foreach(Point setPoint in set)
-		//				{
-		//					if(PointsAdjacent(setPoint, point))
-		//					{
-		//						set.Add(point);
-		//						return;
-		//					}
-		//				}
-		//			}
-		//			sets.Add(new List<Point>() { point });
-		//		}
-		//		private bool PointsAdjacent(Point a, Point b)
-		//		{
-		//			if(a.X == b.X && (a.Y == b.Y - 1 || a.Y == b.Y + 1))
-		//				return true;
-		//			if(a.Y == b.Y && (a.X == b.X - 1 || a.X == b.X + 1))
-		//				return true;
-		//			return false;
-		//		}
-
-		//		private bool PointInSets(List<List<Point>> sets, Point point)
-		//		{
-		//			foreach(List<Point> set in sets)
-		//			{
-		//				if(PointInSet(set, point))
-		//				{
-		//					return true;
-		//				}
-		//			}
-		//			return false;
-		//		}
-
-		private bool PointInList(List<Point> set, Point point)
-		{
-			foreach(Point p in set)
-			{
-				if(p.X == point.X && p.Y == point.Y)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-			//		/// <summary>
-			//		/// Find black-bounded set of pixels starting with point.
-			//		/// </summary>
-			//		private List<Point> FindPixelSet(Point point)
-			//		{
-			//			List<Point> set = new List<Point>() { point };
-			//			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
-			//			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
-			//			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
-			//			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
-			//			return set;
-			//		}
-
-			//		private void ExtendPixelSet(List<Point> set, Point point)
-			//		{
-			//			if(point.X < 0 || point.X >= masterImage.Width) return;
-			//			if(point.Y < 0 || point.Y >= masterImage.Height) return;
-			//			if(masterImage.GetPixel(point.X, point.Y) == Color.Black) return;
-			//			if(PointInSet(set, point)) return;
-			//			set.Add(point);
-			//			ExtendPixelSet(set, new Point(point.X, point.Y - 1));
-			//			ExtendPixelSet(set, new Point(point.X, point.Y + 1));
-			//			ExtendPixelSet(set, new Point(point.X - 1, point.Y));
-			//			ExtendPixelSet(set, new Point(point.X + 1, point.Y));
-			//		}
-
 		private void LoadPalette(string fullFilename)
 		{
 			colorPalette = FormatACO.Load(saveColorPaletteFullFilename);
@@ -717,6 +546,14 @@ namespace PerpetualPaint
 			}
 
 			this.ResumeLayout();
+		}
+
+		private void ShowWaitMessage(string message)
+		{
+			using(WaitForm form = new WaitForm(message))
+			{
+				form.ShowDialog();
+			}
 		}
 
 		private void HandleError(string userMessage, Exception e)

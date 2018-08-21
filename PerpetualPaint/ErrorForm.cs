@@ -49,8 +49,6 @@ namespace PerpetualPaint
 
 			TextBox textBox = new TextBox();
 			LayoutHelper.Above(okButton, margin).Left(this, margin).Top(this, margin).Right(this, margin).Apply(textBox);
-			//textBox.Location = new Point(margin, margin);
-			//textBox.Size = LayoutHelper.FillAbove(this, okButton, margin);
 			textBox.Anchor = LayoutHelper.AnchorAll;
 			textBox.Multiline = true;
 			textBox.WordWrap = true;
