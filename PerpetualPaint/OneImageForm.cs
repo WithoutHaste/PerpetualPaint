@@ -119,6 +119,7 @@ namespace PerpetualPaint
 			toolStrip.Items.Add("Fit", Image.FromFile("resources/icons/icon_fit.png"), Image_OnFit);
 			toolStrip.Items.Add("Zoom In", Image.FromFile("resources/icons/icon_plus.png"), Image_OnZoomIn);
 			toolStrip.Items.Add("Zoom Out", Image.FromFile("resources/icons/icon_minus.png"), Image_OnZoomOut);
+			toolStrip.Items.Add("100%", Image.FromFile("resources/icons/icon_100.png"), Image_OnZoom1);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -272,6 +273,15 @@ namespace PerpetualPaint
 
 			InitZoom();
 			double newImageScale = Math.Max(zoomUnits, imageScale * (1 - zoomUnits));
+			UpdateZoomedImage(newImageScale);
+		}
+
+		private void Image_OnZoom1(object sender, EventArgs e)
+		{
+			if(!this.HasImage) return;
+
+			InitZoom();
+			double newImageScale = 1;
 			UpdateZoomedImage(newImageScale);
 		}
 
