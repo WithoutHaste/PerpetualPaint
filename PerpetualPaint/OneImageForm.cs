@@ -287,46 +287,53 @@ namespace PerpetualPaint
 
 		private void Image_OnClick(object sender, EventArgs e)
 		{
+			if(!HasImage)
+			{
+				OpenFile();
+				return;
+			}
+
 			if(selectedColor == null) return;
 
-			if(HasImage)
+			Point pictureBoxPoint = pictureBox.PointToClient(new Point(MousePosition.X, MousePosition.Y));
+			Point displayPoint;
+			double thisScale = imageScale;
+			if(pictureBox.SizeMode == PictureBoxSizeMode.Zoom)
 			{
-				Point pictureBoxPoint = pictureBox.PointToClient(new Point(MousePosition.X, MousePosition.Y));
-				if(pictureBox.SizeMode == PictureBoxSizeMode.Zoom)
-				{
-					float widthScale = (float)pictureBox.Width / (float)masterImage.Width;
-					float heightScale = (float)pictureBox.Height / (float)masterImage.Height;
-					float scale = Math.Min(widthScale, heightScale);
-					int widthDisplay = (int)(masterImage.Width * scale);
-					int heightDisplay = (int)(masterImage.Height * scale);
-					Point displayOriginPoint = new Point((pictureBox.Width - widthDisplay) / 2, (pictureBox.Height - heightDisplay) / 2); //point of image relative to picturebox
-					Point displayPoint = new Point(pictureBoxPoint.X - displayOriginPoint.X, pictureBoxPoint.Y - displayOriginPoint.Y);
-
-					Point masterImagePoint = new Point((int)(displayPoint.X / scale), (int)(displayPoint.Y / scale));
-					if(masterImagePoint.X < 0 || masterImagePoint.X >= masterImage.Width) return;
-					if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
-
-					Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
-					if(RequestColorWorker.ColorIsGrayscale(currentColor))
-					{
-						requestColorQueue.Enqueue(new RequestColor(selectedColor.Value, masterImagePoint));
-						RunColorRequest();
-					}
-					else
-					{
-						GrayscalePixel(masterImagePoint);
-					}
-					UpdateZoomedImage(SCALE_FIT);
-				}
-				else
-				{
-					//todo: support coloring zoomed image
-				}
+				float widthScale = (float)pictureBox.Width / (float)masterImage.Width;
+				float heightScale = (float)pictureBox.Height / (float)masterImage.Height;
+				thisScale = Math.Min(widthScale, heightScale);
+				int widthDisplay = (int)(masterImage.Width * thisScale);
+				int heightDisplay = (int)(masterImage.Height * thisScale);
+				Point displayOriginPoint = new Point((pictureBox.Width - widthDisplay) / 2, (pictureBox.Height - heightDisplay) / 2); //point of image relative to picturebox
+				displayPoint = new Point(pictureBoxPoint.X - displayOriginPoint.X, pictureBoxPoint.Y - displayOriginPoint.Y);
 			}
 			else
 			{
-				OpenFile();
+				double hScrollPercentage = (double)scrollPanel.HorizontalScroll.Value / (double)(scrollPanel.HorizontalScroll.Maximum + 1 - scrollPanel.HorizontalScroll.LargeChange);
+				double vScrollPercentage = (double)scrollPanel.VerticalScroll.Value / (double)(scrollPanel.VerticalScroll.Maximum + 1 - scrollPanel.VerticalScroll.LargeChange);
+				int hOffscreen = zoomedImage.Width - pictureBox.Width;
+				int vOffscreen = zoomedImage.Height - pictureBox.Height;
+
+				//todo: scrollbar not in use
+
+				displayPoint = new Point(pictureBoxPoint.X + (int)(hOffscreen * hScrollPercentage), pictureBoxPoint.Y + (int)(vOffscreen * vScrollPercentage));
 			}
+			Point masterImagePoint = new Point((int)(displayPoint.X / thisScale), (int)(displayPoint.Y / thisScale));
+			if(masterImagePoint.X < 0 || masterImagePoint.X >= masterImage.Width) return;
+			if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
+
+			Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
+			if(RequestColorWorker.ColorIsGrayscale(currentColor))
+			{
+				requestColorQueue.Enqueue(new RequestColor(selectedColor.Value, masterImagePoint));
+				RunColorRequest();
+			}
+			else
+			{
+				GrayscalePixel(masterImagePoint);
+			}
+			UpdateZoomedImage(imageScale);
 		}
 
 #if DEBUG
@@ -487,7 +494,7 @@ namespace PerpetualPaint
 			pictureBox.Size = new Size(zoomedImage.Width, zoomedImage.Height);
 			pictureBox.Image = zoomedImage;
 
-			if(imageScale != SCALE_FIT)
+			if(imageScale != SCALE_FIT && previousImageScale != newImageScale)
 			{
 				UpdateScrollBars(centerPoint);
 			}
