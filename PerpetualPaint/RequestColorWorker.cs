@@ -71,7 +71,7 @@ namespace PerpetualPaint
 				updateStatusTextFunc("");
 			}
 		}
-		
+
 		//todo accept cancellation from wait form
 		//todo update main form status bar with "Processing request 2 of 6..."
 		//todo on cancellation, still update main form with the last successfully completed coloration
@@ -83,8 +83,6 @@ namespace PerpetualPaint
 			if(queue.Count == 0)
 				return;
 
-			//todo: write more like ConvertRegionToGrayscale
-
 			ColorAtPoint request = queue.Dequeue();
 			Color color = request.Color;
 			Point point = request.Point;
@@ -94,6 +92,13 @@ namespace PerpetualPaint
 				ConvertRegionToGrayscale(point);
 			}
 
+			ConvertRegionToColor(color, point);
+
+			e.Result = new Bitmap(bitmap);
+		}
+
+		private void ConvertRegionToColor(Color color, Point point)
+		{
 			HashSet<Point> done = new HashSet<Point>();
 			List<Point> todo = new List<Point>() { point };
 			while(todo.Count > 0)
@@ -145,8 +150,6 @@ namespace PerpetualPaint
 				if(PointInRange(up) && !PointInList(todo, up)) todo.Add(up);
 				if(PointInRange(down) && !PointInList(todo, down)) todo.Add(down);
 			}
-
-			e.Result = new Bitmap(bitmap);
 		}
 
 		private void ConvertRegionToGrayscale(Point point)
