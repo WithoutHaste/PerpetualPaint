@@ -107,6 +107,7 @@ namespace PerpetualPaint
 #if DEBUG
 			MenuItem debugMenu = new MenuItem("Debug");
 			debugMenu.MenuItems.Add("Show Error Message", new EventHandler(Debug_OnShowErrorMessage));
+			debugMenu.MenuItems.Add("Show Nested Error Message", new EventHandler(Debug_OnShowNestedErrorMessage));
 			debugMenu.MenuItems.Add("Show Wait Message", new EventHandler(Debug_OnShowWaitMessage));
 			this.Menu.MenuItems.Add(debugMenu);
 #endif
@@ -335,6 +336,18 @@ namespace PerpetualPaint
 			try
 			{
 				throw new Exception("More detailed error message.");
+			}
+			catch(Exception exception)
+			{
+				HandleError("Summary for user.", exception);
+			}
+		}
+
+		private void Debug_OnShowNestedErrorMessage(object sender, EventArgs e)
+		{
+			try
+			{
+				throw new Exception("More detailed error message.", new Exception("Layer 1: sfjhskfjsdf", new Exception("Layer 2: 4572398573495873589")));
 			}
 			catch(Exception exception)
 			{
@@ -583,8 +596,19 @@ namespace PerpetualPaint
 
 		private void HandleError(string userMessage, Exception e)
 		{
-			string[] message = new string[] { userMessage, "", "Exception:", e.Message, "", "Stack Trace:", e.StackTrace };
-			using(ErrorForm form = new ErrorForm("Error", message))
+			List<string> message = new List<string>() { userMessage, "", "Exception:", e.Message, "", "Stack Trace:", e.StackTrace };
+			while(e.InnerException != null)
+			{
+				e = e.InnerException;
+				message.Add("");
+				message.Add("============================");
+				message.Add("Inner Exception:");
+				message.Add(e.Message);
+				message.Add("");
+				message.Add("Stack Trace:");
+				message.Add(e.StackTrace);
+			}
+			using(ErrorForm form = new ErrorForm("Error", message.ToArray()))
 			{
 				form.ShowDialog();
 			}
