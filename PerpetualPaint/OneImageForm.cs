@@ -20,6 +20,7 @@ namespace PerpetualPaint
 		private Panel palettePanel;
 		private Panel swatchPanel;
 		private Panel scrollPanel;
+		private StatusPanel statusPanel;
 		private PixelPictureBox pictureBox;
 
 		private const int SCALE_FIT = -1;
@@ -86,12 +87,13 @@ namespace PerpetualPaint
 			InitMenus();
 			InitTools();
 			InitPalette();
+			InitStatusPanel();
 			InitImage();
 
 			LoadPalette(saveColorPaletteFullFilename);
 		}
 
-#region Init
+		#region Init
 
 		private void InitMenus()
 		{
@@ -158,13 +160,20 @@ namespace PerpetualPaint
 			this.Controls.Add(palettePanel);
 		}
 
+		private void InitStatusPanel()
+		{
+			statusPanel = new StatusPanel();
+			LayoutHelper.Bottom(this).RightOf(palettePanel).Right(this).Height(25).Apply(statusPanel);
+			statusPanel.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+
+			this.Controls.Add(statusPanel);
+		}
+
 		private void InitImage()
 		{
 			scrollPanel = new Panel();
 			scrollPanel.AutoScroll = true;
-			LayoutHelper.Below(toolStrip).RightOf(palettePanel).Right(this).Bottom(this).Apply(scrollPanel);
-			//scrollPanel.Location = LayoutHelper.PlaceRight(palettePanel);
-			//scrollPanel.Size = LayoutHelper.FillFromLocation(this, scrollPanel.Location);
+			LayoutHelper.Below(toolStrip).RightOf(palettePanel).Right(this).Above(statusPanel).Apply(scrollPanel);
 			scrollPanel.Anchor = LayoutHelper.AnchorAll;
 			scrollPanel.BorderStyle = BorderStyle.Fixed3D;
 
@@ -334,7 +343,7 @@ namespace PerpetualPaint
 		{
 			if(requestColorWorker == null)
 			{
-				requestColorWorker = new RequestColorWorker(requestColorQueue, masterImage, OnRequestColorCompleted);
+				requestColorWorker = new RequestColorWorker(requestColorQueue, masterImage, UpdateStatusText, OnRequestColorCompleted);
 			}
 			else if(!requestColorWorker.IsBusy)
 			{
@@ -546,6 +555,11 @@ namespace PerpetualPaint
 			}
 
 			this.ResumeLayout();
+		}
+
+		private void UpdateStatusText(string text)
+		{
+			statusPanel.StatusText = text;
 		}
 
 		private void ShowWaitMessage(string message)

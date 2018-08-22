@@ -15,7 +15,9 @@ namespace PerpetualPaint
 		private BackgroundWorker worker;
 		private Queue<RequestColor> queue;
 		private Bitmap bitmap;
-		private WaitForm waitForm;
+		private UpdateStatusText updateStatusTextFunc;
+
+		public delegate void UpdateStatusText(string text);
 
 		public bool IsBusy {
 			get {
@@ -25,7 +27,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		public RequestColorWorker(Queue<RequestColor> queue, Bitmap bitmap, RunWorkerCompletedEventHandler completedEventHandler = null)
+		public RequestColorWorker(Queue<RequestColor> queue, Bitmap bitmap, UpdateStatusText updateStatusTextFunc, RunWorkerCompletedEventHandler completedEventHandler = null)
 		{
 			this.queue = queue;
 			worker = new BackgroundWorker();
@@ -36,12 +38,15 @@ namespace PerpetualPaint
 				worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(completedEventHandler);
 			}
 			worker.WorkerSupportsCancellation = true;
+
+			this.updateStatusTextFunc = updateStatusTextFunc;
+
 			Run(bitmap);
 		}
 
 		public void Run(Bitmap bitmap)
 		{
-			this.bitmap = (Bitmap)bitmap.Clone();
+			this.bitmap = new Bitmap(bitmap);
 			Run();
 		}
 
@@ -52,7 +57,7 @@ namespace PerpetualPaint
 			if(worker.IsBusy)
 				return;
 			worker.RunWorkerAsync();
-			ShowWaitMessage("Applying color..");
+			updateStatusTextFunc("Applying color...");
 		}
 
 		private void OnCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -64,29 +69,10 @@ namespace PerpetualPaint
 			}
 			else
 			{
-				CloseWaitMessage();
+				updateStatusTextFunc("");
 			}
 		}
-
-		private void ShowWaitMessage(string message)
-		{
-			if(waitForm == null)
-			{
-				waitForm = new WaitForm(message);
-			}
-			waitForm.ShowDialog();
-		}
-
-		private void CloseWaitMessage()
-		{
-			if(waitForm == null)
-				return;
-
-			//todo wait form exists but is closed already
-
-			waitForm.Close();
-		}
-
+		
 		//todo accept cancellation from wait form
 		//todo update main form status bar instead of showing a modal popup
 		//todo update main form status bar with "Processing request 2 of 6..."
@@ -155,7 +141,7 @@ namespace PerpetualPaint
 				if(PointInRange(down) && !PointInList(todo, down)) todo.Add(down);
 			}
 
-			e.Result = bitmap;
+			e.Result = new Bitmap(bitmap);
 		}
 
 		private bool PointInList(List<Point> set, Point point)
