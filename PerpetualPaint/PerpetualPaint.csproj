@@ -79,7 +79,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequestColor.cs" />
+    <Compile Include="ColorAtPoint.cs" />
     <Compile Include="RequestColorWorker.cs" />
     <Compile Include="StatusPanel.cs">
       <SubType>Component</SubType>

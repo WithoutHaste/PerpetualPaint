@@ -52,7 +52,7 @@ namespace PerpetualPaint
 		private int palettePadding = 15;
 		private Color? selectedColor;
 
-		private Queue<RequestColor> requestColorQueue = new Queue<RequestColor>();
+		private Queue<ColorAtPoint> requestColorQueue = new Queue<ColorAtPoint>();
 		private RequestColorWorker requestColorWorker;
 
 		private string saveColorPaletteFullFilename = "resources/palettes/Bright-colors.aco";
@@ -324,15 +324,8 @@ namespace PerpetualPaint
 			if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
 
 			Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
-			if(RequestColorWorker.ColorIsGrayscale(currentColor))
-			{
-				requestColorQueue.Enqueue(new RequestColor(selectedColor.Value, masterImagePoint));
-				RunColorRequest();
-			}
-			else
-			{
-				GrayscalePixel(masterImagePoint);
-			}
+			requestColorQueue.Enqueue(new ColorAtPoint(selectedColor.Value, masterImagePoint));
+			RunColorRequest();
 			UpdateZoomedImage(imageScale);
 		}
 
@@ -372,12 +365,6 @@ namespace PerpetualPaint
 		{
 			masterImage = (Bitmap)e.Result;
 			UpdateZoomedImage(imageScale);
-		}
-
-		private void GrayscalePixel(Point point)
-		{
-			//todo
-			//how to determine "white"?
 		}
 
 		private void OpenFile()
@@ -538,6 +525,8 @@ namespace PerpetualPaint
 
 			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
 			swatchPanel.Size = new Size((SwatchesPerRow * swatchWidth) + scrollBarBuffer, swatchPanel.Size.Height);
+			//pictureBox.Location = new Point(palettePanel.Location.X + palettePanel.Width, pictureBox.Location.Y);
+			//statusPanel.Location = new Point(palettePanel.Location.X + palettePanel.Width, statusPanel.Location.Y);
 
 			swatchPanel.Controls.Clear();
 			int rowCount = 0;

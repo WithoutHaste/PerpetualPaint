@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace PerpetualPaint
 {
-	public struct RequestColor
+	public struct ColorAtPoint
 	{
 		public Color Color;
 		public Point Point;
 
-		public RequestColor(Color color, Point point)
+		public ColorAtPoint(Color color, Point point)
 		{
 			Color = color;
 			Point = point;

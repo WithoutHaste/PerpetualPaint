@@ -13,7 +13,7 @@ namespace PerpetualPaint
 	public class RequestColorWorker
 	{
 		private BackgroundWorker worker;
-		private Queue<RequestColor> queue;
+		private Queue<ColorAtPoint> queue;
 		private Bitmap bitmap;
 		private UpdateStatusText updateStatusTextFunc;
 
@@ -27,7 +27,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		public RequestColorWorker(Queue<RequestColor> queue, Bitmap bitmap, UpdateStatusText updateStatusTextFunc, RunWorkerCompletedEventHandler completedEventHandler = null)
+		public RequestColorWorker(Queue<ColorAtPoint> queue, Bitmap bitmap, UpdateStatusText updateStatusTextFunc, RunWorkerCompletedEventHandler completedEventHandler = null)
 		{
 			this.queue = queue;
 			worker = new BackgroundWorker();
@@ -64,7 +64,6 @@ namespace PerpetualPaint
 		{
 			if(queue.Count > 0)
 			{
-				//todo cancel oncompleted
 				Run();
 			}
 			else
@@ -74,7 +73,6 @@ namespace PerpetualPaint
 		}
 		
 		//todo accept cancellation from wait form
-		//todo update main form status bar instead of showing a modal popup
 		//todo update main form status bar with "Processing request 2 of 6..."
 		//todo on cancellation, still update main form with the last successfully completed coloration
 
@@ -85,9 +83,16 @@ namespace PerpetualPaint
 			if(queue.Count == 0)
 				return;
 
-			RequestColor request = queue.Dequeue();
+			//todo: write more like ConvertRegionToGrayscale
+
+			ColorAtPoint request = queue.Dequeue();
 			Color color = request.Color;
 			Point point = request.Point;
+
+			if(!ColorIsGrayscale(bitmap.GetPixel(point.X, point.Y)))
+			{
+				ConvertRegionToGrayscale(point);
+			}
 
 			HashSet<Point> done = new HashSet<Point>();
 			List<Point> todo = new List<Point>() { point };
@@ -144,6 +149,111 @@ namespace PerpetualPaint
 			e.Result = new Bitmap(bitmap);
 		}
 
+		private void ConvertRegionToGrayscale(Point point)
+		{
+			HashSet<ColorAtPoint> inRegion = FindRegion(point);
+			Color white = FindPalestColor(inRegion);
+			foreach(ColorAtPoint p in inRegion)
+			{
+				ConvertPixelToGrayscale(p, white);
+			}
+		}
+
+		/// <summary>
+		/// Find region as bounded by "black".
+		/// </summary>
+		private HashSet<ColorAtPoint> FindRegion(Point startPoint)
+		{
+			HashSet<ColorAtPoint> inRegion = new HashSet<ColorAtPoint>();
+			Bitmap localBitmap = new Bitmap(bitmap);
+
+			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() { new ColorAtPoint(localBitmap.GetPixel(startPoint.X, startPoint.Y), startPoint) };
+			while(todo.Count > 0)
+			{
+				ColorAtPoint p = todo.First();
+				todo.Remove(p);
+				if(inRegion.Contains(p))
+					continue;
+
+				if(ColorIsBlack(p.Color))
+					continue;
+
+				inRegion.Add(p);
+				//todo: duplicate code
+				Point left = new Point(p.Point.X - 1, p.Point.Y);
+				Point right = new Point(p.Point.X + 1, p.Point.Y);
+				Point up = new Point(p.Point.X, p.Point.Y - 1);
+				Point down = new Point(p.Point.X, p.Point.Y + 1);
+				if(PointInRange(left))
+				{
+					Color leftColor = localBitmap.GetPixel(left.X, left.Y);
+					ColorAtPoint leftCAP = new ColorAtPoint(leftColor, left);
+					if(!todo.Contains(leftCAP))
+					{
+						todo.Add(leftCAP);
+					}
+				}
+				if(PointInRange(right))
+				{
+					Color rightColor = localBitmap.GetPixel(right.X, right.Y);
+					ColorAtPoint rightCAP = new ColorAtPoint(rightColor, right);
+					if(!todo.Contains(rightCAP))
+					{
+						todo.Add(rightCAP);
+					}
+				}
+				if(PointInRange(up))
+				{
+					Color upColor = localBitmap.GetPixel(up.X, up.Y);
+					ColorAtPoint upCAP = new ColorAtPoint(upColor, up);
+					if(!todo.Contains(upCAP))
+					{
+						todo.Add(upCAP);
+					}
+				}
+				if(PointInRange(down))
+				{
+					Color downColor = localBitmap.GetPixel(down.X, down.Y);
+					ColorAtPoint downCAP = new ColorAtPoint(downColor, down);
+					if(!todo.Contains(downCAP))
+					{
+						todo.Add(downCAP);
+					}
+				}
+			}
+
+			return inRegion;
+		}
+
+		private Color FindPalestColor(HashSet<ColorAtPoint> points)
+		{
+			Bitmap localBitmap = new Bitmap(bitmap);
+			Color color = Color.Black;
+			HSV hsv = ConvertColors.HSVFromColor(color);
+			foreach(ColorAtPoint p in points)
+			{
+				HSV pHSV = ConvertColors.HSVFromColor(p.Color);
+				if(pHSV.Value > hsv.Value)
+				{
+					color = p.Color;
+					hsv = pHSV;
+				}
+			}
+			return color;
+		}
+
+		private void ConvertPixelToGrayscale(ColorAtPoint p, Color white)
+		{
+			HSV oldHSV = ConvertColors.HSVFromColor(p.Color);
+			HSV oldWhite = ConvertColors.HSVFromColor(white);
+			float adjustedValue = oldHSV.Value / oldWhite.Value / 0.5f;
+			if(adjustedValue > 1)
+				adjustedValue = 1;
+			HSV adjustedHSV = new HSV(0, 0, adjustedValue);
+			Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
+			bitmap.SetPixel(p.Point.X, p.Point.Y, adjustedColor);
+		}
+
 		private bool PointInList(List<Point> set, Point point)
 		{
 			foreach(Point p in set)
@@ -163,35 +273,35 @@ namespace PerpetualPaint
 
 		//todo: allow variable tolerance with demo of pure white/black image
 		//todo: move color determination static methods to somewhere else
-		public static bool ColorIsClear(Color color)
+		private static bool ColorIsClear(Color color)
 		{
 			return (color.A == 0);
 		}
 
-		public static bool ColorIsPartiallyClear(Color color)
+		private static bool ColorIsPartiallyClear(Color color)
 		{
 			return (color.A < 255);
 		}
 
-		public static bool ColorIsBlack(Color color)
+		private static bool ColorIsBlack(Color color)
 		{
 			if(ColorIsPartiallyClear(color)) return false;
 			return (ColorIsGrayscale(color) && color.R < 50);
 		}
 
-		public static bool ColorIsGrayscale(Color color)
+		private static bool ColorIsGrayscale(Color color)
 		{
 			if(ColorIsPartiallyClear(color)) return true;
 			return (color.R == color.G && color.G == color.B);
 		}
 
-		public static bool ColorIsWhite(Color color)
+		private static bool ColorIsWhite(Color color)
 		{
 			if(ColorIsClear(color)) return true;
 			return (ColorIsGrayscale(color) && color.R > 230);
 		}
 
-		public static Color ConvertPartiallyClearToGray(Color oldColor)
+		private static Color ConvertPartiallyClearToGray(Color oldColor)
 		{
 			//25% solid => 75% gray
 			return ConvertColors.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f);
