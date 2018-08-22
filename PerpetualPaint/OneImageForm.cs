@@ -363,6 +363,11 @@ namespace PerpetualPaint
 
 		private void OnRequestColorCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
+			if(e.Error != null)
+			{
+				HandleError("Error occurred while applying color.", e.Error);
+				return;
+			}
 			masterImage = (Bitmap)e.Result;
 			UpdateZoomedImage(imageScale);
 		}

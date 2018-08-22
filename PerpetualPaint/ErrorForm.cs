@@ -46,6 +46,7 @@ namespace PerpetualPaint
 			okButton.Text = "OK";
 			okButton.Dock = DockStyle.Bottom;
 			okButton.Click += new EventHandler(OkButton_OnClick);
+			this.Controls.Add(okButton);
 
 			TextBox textBox = new TextBox();
 			LayoutHelper.Above(okButton, margin).Left(this, margin).Top(this, margin).Right(this, margin).Apply(textBox);
@@ -55,9 +56,7 @@ namespace PerpetualPaint
 			textBox.ReadOnly = true;
 			textBox.ScrollBars = ScrollBars.Vertical;
 			textBox.Text = text;
-
 			this.Controls.Add(textBox);
-			this.Controls.Add(okButton);
 		}
 
 		private void Form_OnShown(object sender, EventArgs e)

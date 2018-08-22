@@ -39,6 +39,7 @@ namespace PerpetualPaint
 			}
 			worker.WorkerSupportsCancellation = true;
 
+			//todo: is this the right pattern? should it be adding to an event on OneImageForm?
 			this.updateStatusTextFunc = updateStatusTextFunc;
 
 			Run(bitmap);
@@ -62,6 +63,11 @@ namespace PerpetualPaint
 
 		private void OnCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
+			if(e.Error != null)
+			{
+				updateStatusTextFunc("Error occurred.");
+				return;
+			}
 			if(queue.Count > 0)
 			{
 				Run();
@@ -93,7 +99,6 @@ namespace PerpetualPaint
 			}
 
 			ConvertRegionToColor(color, point);
-
 			e.Result = new Bitmap(bitmap);
 		}
 
