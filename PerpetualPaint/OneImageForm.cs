@@ -155,7 +155,7 @@ namespace PerpetualPaint
 			Button widenPaletteButton = new Button();
 			widenPaletteButton.Text = ">>";
 			LayoutHelper.Bottom(palettePanel, palettePadding).Right(palettePanel, palettePadding).Width(swatchWidth).Height(swatchWidth).Apply(widenPaletteButton);
-			widenPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			widenPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
 			widenPaletteButton.Click += new EventHandler(Form_OnWidenPalette);
 
 			//todo: some formalizatio of layout helper options
@@ -573,8 +573,8 @@ namespace PerpetualPaint
 
 			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
 			swatchPanel.Size = new Size((SwatchesPerRow * swatchWidth) + scrollBarBuffer, swatchPanel.Size.Height);
-			//pictureBox.Location = new Point(palettePanel.Location.X + palettePanel.Width, pictureBox.Location.Y);
-			//statusPanel.Location = new Point(palettePanel.Location.X + palettePanel.Width, statusPanel.Location.Y);
+			LayoutHelper.RightOf(palettePanel).Bottom(this).Right(this).Height(statusPanel.Height).Apply(statusPanel);
+			LayoutHelper.RightOf(palettePanel).Below(toolStrip).Above(statusPanel).Right(this).Apply(scrollPanel);
 
 			swatchPanel.Controls.Clear();
 			int rowCount = 0;
