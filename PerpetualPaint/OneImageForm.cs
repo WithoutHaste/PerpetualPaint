@@ -23,6 +23,8 @@ namespace PerpetualPaint
 		private StatusPanel statusPanel;
 		private PixelPictureBox pictureBox;
 
+		private History history;
+
 		private const int SCALE_FIT = -1;
 		private const int MAX_IMAGE_DIMENSION = 9000;
 		private const int DEFAULT_SWATCHES_PER_ROW = 3;
@@ -36,8 +38,6 @@ namespace PerpetualPaint
 		private Bitmap zoomedImage;
 		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
 		private double zoomUnits = 0.2; //this is the percentage of change
-		private HashSet<Point> blackPixelSet;
-		private List<HashSet<Point>> pixelSets;
 
 		private int SwatchesPerRow {
 			get {
@@ -90,6 +90,8 @@ namespace PerpetualPaint
 			InitStatusPanel();
 			InitImage();
 
+			InitHistory();
+
 			LoadPalette(saveColorPaletteFullFilename);
 		}
 
@@ -101,8 +103,13 @@ namespace PerpetualPaint
 			fileMenu.MenuItems.Add("Open", new EventHandler(Form_OnOpenFile));
 			fileMenu.MenuItems.Add("Save As", new EventHandler(Form_OnSaveAs));
 
+			MenuItem editMenu = new MenuItem("File");
+			editMenu.MenuItems.Add("Undo", new EventHandler(Form_OnUndo));
+			editMenu.MenuItems.Add("Redo", new EventHandler(Form_OnRedo));
+
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
+			this.Menu.MenuItems.Add(editMenu);
 
 #if DEBUG
 			MenuItem debugMenu = new MenuItem("Debug");
@@ -121,6 +128,9 @@ namespace PerpetualPaint
 			toolStrip.Items.Add("Zoom In", Image.FromFile("resources/icons/icon_plus.png"), Image_OnZoomIn);
 			toolStrip.Items.Add("Zoom Out", Image.FromFile("resources/icons/icon_minus.png"), Image_OnZoomOut);
 			toolStrip.Items.Add("100%", Image.FromFile("resources/icons/icon_100.png"), Image_OnZoom1);
+			toolStrip.Items.Add(new ToolStripSeparator());
+			toolStrip.Items.Add("Undo", Image.FromFile("resources/icons/icon_undo.png"), Form_OnUndo);
+			toolStrip.Items.Add("Redo", Image.FromFile("resources/icons/icon_redo.png"), Form_OnRedo);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -189,6 +199,12 @@ namespace PerpetualPaint
 			this.Controls.Add(scrollPanel);
 		}
 
+		private void InitHistory()
+		{
+			history = new History();
+			RequestColorAction.DoFunc = new RequestColorAction.OnDo(RunColorRequest);
+		}
+
 		/// <summary>
 		/// Start zoom based on the current zoom level of the picture box.
 		/// </summary>
@@ -250,6 +266,16 @@ namespace PerpetualPaint
 					child.BackgroundImage = null;
 				}
 			}
+		}
+
+		private void Form_OnUndo(object sender, EventArgs e)
+		{
+			history.Undo();
+		}
+
+		private void Form_OnRedo(object sender, EventArgs e)
+		{
+			history.Redo();
 		}
 
 		private void Image_OnFit(object sender, EventArgs e)
@@ -325,9 +351,8 @@ namespace PerpetualPaint
 			if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
 
 			Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
-			requestColorQueue.Enqueue(new ColorAtPoint(selectedColor.Value, masterImagePoint));
-			RunColorRequest();
-			UpdateZoomedImage(imageScale);
+			ColorAtPoint newColor = new ColorAtPoint(selectedColor.Value, masterImagePoint);
+			RunColorRequest(newColor);
 		}
 
 #if DEBUG
@@ -362,8 +387,9 @@ namespace PerpetualPaint
 #endif
 		#endregion
 
-		private void RunColorRequest()
+		private void RunColorRequest(ColorAtPoint cap)
 		{
+			requestColorQueue.Enqueue(cap);
 			if(requestColorWorker == null)
 			{
 				requestColorWorker = new RequestColorWorker(requestColorQueue, masterImage, UpdateStatusText, OnRequestColorCompleted);
@@ -381,7 +407,12 @@ namespace PerpetualPaint
 				HandleError("Error occurred while applying color.", e.Error);
 				return;
 			}
-			masterImage = (Bitmap)e.Result;
+			RequestColorWorkerResult result = (RequestColorWorkerResult)e.Result;
+			if(!(result.NewWhite is ColorAtPoint_NoHistory) && !(result.PreviousWhite is ColorAtPoint_NoHistory))
+			{
+				history.Add(new RequestColorAction(result.NewWhite, result.PreviousWhite));
+			}
+			masterImage = result.Bitmap;
 			UpdateZoomedImage(imageScale);
 		}
 
@@ -440,8 +471,7 @@ namespace PerpetualPaint
 		{
 			saveImageFullFilename = fullFilename;
 			masterImage = (Bitmap)Image.FromFile(fullFilename);
-			//CalculateValues();
-			//CalculatePixelSets(); //too slow even with hashsets
+			history.Clear();
 			UpdateZoomedImage(SCALE_FIT);
 		}
 
@@ -610,6 +640,8 @@ namespace PerpetualPaint
 			}
 			using(ErrorForm form = new ErrorForm("Error", message.ToArray()))
 			{
+				form.StartPosition = FormStartPosition.Manual;
+				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
 				form.ShowDialog();
 			}
 		}

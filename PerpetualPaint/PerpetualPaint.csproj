@@ -71,6 +71,7 @@
     <Compile Include="ErrorForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="HistoryActions\RequestColorAction.cs" />
     <Compile Include="OneImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -81,6 +82,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ColorAtPoint.cs" />
     <Compile Include="RequestColorWorker.cs" />
+    <Compile Include="RequestColorWorkerResult.cs" />
     <Compile Include="StatusPanel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -137,7 +139,13 @@
     <Content Include="resources\icons\icon_plus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="resources\icons\icon_redo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="resources\icons\icon_selector.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="resources\icons\icon_undo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="resources\images\sample_rabbit.png">

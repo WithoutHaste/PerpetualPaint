@@ -93,13 +93,14 @@ namespace PerpetualPaint
 			Color color = request.Color;
 			Point point = request.Point;
 
+			Color oldWhite = Color.White;
 			if(!ColorIsGrayscale(bitmap.GetPixel(point.X, point.Y)))
 			{
-				ConvertRegionToGrayscale(point);
+				oldWhite = ConvertRegionToGrayscale(point);
 			}
 
 			ConvertRegionToColor(color, point);
-			e.Result = new Bitmap(bitmap);
+			e.Result = new RequestColorWorkerResult(new Bitmap(bitmap), request, request.ChangeColor(oldWhite));
 		}
 
 		private void ConvertRegionToColor(Color color, Point point)
@@ -157,7 +158,12 @@ namespace PerpetualPaint
 			}
 		}
 
-		private void ConvertRegionToGrayscale(Point point)
+		/// <summary>
+		/// Convert region from color to grayscale.
+		/// </summary>
+		/// <param name="point">Any point in a black-bounded region.</param>
+		/// <returns>The previous "white" color.</returns>
+		private Color ConvertRegionToGrayscale(Point point)
 		{
 			HashSet<ColorAtPoint> inRegion = FindRegion(point);
 			Color white = FindPalestColor(inRegion);
@@ -165,6 +171,7 @@ namespace PerpetualPaint
 			{
 				ConvertPixelToGrayscale(p, white);
 			}
+			return white;
 		}
 
 		/// <summary>
@@ -175,7 +182,8 @@ namespace PerpetualPaint
 			HashSet<ColorAtPoint> inRegion = new HashSet<ColorAtPoint>();
 			Bitmap localBitmap = new Bitmap(bitmap);
 
-			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() { new ColorAtPoint(localBitmap.GetPixel(startPoint.X, startPoint.Y), startPoint) };
+			//todo: why is this using up memory on small color change on cat?
+			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() { new ColorAtPoint(GetPixel(localBitmap, startPoint), startPoint) };
 			while(todo.Count > 0)
 			{
 				ColorAtPoint p = todo.First();
@@ -194,7 +202,7 @@ namespace PerpetualPaint
 				Point down = new Point(p.Point.X, p.Point.Y + 1);
 				if(PointInRange(left))
 				{
-					Color leftColor = localBitmap.GetPixel(left.X, left.Y);
+					Color leftColor = GetPixel(localBitmap, left);
 					ColorAtPoint leftCAP = new ColorAtPoint(leftColor, left);
 					if(!todo.Contains(leftCAP))
 					{
@@ -203,7 +211,7 @@ namespace PerpetualPaint
 				}
 				if(PointInRange(right))
 				{
-					Color rightColor = localBitmap.GetPixel(right.X, right.Y);
+					Color rightColor = GetPixel(localBitmap, right);
 					ColorAtPoint rightCAP = new ColorAtPoint(rightColor, right);
 					if(!todo.Contains(rightCAP))
 					{
@@ -212,7 +220,7 @@ namespace PerpetualPaint
 				}
 				if(PointInRange(up))
 				{
-					Color upColor = localBitmap.GetPixel(up.X, up.Y);
+					Color upColor = GetPixel(localBitmap, up);
 					ColorAtPoint upCAP = new ColorAtPoint(upColor, up);
 					if(!todo.Contains(upCAP))
 					{
@@ -221,7 +229,7 @@ namespace PerpetualPaint
 				}
 				if(PointInRange(down))
 				{
-					Color downColor = localBitmap.GetPixel(down.X, down.Y);
+					Color downColor = GetPixel(localBitmap, down);
 					ColorAtPoint downCAP = new ColorAtPoint(downColor, down);
 					if(!todo.Contains(downCAP))
 					{
@@ -277,6 +285,16 @@ namespace PerpetualPaint
 		private bool PointInRange(Point point)
 		{
 			return (point.X >= 0 && point.X < bitmap.Width && point.Y >= 0 && point.Y < bitmap.Height);
+		}
+
+		private Color GetPixel(Bitmap bitmap, Point point)
+		{
+			Color color = bitmap.GetPixel(point.X, point.Y);
+			if(ColorIsPartiallyClear(color))
+			{
+				color = ConvertPartiallyClearToGray(color);
+			}
+			return color;
 		}
 
 		//todo: allow variable tolerance with demo of pure white/black image
