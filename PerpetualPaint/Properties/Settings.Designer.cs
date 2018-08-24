@@ -34,5 +34,17 @@ namespace PerpetualPaint.Properties {
                 this["SwatchesPerRow"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("resources/palettes/Bright-colors.aco")]
+        public string PaletteFullFilename {
+            get {
+                return ((string)(this["PaletteFullFilename"]));
+            }
+            set {
+                this["PaletteFullFilename"] = value;
+            }
+        }
     }
 }

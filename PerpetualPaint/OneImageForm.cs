@@ -54,7 +54,16 @@ namespace PerpetualPaint
 		private Queue<ColorAtPoint> requestColorQueue = new Queue<ColorAtPoint>();
 		private RequestColorWorker requestColorWorker;
 
-		private string saveColorPaletteFullFilename = "resources/palettes/Bright-colors.aco";
+		private string PaletteFullFilename {
+			get {
+				return Properties.Settings.Default.PaletteFullFilename;
+			}
+			set {
+				Properties.Settings.Default.PaletteFullFilename = value;
+				Properties.Settings.Default.Save();
+			}
+		}
+
 		private WithoutHaste.Drawing.Colors.ColorPalette colorPalette;
 
 		private bool HasImage { get { return masterImage != null; } }
@@ -91,7 +100,7 @@ namespace PerpetualPaint
 
 			InitHistory();
 
-			LoadPalette(saveColorPaletteFullFilename);
+			LoadPalette();
 		}
 
 		#region Init
@@ -287,8 +296,8 @@ namespace PerpetualPaint
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
 				if(form.ShowDialog() == DialogResult.OK)
 				{
-					saveColorPaletteFullFilename = form.FullFilename;
-					LoadPalette(saveColorPaletteFullFilename);
+					PaletteFullFilename = form.FullFilename;
+					LoadPalette();
 				}
 			}
 		}
@@ -305,8 +314,8 @@ namespace PerpetualPaint
 			}
 			try
 			{
-				saveColorPaletteFullFilename = openFileDialog.FileName;
-				LoadPalette(saveColorPaletteFullFilename);
+				PaletteFullFilename = openFileDialog.FileName;
+				LoadPalette();
 			}
 			catch(FileNotFoundException exception)
 			{
@@ -316,14 +325,14 @@ namespace PerpetualPaint
 
 		private void Form_OnEditPalette(object sender, EventArgs e)
 		{
-			using(EditPaletteDialog form = new EditPaletteDialog(saveColorPaletteFullFilename))
+			using(EditPaletteDialog form = new EditPaletteDialog(PaletteFullFilename))
 			{
 				form.StartPosition = FormStartPosition.Manual;
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
 				if(form.ShowDialog() == DialogResult.OK)
 				{
-					saveColorPaletteFullFilename = form.FullFilename;
-					LoadPalette(saveColorPaletteFullFilename);
+					PaletteFullFilename = form.FullFilename;
+					LoadPalette();
 				}
 			}
 		}
@@ -607,9 +616,17 @@ namespace PerpetualPaint
 			}
 		}
 
-		private void LoadPalette(string fullFilename)
+		private void LoadPalette()
 		{
-			colorPalette = FormatACO.Load(saveColorPaletteFullFilename);
+			try
+			{
+				colorPalette = FormatACO.Load(PaletteFullFilename);
+			}
+			catch(Exception e)
+			{
+				HandleError("Cannot load palette: " + PaletteFullFilename, e);
+				return;
+			}
 			DisplayPalette();
 		}
 

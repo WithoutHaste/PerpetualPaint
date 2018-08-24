@@ -5,5 +5,8 @@
     <Setting Name="SwatchesPerRow" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3</Value>
     </Setting>
+    <Setting Name="PaletteFullFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">resources/palettes/Bright-colors.aco</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
