@@ -100,14 +100,15 @@ namespace PerpetualPaint
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			fileMenu.MenuItems.Add("Open", new EventHandler(Form_OnOpenFile));
-			fileMenu.MenuItems.Add("Save As", new EventHandler(Form_OnSaveAs));
+			fileMenu.MenuItems.Add("Open Image", new EventHandler(Form_OnOpenFile));
+			fileMenu.MenuItems.Add("Save Image As", new EventHandler(Form_OnSaveAs));
 
 			MenuItem editMenu = new MenuItem("Edit");
 			editMenu.MenuItems.Add("Undo", new EventHandler(Form_OnUndo));
 			editMenu.MenuItems.Add("Redo", new EventHandler(Form_OnRedo));
 
 			MenuItem paletteMenu = new MenuItem("Palette");
+			paletteMenu.MenuItems.Add("Load Palette", new EventHandler(Form_OnLoadPalette));
 			paletteMenu.MenuItems.Add("Edit Palette", new EventHandler(Form_OnEditPalette));
 
 			this.Menu = new MainMenu();
@@ -280,6 +281,27 @@ namespace PerpetualPaint
 		private void Form_OnRedo(object sender, EventArgs e)
 		{
 			history.Redo();
+		}
+
+		private void Form_OnLoadPalette(object sender, EventArgs e)
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Palette Files|*.ACO";
+			openFileDialog.Title = "Select a Palette File";
+
+			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+			try
+			{
+				saveColorPaletteFullFilename = openFileDialog.FileName;
+				LoadPalette(saveColorPaletteFullFilename);
+			}
+			catch(FileNotFoundException exception)
+			{
+				HandleError("Failed to open file.", exception);
+			}
 		}
 
 		private void Form_OnEditPalette(object sender, EventArgs e)
