@@ -68,6 +68,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dialogs\NewColorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditPaletteForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ErrorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,6 +90,9 @@
     <Compile Include="RequestColorWorker.cs" />
     <Compile Include="RequestColorWorkerResult.cs" />
     <Compile Include="StatusPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SwatchPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="WaitForm.cs">

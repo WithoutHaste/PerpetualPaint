@@ -103,13 +103,17 @@ namespace PerpetualPaint
 			fileMenu.MenuItems.Add("Open", new EventHandler(Form_OnOpenFile));
 			fileMenu.MenuItems.Add("Save As", new EventHandler(Form_OnSaveAs));
 
-			MenuItem editMenu = new MenuItem("File");
+			MenuItem editMenu = new MenuItem("Edit");
 			editMenu.MenuItems.Add("Undo", new EventHandler(Form_OnUndo));
 			editMenu.MenuItems.Add("Redo", new EventHandler(Form_OnRedo));
+
+			MenuItem paletteMenu = new MenuItem("Palette");
+			paletteMenu.MenuItems.Add("Edit Palette", new EventHandler(Form_OnEditPalette));
 
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
 			this.Menu.MenuItems.Add(editMenu);
+			this.Menu.MenuItems.Add(paletteMenu);
 
 #if DEBUG
 			MenuItem debugMenu = new MenuItem("Debug");
@@ -276,6 +280,16 @@ namespace PerpetualPaint
 		private void Form_OnRedo(object sender, EventArgs e)
 		{
 			history.Redo();
+		}
+
+		private void Form_OnEditPalette(object sender, EventArgs e)
+		{
+			using(EditPaletteForm form = new EditPaletteForm(saveColorPaletteFullFilename))
+			{
+				form.StartPosition = FormStartPosition.Manual;
+				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
+				form.ShowDialog();
+			}
 		}
 
 		private void Image_OnFit(object sender, EventArgs e)
