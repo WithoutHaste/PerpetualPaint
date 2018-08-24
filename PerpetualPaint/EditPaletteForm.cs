@@ -50,6 +50,8 @@ namespace PerpetualPaint
 				if(dialog.ShowDialog() == DialogResult.OK)
 				{
 					Color newColor = dialog.Color;
+					colorPalette.Add(newColor);
+					swatchPanel.DisplayColors(colorPalette);
 				}
 			}
 		}
