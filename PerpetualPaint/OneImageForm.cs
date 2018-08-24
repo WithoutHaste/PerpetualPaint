@@ -31,8 +31,6 @@ namespace PerpetualPaint
 		private const int MIN_SWATCHES_PER_ROW = 3;
 		private const int MAX_SWATCHES_PER_ROW = 12;
 
-		private IconManager iconManager = IconManager.Singleton;
-
 		private string saveImageFullFilename;
 		private Bitmap masterImage;
 		private Bitmap zoomedImage;
@@ -138,13 +136,13 @@ namespace PerpetualPaint
 		{
 			toolStrip = new ToolStrip();
 			toolStrip.Dock = DockStyle.Top;
-			toolStrip.Items.Add("Fit", iconManager.ICON_ZOOM_FIT, Image_OnFit);
-			toolStrip.Items.Add("Zoom In", iconManager.ICON_ZOOM_IN, Image_OnZoomIn);
-			toolStrip.Items.Add("Zoom Out", iconManager.ICON_ZOOM_OUT, Image_OnZoomOut);
-			toolStrip.Items.Add("100%", iconManager.ICON_ZOOM_100, Image_OnZoom1);
+			toolStrip.Items.Add("Fit", IconManager.ICON_ZOOM_FIT, Image_OnFit);
+			toolStrip.Items.Add("Zoom In", IconManager.ICON_ZOOM_IN, Image_OnZoomIn);
+			toolStrip.Items.Add("Zoom Out", IconManager.ICON_ZOOM_OUT, Image_OnZoomOut);
+			toolStrip.Items.Add("100%", IconManager.ICON_ZOOM_100, Image_OnZoom1);
 			toolStrip.Items.Add(new ToolStripSeparator());
-			toolStrip.Items.Add("Undo", iconManager.ICON_UNDO, Form_OnUndo);
-			toolStrip.Items.Add("Redo", iconManager.ICON_REDO, Form_OnRedo);
+			toolStrip.Items.Add("Undo", IconManager.ICON_UNDO, Form_OnUndo);
+			toolStrip.Items.Add("Redo", IconManager.ICON_REDO, Form_OnRedo);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -268,7 +266,7 @@ namespace PerpetualPaint
 			{
 				if(child.BackColor == selectedColor)
 				{
-					child.BackgroundImage = iconManager.ICON_SELECTED_COLOR;
+					child.BackgroundImage = IconManager.ICON_SELECTED_COLOR;
 					child.BackgroundImageLayout = ImageLayout.Stretch;
 				}
 				else

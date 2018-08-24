@@ -52,8 +52,8 @@ namespace PerpetualPaint
 
 			ToolStrip toolStrip = new ToolStrip();
 			toolStrip.Dock = DockStyle.Top;
-			toolStrip.Items.Add("Undo", Image.FromFile("resources/icons/icon_undo.png"), Form_OnUndo);
-			toolStrip.Items.Add("Redo", Image.FromFile("resources/icons/icon_redo.png"), Form_OnRedo);
+			toolStrip.Items.Add("Undo", IconManager.ICON_UNDO, Form_OnUndo);
+			toolStrip.Items.Add("Redo", IconManager.ICON_REDO, Form_OnRedo);
 			this.Controls.Add(toolStrip);
 
 			Button addButton = new Button();
