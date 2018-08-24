@@ -32,7 +32,10 @@ namespace PerpetualPaint
 
 		public void DisplayColors(ColorPalette colorPalette)
 		{
+			this.SuspendLayout();
+
 			this.Controls.Clear();
+			int count = 0;
 			foreach(Color color in colorPalette.Colors)
 			{
 				if(selectedColor == null)
@@ -41,6 +44,7 @@ namespace PerpetualPaint
 				}
 
 				Panel colorPanel = new Panel();
+				colorPanel.TabIndex = count; //corresponds to index in color palette
 				colorPanel.Size = new Size(SWATCH_WIDTH, SWATCH_WIDTH);
 				colorPanel.Padding = new Padding(0);
 				colorPanel.Margin = new Padding(0);
@@ -61,7 +65,10 @@ namespace PerpetualPaint
 					colorPanel.Click += new EventHandler(onClickColor);
 				}
 				this.Controls.Add(colorPanel);
+				count++;
 			}
+
+			this.ResumeLayout();
 		}
 
 		public void Color_OnClick(object sender, EventArgs e)

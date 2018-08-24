@@ -16,6 +16,7 @@ namespace PerpetualPaint
 		private ColorPalette colorPalette;
 		private SwatchPanel swatchPanel;
 		private bool editedSinceSave;
+		private History history;
 
 		public string FullFilename {
 			get {
@@ -34,7 +35,19 @@ namespace PerpetualPaint
 			this.Text = "Edit Palette";
 			this.FormClosing += new FormClosingEventHandler(Form_OnClosing);
 
+			Init();
+			InitHistory();
+		}
+
+		private void Init()
+		{
 			int margin = 10;
+
+			ToolStrip toolStrip = new ToolStrip();
+			toolStrip.Dock = DockStyle.Top;
+			toolStrip.Items.Add("Undo", Image.FromFile("resources/icons/icon_undo.png"), Form_OnUndo);
+			toolStrip.Items.Add("Redo", Image.FromFile("resources/icons/icon_redo.png"), Form_OnRedo);
+			this.Controls.Add(toolStrip);
 
 			Button addButton = new Button();
 			LayoutHelper.Bottom(this, margin).Left(this, margin).Height(25).Width(80).Apply(addButton);
@@ -70,9 +83,31 @@ namespace PerpetualPaint
 			colorContextMenu.MenuItems.Add("Delete", Color_OnDelete);
 
 			swatchPanel = new SwatchPanel(colorPalette, null, colorContextMenu);
-			LayoutHelper.Left(this, margin).Top(this, margin).Right(this, margin).Above(addButton, margin).Apply(swatchPanel);
+			LayoutHelper.Left(this, margin).Below(toolStrip).Right(this, margin).Above(addButton, margin).Apply(swatchPanel);
 			swatchPanel.Anchor = LayoutHelper.AnchorAll;
 			this.Controls.Add(swatchPanel);
+		}
+
+		private void InitHistory()
+		{
+			history = new History();
+			AddPaletteColorAction.DoFunc = new AddPaletteColorAction.DoOperation(AddColorToPalette);
+			AddPaletteColorAction.UndoFunc = new AddPaletteColorAction.UndoOperation(RemoveColorFromPalette);
+			RemovePaletteColorAction.DoFunc = new RemovePaletteColorAction.DoOperation(RemoveColorFromPalette);
+			RemovePaletteColorAction.UndoFunc = new RemovePaletteColorAction.UndoOperation(AddColorToPalette);
+			ReplacePaletteColorAction.DoUndoFunc = new ReplacePaletteColorAction.Operation(ReplaceColorInPalette);
+		}
+
+		#region Event Handlers
+
+		private void Form_OnUndo(object sender, EventArgs e)
+		{
+			history.Undo();
+		}
+
+		private void Form_OnRedo(object sender, EventArgs e)
+		{
+			history.Redo();
 		}
 
 		private void Form_OnClosing(object sender, FormClosingEventArgs e)
@@ -98,9 +133,9 @@ namespace PerpetualPaint
 				if(dialog.ShowDialog() == DialogResult.OK)
 				{
 					Color newColor = dialog.Color;
-					colorPalette.Add(newColor);
-					swatchPanel.DisplayColors(colorPalette);
-					editedSinceSave = true;
+					int index = colorPalette.Count;
+					AddColorToPalette(newColor, index);
+					history.Add(new AddPaletteColorAction(newColor, index));
 				}
 			}
 		}
@@ -115,15 +150,13 @@ namespace PerpetualPaint
 			{
 				return;
 			}
-			fullFilename = saveFileDialog.FileName;
-			FormatACO.Save(fullFilename, colorPalette);
-			editedSinceSave = false;
+			Save(saveFileDialog.FileName);
+			fullFilename = saveFileDialog.FileName; //when save is successful, keep new filename
 		}
 
 		private void Form_OnSave(object sender, EventArgs e)
 		{
-			FormatACO.Save(fullFilename, colorPalette);
-			editedSinceSave = false;
+			Save(fullFilename);
 		}
 
 		private void Form_OnDone(object sender, EventArgs e)
@@ -142,9 +175,8 @@ namespace PerpetualPaint
 				if(dialog.ShowDialog() == DialogResult.OK)
 				{
 					Color newColor = dialog.Color;
-					colorPalette.Replace(oldColor, newColor);
-					swatchPanel.DisplayColors(colorPalette);
-					editedSinceSave = true;
+					ReplaceColorInPalette(control.TabIndex, newColor);
+					history.Add(new ReplacePaletteColorAction(control.TabIndex, oldColor, newColor));
 				}
 			}
 		}
@@ -160,9 +192,9 @@ namespace PerpetualPaint
 				if(dialog.ShowDialog() == DialogResult.OK)
 				{
 					Color newColor = dialog.Color;
-					colorPalette.Add(newColor);
-					swatchPanel.DisplayColors(colorPalette);
-					editedSinceSave = true;
+					int index = colorPalette.Count;
+					AddColorToPalette(newColor, index);
+					history.Add(new AddPaletteColorAction(newColor, index));
 				}
 			}
 		}
@@ -170,9 +202,43 @@ namespace PerpetualPaint
 		private void Color_OnDelete(object sender, EventArgs e)
 		{
 			Control control = (sender as MenuItem).GetContextMenu().SourceControl;
-			colorPalette.Remove(control.BackColor);
+			RemoveColorFromPalette(control.TabIndex);
+			history.Add(new RemovePaletteColorAction(control.BackColor, control.TabIndex));
+		}
+
+#endregion
+
+		private void Save(string fullFilename)
+		{
+			FormatACO.Save(fullFilename, colorPalette);
+			editedSinceSave = false;
+		}
+
+		private void AddColorToPalette(Color color, int index)
+		{
+			colorPalette.Insert(color, index);
 			swatchPanel.DisplayColors(colorPalette);
 			editedSinceSave = true;
 		}
+
+		private void RemoveColorFromPalette(int index)
+		{
+			colorPalette.RemoveAt(index);
+			swatchPanel.DisplayColors(colorPalette);
+			editedSinceSave = true;
+		}
+
+		private void ReplaceColorInPalette(int index, Color newColor)
+		{
+			colorPalette.ReplaceAt(index, newColor);
+			swatchPanel.DisplayColors(colorPalette);
+			editedSinceSave = true;
+		}
+
+		private void ResetHistory()
+		{
+			history.Clear();
+		}
+
 	}
 }
