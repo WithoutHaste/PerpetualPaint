@@ -33,7 +33,7 @@ namespace PerpetualPaint
 			}
 			else
 			{
-				this.colorPalette = FormatACO.Load(fullFilename);
+				this.colorPalette = WithoutHaste.Drawing.Colors.ColorPalette.Load(fullFilename);
 			}
 			this.editedSinceSave = false;
 
@@ -150,7 +150,7 @@ namespace PerpetualPaint
 		private void Form_OnSaveAs(object sender, EventArgs e)
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "Palette Files|*.ACO";
+			saveFileDialog.Filter = "Palette Files|*.aco;*.pal";
 			saveFileDialog.Title = "Save as Palette File";
 
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
@@ -224,7 +224,7 @@ namespace PerpetualPaint
 
 		private void Save(string fullFilename)
 		{
-			FormatACO.Save(fullFilename, colorPalette);
+			colorPalette.Save(fullFilename);
 			editedSinceSave = false;
 		}
 

@@ -121,8 +121,9 @@ hmm, ACO also stands for Ant Colony Optimization, a common problem on Github
 not finding a c# solution on Github, so I'll roll my own
 new repository - name? ColorPalettes? another library file
 	
-Paint Shop Pro: *.pal
+Paint Shop Pro: *.pal (plain-text file format)
 	http://www.tigercolor.com/color-lab/Palette-collections/color-palettes.htm (download examples)
+	http://www.cryer.co.uk/file-types/p/pal.htm (file format specification)
 
 GIMP: *.gpl
 	??
