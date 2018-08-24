@@ -11,8 +11,8 @@ namespace PerpetualPaint
 {
 	public class SwatchPanel : FlowLayoutPanel
 	{
-		public readonly int SCROLLBAR_WIDTH = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-		public const int SWATCH_WIDTH = 25;
+		public static readonly int SCROLLBAR_WIDTH = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
+		public static readonly int SWATCH_WIDTH = 25;
 
 		private Color? selectedColor = null;
 		private EventHandler onClickColor;
@@ -20,14 +20,29 @@ namespace PerpetualPaint
 
 		private readonly Image IMAGE_SELECTED_COLOR = Image.FromFile("resources/icons/icon_selector.png");
 
+		public SwatchPanel()
+		{
+			Init();
+		}
+
+		public SwatchPanel(EventHandler onClickColor)
+		{
+			Init();
+			this.onClickColor = onClickColor;
+		}
+
 		public SwatchPanel(ColorPalette colorPalette, EventHandler onClickColor=null, ContextMenu colorContextMenu=null)
 		{
-			this.AutoScroll = true;
-			this.BorderStyle = BorderStyle.Fixed3D;
-
+			Init();
 			this.onClickColor = onClickColor;
 			this.colorContextMenu = colorContextMenu;
 			DisplayColors(colorPalette);
+		}
+
+		private void Init()
+		{
+			this.AutoScroll = true;
+			this.BorderStyle = BorderStyle.Fixed3D;
 		}
 
 		public void DisplayColors(ColorPalette colorPalette)

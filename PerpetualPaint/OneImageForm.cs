@@ -18,7 +18,7 @@ namespace PerpetualPaint
 	{
 		private ToolStrip toolStrip;
 		private Panel palettePanel;
-		private Panel swatchPanel;
+		private SwatchPanel swatchPanel;
 		private Panel scrollPanel;
 		private StatusPanel statusPanel;
 		private PixelPictureBox pictureBox;
@@ -48,7 +48,6 @@ namespace PerpetualPaint
 				Properties.Settings.Default.Save();
 			}
 		}
-		private int swatchWidth = 25;
 		private int palettePadding = 15;
 		private Color? selectedColor;
 
@@ -145,7 +144,7 @@ namespace PerpetualPaint
 		private void InitPalette()
 		{
 			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int swatchesWidth = (swatchWidth * SwatchesPerRow) + scrollBarBuffer;
+			int swatchesWidth = (SwatchPanel.SWATCH_WIDTH * SwatchesPerRow) + scrollBarBuffer;
 			int paletteWidth =  swatchesWidth + (2 * palettePadding);
 
 			palettePanel = new Panel();
@@ -154,23 +153,19 @@ namespace PerpetualPaint
 
 			Button narrowPaletteButton = new Button();
 			narrowPaletteButton.Text = "<<";
-			LayoutHelper.Bottom(palettePanel, palettePadding).Left(palettePanel, palettePadding).Width(swatchWidth).Height(swatchWidth).Apply(narrowPaletteButton);
+			LayoutHelper.Bottom(palettePanel, palettePadding).Left(palettePanel, palettePadding).Width(SwatchPanel.SWATCH_WIDTH).Height(SwatchPanel.SWATCH_WIDTH).Apply(narrowPaletteButton);
 			narrowPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
 			narrowPaletteButton.Click += new EventHandler(Form_OnNarrowPalette);
 
 			Button widenPaletteButton = new Button();
 			widenPaletteButton.Text = ">>";
-			LayoutHelper.Bottom(palettePanel, palettePadding).Right(palettePanel, palettePadding).Width(swatchWidth).Height(swatchWidth).Apply(widenPaletteButton);
+			LayoutHelper.Bottom(palettePanel, palettePadding).Right(palettePanel, palettePadding).Width(SwatchPanel.SWATCH_WIDTH).Height(SwatchPanel.SWATCH_WIDTH).Apply(widenPaletteButton);
 			widenPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
 			widenPaletteButton.Click += new EventHandler(Form_OnWidenPalette);
 
-			//todo: some formalizatio of layout helper options
-			//like how to handle swatchPanel as a FillAbove(narrowPaletteButton)
-			swatchPanel = new Panel();
-			swatchPanel.AutoScroll = true;
+			swatchPanel = new SwatchPanel(Form_OnClickColor);
 			LayoutHelper.Top(palettePanel).MatchLeft(narrowPaletteButton).MatchRight(widenPaletteButton).Above(narrowPaletteButton, palettePadding).Apply(swatchPanel);
 			swatchPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-			swatchPanel.BorderStyle = BorderStyle.Fixed3D;
 
 			palettePanel.Controls.Add(swatchPanel);
 			palettePanel.Controls.Add(narrowPaletteButton);
@@ -244,7 +239,7 @@ namespace PerpetualPaint
 			if(SwatchesPerRow == MIN_SWATCHES_PER_ROW) return;
 
 			SwatchesPerRow--;
-			ArrangePalette();
+			DisplayPalette();
 		}
 
 		private void Form_OnWidenPalette(object sender, EventArgs e)
@@ -252,7 +247,7 @@ namespace PerpetualPaint
 			if(SwatchesPerRow == MAX_SWATCHES_PER_ROW) return;
 
 			SwatchesPerRow++;
-			ArrangePalette();
+			DisplayPalette();
 		}
 
 		private void Form_OnClickColor(object sender, EventArgs e)
@@ -615,55 +610,19 @@ namespace PerpetualPaint
 		private void LoadPalette(string fullFilename)
 		{
 			colorPalette = FormatACO.Load(saveColorPaletteFullFilename);
-			ArrangePalette();
+			DisplayPalette();
 		}
 
-		private void ArrangePalette()
+		private void DisplayPalette()
 		{
-			this.SuspendLayout();
-
-			//todo: duplicate code
-			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int paletteWidth = (SwatchesPerRow * swatchWidth) + (2 * palettePadding) + scrollBarBuffer;
+			int paletteWidth = (SwatchesPerRow * SwatchPanel.SWATCH_WIDTH) + (2 * palettePadding) + SwatchPanel.SCROLLBAR_WIDTH;
 
 			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
-			swatchPanel.Size = new Size((SwatchesPerRow * swatchWidth) + scrollBarBuffer, swatchPanel.Size.Height);
+			swatchPanel.Size = new Size((SwatchesPerRow * SwatchPanel.SWATCH_WIDTH) + SwatchPanel.SCROLLBAR_WIDTH, swatchPanel.Size.Height);
 			LayoutHelper.RightOf(palettePanel).Bottom(this).Right(this).Height(statusPanel.Height).Apply(statusPanel);
 			LayoutHelper.RightOf(palettePanel).Below(toolStrip).Above(statusPanel).Right(this).Apply(scrollPanel);
 
-			swatchPanel.Controls.Clear();
-			int rowCount = 0;
-			int colCount = 0;
-			foreach(Color color in colorPalette.Colors)
-			{
-				if(selectedColor == null)
-				{
-					selectedColor = color;
-				}
-
-				Panel colorPanel = new Panel();
-				colorPanel.Location = new Point(rowCount * swatchWidth, colCount * swatchWidth);
-				colorPanel.Size = new Size(swatchWidth, swatchWidth);
-				colorPanel.BackColor = color;
-				if(color == selectedColor)
-				{
-					//todo: duplicate code
-					colorPanel.BackgroundImage = IMAGE_SELECTED_COLOR;
-					colorPanel.BackgroundImageLayout = ImageLayout.Stretch;
-				}
-				colorPanel.Cursor = Cursors.Hand;
-				colorPanel.Click += new EventHandler(Form_OnClickColor);
-				swatchPanel.Controls.Add(colorPanel);
-
-				rowCount++;
-				if(rowCount >= SwatchesPerRow)
-				{
-					rowCount = 0;
-					colCount++;
-				}
-			}
-
-			this.ResumeLayout();
+			swatchPanel.DisplayColors(colorPalette);
 		}
 
 		private void UpdateStatusText(string text)
