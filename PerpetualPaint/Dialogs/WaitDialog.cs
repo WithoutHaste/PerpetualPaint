@@ -9,11 +9,11 @@ using WithoutHaste.Windows.GUI;
 
 namespace PerpetualPaint
 {
-	public class WaitForm : Form
+	public class WaitDialog : Form
 	{
 		private Button cancelButton;
 
-		public WaitForm(string message)
+		public WaitDialog(string message)
 		{
 			InitForm(message);
 		}

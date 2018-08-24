@@ -286,7 +286,7 @@ namespace PerpetualPaint
 
 		private void Form_OnNewPalette(object sender, EventArgs e)
 		{
-			using(EditPaletteForm form = new EditPaletteForm(null))
+			using(EditPaletteDialog form = new EditPaletteDialog(null))
 			{
 				form.StartPosition = FormStartPosition.Manual;
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
@@ -321,7 +321,7 @@ namespace PerpetualPaint
 
 		private void Form_OnEditPalette(object sender, EventArgs e)
 		{
-			using(EditPaletteForm form = new EditPaletteForm(saveColorPaletteFullFilename))
+			using(EditPaletteDialog form = new EditPaletteDialog(saveColorPaletteFullFilename))
 			{
 				form.StartPosition = FormStartPosition.Manual;
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
@@ -673,7 +673,7 @@ namespace PerpetualPaint
 
 		private void ShowWaitMessage(string message)
 		{
-			using(WaitForm form = new WaitForm(message))
+			using(WaitDialog form = new WaitDialog(message))
 			{
 				form.ShowDialog();
 			}
@@ -693,7 +693,7 @@ namespace PerpetualPaint
 				message.Add("Stack Trace:");
 				message.Add(e.StackTrace);
 			}
-			using(ErrorForm form = new ErrorForm("Error", message.ToArray()))
+			using(ErrorDialog form = new ErrorDialog("Error", message.ToArray()))
 			{
 				form.StartPosition = FormStartPosition.Manual;
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);

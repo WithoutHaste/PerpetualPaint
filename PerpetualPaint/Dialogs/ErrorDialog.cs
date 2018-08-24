@@ -9,18 +9,18 @@ using WithoutHaste.Windows.GUI;
 
 namespace PerpetualPaint
 {
-	public class ErrorForm : Form
+	public class ErrorDialog : Form
 	{
 		public const string LineBreak = "\r\n";
 
 		private Button okButton;
 
-		public ErrorForm(string title, string message)
+		public ErrorDialog(string title, string message)
 		{
 			InitForm(title, message);
 		}
 
-		public ErrorForm(string title, string[] message)
+		public ErrorDialog(string title, string[] message)
 		{
 			InitForm(title, String.Join(LineBreak, message));
 		}

@@ -10,7 +10,7 @@ using WithoutHaste.Windows.GUI;
 
 namespace PerpetualPaint
 {
-	public class EditPaletteForm : Form
+	public class EditPaletteDialog : Form
 	{
 		private string fullFilename;
 		private ColorPalette colorPalette;
@@ -24,7 +24,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		public EditPaletteForm(string fullFilename)
+		public EditPaletteDialog(string fullFilename)
 		{
 			this.fullFilename = fullFilename;
 			if(fullFilename == null)

@@ -71,10 +71,10 @@
     <Compile Include="Dialogs\NewColorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditPaletteForm.cs">
+    <Compile Include="Dialogs\EditPaletteDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ErrorForm.cs">
+    <Compile Include="Dialogs\ErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="HistoryActions\AddPaletteColorAction.cs" />
@@ -98,7 +98,7 @@
     <Compile Include="SwatchPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="WaitForm.cs">
+    <Compile Include="Dialogs\WaitDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
