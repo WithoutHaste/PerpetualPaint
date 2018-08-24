@@ -81,6 +81,7 @@
     <Compile Include="HistoryActions\RemovePaletteColorAction.cs" />
     <Compile Include="HistoryActions\ReplacePaletteColorAction.cs" />
     <Compile Include="HistoryActions\RequestColorAction.cs" />
+    <Compile Include="IconManager.cs" />
     <Compile Include="OneImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
