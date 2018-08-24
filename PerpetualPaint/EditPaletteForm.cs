@@ -36,6 +36,7 @@ namespace PerpetualPaint
 			this.Controls.Add(addButton);
 
 			ContextMenu colorContextMenu = new ContextMenu();
+			colorContextMenu.MenuItems.Add("Edit", Color_OnEdit);
 			colorContextMenu.MenuItems.Add("Delete", Color_OnDelete);
 
 			swatchPanel = new SwatchPanel(colorPalette, null, colorContextMenu);
@@ -54,6 +55,23 @@ namespace PerpetualPaint
 				{
 					Color newColor = dialog.Color;
 					colorPalette.Add(newColor);
+					swatchPanel.DisplayColors(colorPalette);
+				}
+			}
+		}
+
+		private void Color_OnEdit(object sender, EventArgs e)
+		{
+			Control control = (sender as MenuItem).GetContextMenu().SourceControl;
+			Color oldColor = control.BackColor;
+			using(NewColorDialog dialog = new NewColorDialog(oldColor))
+			{
+				dialog.StartPosition = FormStartPosition.Manual;
+				dialog.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
+				if(dialog.ShowDialog() == DialogResult.OK)
+				{
+					Color newColor = dialog.Color;
+					colorPalette.Replace(oldColor, newColor);
 					swatchPanel.DisplayColors(colorPalette);
 				}
 			}

@@ -19,20 +19,24 @@ namespace PerpetualPaint
 
 		public Color Color { get; protected set; }
 
-		public NewColorDialog()
+		public NewColorDialog(Color? startColor=null)
 		{
 			int margin = 10;
+			if(startColor.HasValue)
+			{
+				Color = startColor.Value;
+			}
 
 			this.Width = (HuePanel.UNIT + margin + margin/*why second margin needed?*/) * 2;
 			this.Height = 500 + margin;
 			this.Text = "New Color";
 
-			huePanel = new HuePanel();
+			huePanel = new HuePanel(Color);
 			huePanel.Location = new Point(margin, margin);
 			huePanel.OnColorChange = Hue_OnChange;
 			this.Controls.Add(huePanel);
 
-			saturationValuePanel = new SaturationValuePanel();
+			saturationValuePanel = new SaturationValuePanel(Color);
 			saturationValuePanel.Location = new Point(margin, huePanel.Location.Y + huePanel.Height + margin);
 			saturationValuePanel.OnColorChange = SaturationValue_OnChange;
 			this.Controls.Add(saturationValuePanel);
@@ -103,7 +107,7 @@ namespace PerpetualPaint
 
 		public EventHandler OnColorChange { get; set; }
 
-		public HuePanel()
+		public HuePanel(Color? startColor=null)
 		{
 			this.Height = TRACKBAR_HEIGHT + 50;
 			this.Width = UNIT * 2;
@@ -127,6 +131,11 @@ namespace PerpetualPaint
 				colorPanel.BackColor = ConvertColors.ColorFromHSV(new HSV(hue, 1, 1));
 				colorPanel.Click += new EventHandler(Color_OnClick);
 				this.Controls.Add(colorPanel);
+			}
+
+			if(startColor.HasValue)
+			{
+				Hue = (int)ConvertColors.HSVFromColor(startColor.Value).Hue;
 			}
 		}
 
@@ -185,14 +194,13 @@ namespace PerpetualPaint
 			}
 		}
 
-		public SaturationValuePanel()
+		public SaturationValuePanel(Color? startColor=null)
 		{
 			int totalColorHeight = UNIT * 3;
 
 			this.Height = TRACKBAR_HEIGHT + totalColorHeight;
 			this.Width = TRACKBAR_HEIGHT + totalColorHeight;
 			this.BorderStyle = BorderStyle.Fixed3D;
-			this.hue = 0;
 
 			saturationTrackBar = new TrackBar();
 			saturationTrackBar.Location = new Point(TRACKBAR_HEIGHT, 0);
@@ -215,6 +223,14 @@ namespace PerpetualPaint
 			gradientPanel.Location = new Point(TRACKBAR_HEIGHT, TRACKBAR_HEIGHT);
 			gradientPanel.OnColorChange = Gradient_OnColorChange;
 			this.Controls.Add(gradientPanel);
+
+			if(startColor.HasValue)
+			{
+				HSV hsv = ConvertColors.HSVFromColor(startColor.Value);
+				Hue = (int)hsv.Hue;
+				Saturation = (int)(hsv.Saturation * 100);
+				Value = (int)(hsv.Value * 100);
+			}
 		}
 
 		private void Gradient_OnColorChange(object sender, EventArgs e)
