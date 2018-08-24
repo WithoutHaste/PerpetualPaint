@@ -31,7 +31,13 @@ namespace PerpetualPaint
 		private const int MIN_SWATCHES_PER_ROW = 3;
 		private const int MAX_SWATCHES_PER_ROW = 12;
 		
-		private readonly Image IMAGE_SELECTED_COLOR = Image.FromFile("resources/icons/icon_selector.png");
+		private Image ICON_SELECTED_COLOR;
+		private Image ICON_ZOOM_100;
+		private Image ICON_ZOOM_FIT;
+		private Image ICON_ZOOM_IN;
+		private Image ICON_ZOOM_OUT;
+		private Image ICON_REDO;
+		private Image ICON_UNDO;
 
 		private string saveImageFullFilename;
 		private Bitmap masterImage;
@@ -92,6 +98,7 @@ namespace PerpetualPaint
 			this.Width = 800;
 			this.Height = 600;
 
+			InitIcons();
 			InitMenus();
 			InitTools();
 			InitPalette();
@@ -104,6 +111,29 @@ namespace PerpetualPaint
 		}
 
 		#region Init
+
+		private void InitIcons()
+		{
+			ICON_SELECTED_COLOR = TryLoadIcon("resources/icons/icon_selector.png");
+			ICON_ZOOM_100 = TryLoadIcon("resources/icons/icon_100.png");
+			ICON_ZOOM_FIT = TryLoadIcon("resources/icons/icon_fit.png");
+			ICON_ZOOM_IN = TryLoadIcon("resources/icons/icon_plus.png");
+			ICON_ZOOM_OUT = TryLoadIcon("resources/icons/icon_minus.png");
+			ICON_REDO = TryLoadIcon("resources/icons/icon_redo.png");
+			ICON_UNDO = TryLoadIcon("resources/icons/icon_undo.png");
+		}
+
+		private Image TryLoadIcon(string fullFilename)
+		{
+			try
+			{
+				return Image.FromFile(fullFilename);
+			}
+			catch(Exception)
+			{
+				return SystemIcons.Question.ToBitmap();
+			}
+		}
 
 		private void InitMenus()
 		{
@@ -138,13 +168,13 @@ namespace PerpetualPaint
 		{
 			toolStrip = new ToolStrip();
 			toolStrip.Dock = DockStyle.Top;
-			toolStrip.Items.Add("Fit", Image.FromFile("resources/icons/icon_fit.png"), Image_OnFit);
-			toolStrip.Items.Add("Zoom In", Image.FromFile("resources/icons/icon_plus.png"), Image_OnZoomIn);
-			toolStrip.Items.Add("Zoom Out", Image.FromFile("resources/icons/icon_minus.png"), Image_OnZoomOut);
-			toolStrip.Items.Add("100%", Image.FromFile("resources/icons/icon_100.png"), Image_OnZoom1);
+			toolStrip.Items.Add("Fit", ICON_ZOOM_FIT, Image_OnFit);
+			toolStrip.Items.Add("Zoom In", ICON_ZOOM_IN, Image_OnZoomIn);
+			toolStrip.Items.Add("Zoom Out", ICON_ZOOM_OUT, Image_OnZoomOut);
+			toolStrip.Items.Add("100%", ICON_ZOOM_100, Image_OnZoom1);
 			toolStrip.Items.Add(new ToolStripSeparator());
-			toolStrip.Items.Add("Undo", Image.FromFile("resources/icons/icon_undo.png"), Form_OnUndo);
-			toolStrip.Items.Add("Redo", Image.FromFile("resources/icons/icon_redo.png"), Form_OnRedo);
+			toolStrip.Items.Add("Undo", ICON_UNDO, Form_OnUndo);
+			toolStrip.Items.Add("Redo", ICON_REDO, Form_OnRedo);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -268,7 +298,7 @@ namespace PerpetualPaint
 			{
 				if(child.BackColor == selectedColor)
 				{
-					child.BackgroundImage = IMAGE_SELECTED_COLOR;
+					child.BackgroundImage = ICON_SELECTED_COLOR;
 					child.BackgroundImageLayout = ImageLayout.Stretch;
 				}
 				else
