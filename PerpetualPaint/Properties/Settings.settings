@@ -8,8 +8,14 @@
     <Setting Name="PaletteFullFilename" Type="System.String" Scope="User">
       <Value Profile="(Default)">resources/palettes/Bright-colors.aco</Value>
     </Setting>
-    <Setting Name="FullScreen" Type="System.Boolean" Scope="User">
+    <Setting Name="FormFullScreen" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="FormNormalWidth" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">800</Value>
+    </Setting>
+    <Setting Name="FormNormalHeight" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">600</Value>
     </Setting>
   </Settings>
 </SettingsFile>

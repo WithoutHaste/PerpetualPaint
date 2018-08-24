@@ -50,12 +50,36 @@ namespace PerpetualPaint.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool FullScreen {
+        public bool FormFullScreen {
             get {
-                return ((bool)(this["FullScreen"]));
+                return ((bool)(this["FormFullScreen"]));
             }
             set {
-                this["FullScreen"] = value;
+                this["FormFullScreen"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("800")]
+        public int FormNormalWidth {
+            get {
+                return ((int)(this["FormNormalWidth"]));
+            }
+            set {
+                this["FormNormalWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("600")]
+        public int FormNormalHeight {
+            get {
+                return ((int)(this["FormNormalHeight"]));
+            }
+            set {
+                this["FormNormalHeight"] = value;
             }
         }
     }

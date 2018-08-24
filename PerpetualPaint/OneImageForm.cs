@@ -62,6 +62,38 @@ namespace PerpetualPaint
 			}
 		}
 
+		private bool FormFullScreen {
+			get {
+				return Properties.Settings.Default.FormFullScreen;
+			}
+			set {
+				Properties.Settings.Default.FormFullScreen = value;
+				Properties.Settings.Default.Save();
+			}
+		}
+
+		private int FormNormalWidth {
+			get {
+				return Properties.Settings.Default.FormNormalWidth;
+			}
+			set {
+				Properties.Settings.Default.FormNormalWidth = value;
+				Properties.Settings.Default.Save();
+			}
+		}
+
+		private int FormNormalHeight {
+			get {
+				return Properties.Settings.Default.FormNormalHeight;
+			}
+			set {
+				Properties.Settings.Default.FormNormalHeight = value;
+				Properties.Settings.Default.Save();
+			}
+		}
+
+		private FormWindowState previousFormWindowState;
+
 		private WithoutHaste.Drawing.Colors.ColorPalette colorPalette;
 
 		private bool HasImage { get { return masterImage != null; } }
@@ -87,8 +119,18 @@ namespace PerpetualPaint
 		public OneImageForm()
 		{
 			this.Text = "Perpetual Paint";
-			this.Width = 800;
-			this.Height = 600;
+			if(FormFullScreen)
+			{
+				this.WindowState = FormWindowState.Maximized;
+			}
+			else
+			{
+				this.WindowState = FormWindowState.Normal;
+				this.Width = FormNormalWidth;
+				this.Height = FormNormalHeight;
+			}
+			previousFormWindowState = this.WindowState;
+			this.Resize += new EventHandler(Form_Resize);
 
 			InitMenus();
 			InitTools();
@@ -230,6 +272,35 @@ namespace PerpetualPaint
 		#endregion
 
 		#region Event Handlers
+
+		private void Form_Resize(object sender, EventArgs e)
+		{
+			if(previousFormWindowState == this.WindowState)
+			{
+				if(this.WindowState == FormWindowState.Normal)
+				{
+					FormNormalWidth = this.Width;
+					FormNormalHeight = this.Height;
+				}
+				return;
+			}
+
+			switch(this.WindowState)
+			{
+				case FormWindowState.Maximized:
+					FormFullScreen = true;
+					break;
+				case FormWindowState.Normal:
+					FormFullScreen = false;
+					this.Width = FormNormalWidth;
+					this.Height = FormNormalHeight;
+					break;
+				case FormWindowState.Minimized:
+					//no action
+					break;
+			}
+			previousFormWindowState = this.WindowState;
+		}
 
 		private void Form_OnOpenFile(object sender, EventArgs e)
 		{
