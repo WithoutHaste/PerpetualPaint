@@ -108,6 +108,7 @@ namespace PerpetualPaint
 			editMenu.MenuItems.Add("Redo", new EventHandler(Form_OnRedo));
 
 			MenuItem paletteMenu = new MenuItem("Palette");
+			paletteMenu.MenuItems.Add("New", new EventHandler(Form_OnNewPalette));
 			paletteMenu.MenuItems.Add("Load", new EventHandler(Form_OnLoadPalette));
 			paletteMenu.MenuItems.Add("Edit", new EventHandler(Form_OnEditPalette));
 
@@ -281,6 +282,20 @@ namespace PerpetualPaint
 		private void Form_OnRedo(object sender, EventArgs e)
 		{
 			history.Redo();
+		}
+
+		private void Form_OnNewPalette(object sender, EventArgs e)
+		{
+			using(EditPaletteForm form = new EditPaletteForm(null))
+			{
+				form.StartPosition = FormStartPosition.Manual;
+				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
+				if(form.ShowDialog() == DialogResult.OK)
+				{
+					saveColorPaletteFullFilename = form.FullFilename;
+					LoadPalette(saveColorPaletteFullFilename);
+				}
+			}
 		}
 
 		private void Form_OnLoadPalette(object sender, EventArgs e)

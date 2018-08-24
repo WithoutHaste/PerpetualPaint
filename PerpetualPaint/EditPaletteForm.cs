@@ -27,7 +27,14 @@ namespace PerpetualPaint
 		public EditPaletteForm(string fullFilename)
 		{
 			this.fullFilename = fullFilename;
-			this.colorPalette = FormatACO.Load(fullFilename);
+			if(fullFilename == null)
+			{
+				this.colorPalette = new ColorPalette();
+			}
+			else
+			{
+				this.colorPalette = FormatACO.Load(fullFilename);
+			}
 			this.editedSinceSave = false;
 
 			this.Width = 500;
@@ -156,7 +163,14 @@ namespace PerpetualPaint
 
 		private void Form_OnSave(object sender, EventArgs e)
 		{
-			Save(fullFilename);
+			if(fullFilename == null)
+			{
+				Form_OnSaveAs(sender, e);
+			}
+			else
+			{
+				Save(fullFilename);
+			}
 		}
 
 		private void Form_OnDone(object sender, EventArgs e)
