@@ -35,7 +35,10 @@ namespace PerpetualPaint
 			addButton.Click += new EventHandler(OnAdd);
 			this.Controls.Add(addButton);
 
-			swatchPanel = new SwatchPanel(colorPalette);
+			ContextMenu colorContextMenu = new ContextMenu();
+			colorContextMenu.MenuItems.Add("Delete", Color_OnDelete);
+
+			swatchPanel = new SwatchPanel(colorPalette, null, colorContextMenu);
 			LayoutHelper.Left(this, margin).Top(this, margin).Right(this, margin).Above(addButton, margin).Apply(swatchPanel);
 			swatchPanel.Anchor = LayoutHelper.AnchorAll;
 			this.Controls.Add(swatchPanel);
@@ -54,6 +57,13 @@ namespace PerpetualPaint
 					swatchPanel.DisplayColors(colorPalette);
 				}
 			}
+		}
+
+		private void Color_OnDelete(object sender, EventArgs e)
+		{
+			Control control = (sender as MenuItem).GetContextMenu().SourceControl;
+			colorPalette.Remove(control.BackColor);
+			swatchPanel.DisplayColors(colorPalette);
 		}
 	}
 }

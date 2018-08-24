@@ -16,15 +16,17 @@ namespace PerpetualPaint
 
 		private Color? selectedColor = null;
 		private EventHandler onClickColor;
+		private ContextMenu colorContextMenu;
 
 		private readonly Image IMAGE_SELECTED_COLOR = Image.FromFile("resources/icons/icon_selector.png");
 
-		public SwatchPanel(ColorPalette colorPalette, EventHandler onClickColor=null)
+		public SwatchPanel(ColorPalette colorPalette, EventHandler onClickColor=null, ContextMenu colorContextMenu=null)
 		{
 			this.AutoScroll = true;
 			this.BorderStyle = BorderStyle.Fixed3D;
 
 			this.onClickColor = onClickColor;
+			this.colorContextMenu = colorContextMenu;
 			DisplayColors(colorPalette);
 		}
 
@@ -50,6 +52,10 @@ namespace PerpetualPaint
 				}
 				colorPanel.Cursor = Cursors.Hand;
 				colorPanel.Click += new EventHandler(Color_OnClick);
+				if(colorContextMenu != null)
+				{
+					colorPanel.ContextMenu = colorContextMenu;
+				}
 				if(onClickColor != null)
 				{
 					colorPanel.Click += new EventHandler(onClickColor);

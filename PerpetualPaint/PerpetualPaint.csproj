@@ -60,7 +60,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WithoutHaste.Drawing.Colors">
-      <HintPath>..\..\WithoutHaste.Drawing.Colors\Colors\bin\Debug\WithoutHaste.Drawing.Colors.dll</HintPath>
+      <HintPath>..\..\WithoutHaste.Drawing.Colors\Colors\bin\Release\WithoutHaste.Drawing.Colors.dll</HintPath>
     </Reference>
     <Reference Include="WithoutHaste.Windows.GUI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
