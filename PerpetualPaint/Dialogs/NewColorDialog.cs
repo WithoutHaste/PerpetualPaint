@@ -60,6 +60,7 @@ namespace PerpetualPaint
 			colorDataPanel = new ColorDataPanel(readOnly: false);
 			LayoutHelper.Above(okButton, margin).Right(this, margin).Below(huePanel).Width(150).Apply(colorDataPanel);
 			colorDataPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+			colorDataPanel.ColorChangeFunc = new ColorDataPanel.OnColorChange(ColorData_OnChange);
 			this.Controls.Add(colorDataPanel);
 
 			selectedColorPanel = new Panel();
@@ -91,6 +92,14 @@ namespace PerpetualPaint
 			UpdateSelectedColor();
 		}
 
+		private void ColorData_OnChange(Color color)
+		{
+			Color = color;
+			selectedColorPanel.BackColor = color;
+			huePanel.Color = color;
+			saturationValuePanel.Color = color;
+		}
+
 		private void UpdateSelectedColor()
 		{
 			Color = ConvertColors.ColorFromHSV(new HSV(huePanel.Hue, saturationValuePanel.Saturation / 100f, saturationValuePanel.Value / 100f));
@@ -112,6 +121,12 @@ namespace PerpetualPaint
 			}
 			set {
 				trackBar.Value = value;
+			}
+		}
+
+		public Color Color {
+			set {
+				Hue = (int)ConvertColors.HSVFromColor(value).Hue;
 			}
 		}
 
@@ -190,6 +205,14 @@ namespace PerpetualPaint
 			}
 			set {
 				valueTrackBar.Value = value;
+			}
+		}
+
+		public Color Color {
+			set {
+				HSV hsv = ConvertColors.HSVFromColor(value);
+				Saturation = (int)(hsv.Saturation * 100);
+				Value = (int)(hsv.Value * 100);
 			}
 		}
 
