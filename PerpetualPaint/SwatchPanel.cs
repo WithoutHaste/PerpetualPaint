@@ -18,6 +18,12 @@ namespace PerpetualPaint
 		private EventHandler onClickColor;
 		private ContextMenu colorContextMenu;
 
+		public Color? SelectedColor {
+			get {
+				return selectedColor;
+			}
+		}
+
 		public SwatchPanel()
 		{
 			Init();

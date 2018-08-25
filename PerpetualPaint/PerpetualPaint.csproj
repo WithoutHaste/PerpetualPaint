@@ -68,6 +68,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorDataPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Dialogs\NewColorDialog.cs">
       <SubType>Form</SubType>
     </Compile>

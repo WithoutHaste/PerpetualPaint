@@ -57,6 +57,9 @@ namespace PerpetualPaint
 			toolStrip.Items.Add("Redo", IconManager.ICON_REDO, Form_OnRedo);
 			this.Controls.Add(toolStrip);
 
+			colorDataPanel = new ColorDataPanel();
+
+
 			Button addButton = new Button();
 			LayoutHelper.Bottom(this, margin).Left(this, margin).Height(25).Width(80).Apply(addButton);
 			addButton.Text = "Add";
@@ -90,14 +93,9 @@ namespace PerpetualPaint
 			colorContextMenu.MenuItems.Add("Add New Based on This", Color_OnAddBasedOn);
 			colorContextMenu.MenuItems.Add("Delete", Color_OnDelete);
 
-			colorDataPanel = new ColorDataPanel();
-			LayoutHelper.Above(okButton, margin).Right(this, margin).Below(toolStrip).Width(150).Apply(colorDataPanel);
-			this.Controls.Add(colorDataPanel);
-
-			swatchPanel = new SwatchPanel(colorPalette, Color_OnSelect, colorContextMenu);
-			LayoutHelper.Left(this, margin).Below(toolStrip).LeftOf(colorDataPanel).Above(addButton, margin).Apply(swatchPanel);
+			swatchPanel = new SwatchPanel(colorPalette, null, colorContextMenu);
+			LayoutHelper.Left(this, margin).Below(toolStrip).Right(this, margin).Above(addButton, margin).Apply(swatchPanel);
 			swatchPanel.Anchor = LayoutHelper.AnchorAll;
-			UpdateColorData();
 			this.Controls.Add(swatchPanel);
 		}
 
@@ -184,11 +182,6 @@ namespace PerpetualPaint
 			this.Close();
 		}
 
-		private void Color_OnSelect(object sender, EventArgs e)
-		{
-			UpdateColorData();
-		}
-
 		private void Color_OnEdit(object sender, EventArgs e)
 		{
 			Control control = (sender as MenuItem).GetContextMenu().SourceControl;
@@ -258,11 +251,6 @@ namespace PerpetualPaint
 			colorPalette.ReplaceAt(index, newColor);
 			swatchPanel.DisplayColors(colorPalette);
 			editedSinceSave = true;
-		}
-
-		private void UpdateColorData()
-		{
-			colorDataPanel.Color = swatchPanel.SelectedColor;
 		}
 
 		private void ResetHistory()
