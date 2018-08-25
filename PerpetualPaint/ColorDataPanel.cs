@@ -24,15 +24,15 @@ namespace PerpetualPaint
 		private TextBox rgbData;
 		private TextBox hsvData;
 
-		public ColorDataPanel()
+		public ColorDataPanel(bool readOnly = true)
 		{
 			this.Width = 150;
 			this.Height = 200;
 
-			Init();
+			Init(readOnly);
 		}
 
-		private void Init()
+		private void Init(bool readOnly)
 		{
 			int margin = 10;
 			int controlHeight = 25;
@@ -44,7 +44,7 @@ namespace PerpetualPaint
 			hexadecimalHeader.Text = "Hexadecimal";
 			this.Controls.Add(hexadecimalHeader);
 
-			hexadecimalData = GetReadonlyTextBox();
+			hexadecimalData = GetTextBox(readOnly);
 			LayoutHelper.Left(this, margin * 2).Below(hexadecimalHeader).Width(this.Width).Height(controlHeight).Apply(hexadecimalData);
 			this.Controls.Add(hexadecimalData);
 
@@ -53,7 +53,7 @@ namespace PerpetualPaint
 			rgbHeader.Text = "Red, Green, Blue";
 			this.Controls.Add(rgbHeader);
 
-			rgbData = GetReadonlyTextBox();
+			rgbData = GetTextBox(readOnly);
 			LayoutHelper.Left(this, margin * 2).Below(rgbHeader).Width(this.Width).Height(controlHeight).Apply(rgbData);
 			this.Controls.Add(rgbData);
 
@@ -62,7 +62,7 @@ namespace PerpetualPaint
 			hsvHeader.Text = "Hue, Saturation, Value";
 			this.Controls.Add(hsvHeader);
 
-			hsvData = GetReadonlyTextBox();
+			hsvData = GetTextBox(readOnly);
 			LayoutHelper.Left(this, margin * 2).Below(hsvHeader).Width(this.Width).Height(controlHeight).Apply(hsvData);
 			this.Controls.Add(hsvData);
 		}
@@ -83,7 +83,17 @@ namespace PerpetualPaint
 			hsvData.Text = String.Format("({0}, {1}, {2})", (int)hsv.Hue, (int)(hsv.Saturation * 100), (int)(hsv.Value * 100));
 		}
 
-		private TextBox GetReadonlyTextBox()
+		private TextBox GetTextBox(bool readOnly)
+		{
+			if(readOnly)
+				return GetReadOnlyTextBox();
+
+			return new TextBox() {
+				BorderStyle = BorderStyle.FixedSingle
+			};
+		}
+
+		private TextBox GetReadOnlyTextBox()
 		{
 			return new TextBox() {
 				ReadOnly = true,

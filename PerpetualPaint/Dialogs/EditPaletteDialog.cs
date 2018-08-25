@@ -64,8 +64,24 @@ namespace PerpetualPaint
 			addButton.Click += new EventHandler(Form_OnAdd);
 			this.Controls.Add(addButton);
 
+			ContextMenu colorContextMenu = new ContextMenu();
+			colorContextMenu.MenuItems.Add("Edit", Color_OnEdit);
+			colorContextMenu.MenuItems.Add("Add New Based on This", Color_OnAddBasedOn);
+			colorContextMenu.MenuItems.Add("Delete", Color_OnDelete);
+
+			colorDataPanel = new ColorDataPanel(readOnly:true);
+			LayoutHelper.Above(addButton, margin).Right(this, margin).Below(toolStrip).Width(150).Apply(colorDataPanel);
+			colorDataPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+			this.Controls.Add(colorDataPanel);
+
+			swatchPanel = new SwatchPanel(colorPalette, Color_OnSelect, colorContextMenu);
+			LayoutHelper.Left(this, margin).Below(toolStrip).LeftOf(colorDataPanel).Above(addButton, margin).Apply(swatchPanel);
+			swatchPanel.Anchor = LayoutHelper.AnchorAll;
+			UpdateColorData();
+			this.Controls.Add(swatchPanel);
+
 			Button okButton = new Button();
-			LayoutHelper.Bottom(this, margin).Right(this, margin).Height(25).Width(80).Apply(okButton);
+			LayoutHelper.Bottom(this, margin).MatchRight(swatchPanel, margin).Height(25).Width(80).Apply(okButton);
 			okButton.Text = "Done";
 			okButton.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
 			okButton.Click += new EventHandler(Form_OnDone);
@@ -84,21 +100,6 @@ namespace PerpetualPaint
 			saveButton.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
 			saveButton.Click += new EventHandler(Form_OnSave);
 			this.Controls.Add(saveButton);
-
-			ContextMenu colorContextMenu = new ContextMenu();
-			colorContextMenu.MenuItems.Add("Edit", Color_OnEdit);
-			colorContextMenu.MenuItems.Add("Add New Based on This", Color_OnAddBasedOn);
-			colorContextMenu.MenuItems.Add("Delete", Color_OnDelete);
-
-			colorDataPanel = new ColorDataPanel();
-			LayoutHelper.Above(okButton, margin).Right(this, margin).Below(toolStrip).Width(150).Apply(colorDataPanel);
-			this.Controls.Add(colorDataPanel);
-
-			swatchPanel = new SwatchPanel(colorPalette, Color_OnSelect, colorContextMenu);
-			LayoutHelper.Left(this, margin).Below(toolStrip).LeftOf(colorDataPanel).Above(addButton, margin).Apply(swatchPanel);
-			swatchPanel.Anchor = LayoutHelper.AnchorAll;
-			UpdateColorData();
-			this.Controls.Add(swatchPanel);
 		}
 
 		private void InitHistory()
