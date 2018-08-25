@@ -125,5 +125,11 @@ Paint Shop Pro: *.pal (plain-text file format)
 	http://www.tigercolor.com/color-lab/Palette-collections/color-palettes.htm (download examples)
 	http://www.cryer.co.uk/file-types/p/pal.htm (file format specification)
 
-GIMP: *.gpl
-	??
+GIMP: *.gpl (plain-text file format)
+	https://github.com/denilsonsa/gimp-palettes/tree/master/palettes (download examples)
+	https://github.com/portnov/color-palette/wiki/Gimp-palette-format-extensions (some description of format)
+	
+ArtRage: *.col
+	???
+	
+	
