@@ -45,7 +45,8 @@ namespace PerpetualPaint
 			this.Controls.Add(hexadecimalHeader);
 
 			hexadecimalData = GetTextBox(readOnly);
-			LayoutHelper.Left(this, margin * 2).Below(hexadecimalHeader).Width(this.Width).Height(controlHeight).Apply(hexadecimalData);
+			LayoutHelper.Left(this, margin * 2).Below(hexadecimalHeader).Width(this.Width - (margin * 2)).Height(controlHeight).Apply(hexadecimalData);
+			hexadecimalData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 			this.Controls.Add(hexadecimalData);
 
 			Label rgbHeader = new Label();
@@ -54,7 +55,8 @@ namespace PerpetualPaint
 			this.Controls.Add(rgbHeader);
 
 			rgbData = GetTextBox(readOnly);
-			LayoutHelper.Left(this, margin * 2).Below(rgbHeader).Width(this.Width).Height(controlHeight).Apply(rgbData);
+			LayoutHelper.Left(this, margin * 2).Below(rgbHeader).Width(this.Width - (margin * 2)).Height(controlHeight).Apply(rgbData);
+			rgbData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 			this.Controls.Add(rgbData);
 
 			Label hsvHeader = new Label();
@@ -63,7 +65,8 @@ namespace PerpetualPaint
 			this.Controls.Add(hsvHeader);
 
 			hsvData = GetTextBox(readOnly);
-			LayoutHelper.Left(this, margin * 2).Below(hsvHeader).Width(this.Width).Height(controlHeight).Apply(hsvData);
+			LayoutHelper.Left(this, margin * 2).Below(hsvHeader).Width(this.Width - (margin * 2)).Height(controlHeight).Apply(hsvData);
+			hsvData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 			this.Controls.Add(hsvData);
 		}
 

@@ -15,6 +15,7 @@ namespace PerpetualPaint
 	{
 		private HuePanel huePanel;
 		private SaturationValuePanel saturationValuePanel;
+		private ColorDataPanel colorDataPanel;
 		private Panel selectedColorPanel;
 
 		public Color Color { get; protected set; }
@@ -30,6 +31,9 @@ namespace PerpetualPaint
 			this.Width = (HuePanel.UNIT + margin + margin/*why second margin needed?*/) * 2;
 			this.Height = 500 + margin;
 			this.Text = "New Color";
+			this.FormBorderStyle = FormBorderStyle.FixedSingle; //disable resize
+			this.MinimizeBox = false;
+			this.MaximizeBox = false;
 
 			huePanel = new HuePanel(Color);
 			huePanel.Location = new Point(margin, margin);
@@ -53,8 +57,13 @@ namespace PerpetualPaint
 			cancelButton.Click += new EventHandler(Cancel_OnClick);
 			this.Controls.Add(cancelButton);
 
+			colorDataPanel = new ColorDataPanel(readOnly: false);
+			LayoutHelper.Above(okButton, margin).Right(this, margin).Below(huePanel).Width(150).Apply(colorDataPanel);
+			colorDataPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+			this.Controls.Add(colorDataPanel);
+
 			selectedColorPanel = new Panel();
-			LayoutHelper.RightOf(saturationValuePanel, margin).Below(huePanel, margin).Right(this, margin).Above(okButton, margin).Apply(selectedColorPanel);
+			LayoutHelper.RightOf(saturationValuePanel, margin).Below(huePanel, margin).LeftOf(colorDataPanel).Above(okButton, margin).Apply(selectedColorPanel);
 			UpdateSelectedColor();
 			this.Controls.Add(selectedColorPanel);
 		}
@@ -86,6 +95,7 @@ namespace PerpetualPaint
 		{
 			Color = ConvertColors.ColorFromHSV(new HSV(huePanel.Hue, saturationValuePanel.Saturation / 100f, saturationValuePanel.Value / 100f));
 			selectedColorPanel.BackColor = Color;
+			colorDataPanel.Color = Color;
 		}
 	}
 
