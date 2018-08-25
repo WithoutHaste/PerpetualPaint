@@ -18,8 +18,6 @@ namespace PerpetualPaint
 		private EventHandler onClickColor;
 		private ContextMenu colorContextMenu;
 
-		private readonly Image IMAGE_SELECTED_COLOR = Image.FromFile("resources/icons/icon_selector.png");
-
 		public SwatchPanel()
 		{
 			Init();
@@ -66,7 +64,7 @@ namespace PerpetualPaint
 				colorPanel.BackColor = color;
 				if(color == selectedColor)
 				{
-					colorPanel.BackgroundImage = IMAGE_SELECTED_COLOR;
+					colorPanel.BackgroundImage = IconManager.ICON_SELECTED_COLOR;
 					colorPanel.BackgroundImageLayout = ImageLayout.Stretch;
 				}
 				colorPanel.Cursor = Cursors.Hand;
@@ -93,7 +91,7 @@ namespace PerpetualPaint
 			{
 				if(child.BackColor == selectedColor)
 				{
-					child.BackgroundImage = IMAGE_SELECTED_COLOR;
+					child.BackgroundImage = IconManager.ICON_SELECTED_COLOR;
 				}
 				else
 				{

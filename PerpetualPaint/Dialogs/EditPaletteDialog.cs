@@ -150,7 +150,7 @@ namespace PerpetualPaint
 		private void Form_OnSaveAs(object sender, EventArgs e)
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "Palette Files|*.aco;*.pal";
+			saveFileDialog.Filter = "Palette Files|*.aco;*.gpl;*.pal";
 			saveFileDialog.Title = "Save as Palette File";
 
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)

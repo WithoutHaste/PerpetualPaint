@@ -374,7 +374,7 @@ namespace PerpetualPaint
 		private void Form_OnLoadPalette(object sender, EventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Palette Files|*.aco;*.pal";
+			openFileDialog.Filter = "Palette Files|*.aco;*.gpl;*.pal";
 			openFileDialog.Title = "Select a Palette File";
 
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
