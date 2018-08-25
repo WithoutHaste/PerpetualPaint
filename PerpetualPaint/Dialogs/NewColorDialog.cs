@@ -94,10 +94,14 @@ namespace PerpetualPaint
 
 		private void ColorData_OnChange(Color color)
 		{
+			colorDataPanel.IgnoreChanges = true;
+
 			Color = color;
 			selectedColorPanel.BackColor = color;
 			huePanel.Color = color;
 			saturationValuePanel.Color = color;
+
+			colorDataPanel.IgnoreChanges = false;
 		}
 
 		private void UpdateSelectedColor()

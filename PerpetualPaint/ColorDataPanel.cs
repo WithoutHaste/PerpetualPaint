@@ -15,10 +15,15 @@ namespace PerpetualPaint
 		private Color? color;
 		public Color? Color {
 			set {
-				color = value;
-				DisplayData();
+				if(!IgnoreChanges)
+				{
+					color = value;
+					DisplayData();
+				}
 			}
 		}
+
+		public bool IgnoreChanges { get; set; }
 
 		public delegate void OnColorChange(Color color);
 		public OnColorChange ColorChangeFunc;
@@ -40,6 +45,8 @@ namespace PerpetualPaint
 			this.Height = 200;
 
 			Init(readOnly);
+
+			IgnoreChanges = false;
 		}
 
 		private void Init(bool readOnly)
@@ -93,22 +100,10 @@ namespace PerpetualPaint
 				return;
 			}
 
-			//only update textbox if necessary
-			//use case: intending to write "255,255,255", when you reach "255,255,2" the text gets replaced
-			Color tempColor = System.Drawing.Color.Black;
-			if(!ConvertColors.TryParseHexadecimal(hexadecimalData.Text, out tempColor) || tempColor != color)
-			{
-				SetTextWithoutEvent(hexadecimalData, ConvertColors.HexadecimalFromColor(color.Value));
-			}
-			if(!ConvertColors.TryParseRGB(rgbData.Text, out tempColor) || tempColor != color)
-			{
-				SetTextWithoutEvent(rgbData, String.Format("({0}, {1}, {2})", color.Value.R, color.Value.G, color.Value.B));
-			}
-			if(!ConvertColors.TryParseHSV(hsvData.Text, out tempColor) || tempColor != color)
-			{
-				HSV hsv = ConvertColors.HSVFromColor(color.Value);
-				SetTextWithoutEvent(hsvData, String.Format("({0}, {1}, {2})", (int)hsv.Hue, (int)(hsv.Saturation * 100), (int)(hsv.Value * 100)));
-			}
+			SetTextWithoutEvent(hexadecimalData, ConvertColors.HexadecimalFromColor(color.Value));
+			SetTextWithoutEvent(rgbData, String.Format("({0}, {1}, {2})", color.Value.R, color.Value.G, color.Value.B));
+			HSV hsv = ConvertColors.HSVFromColor(color.Value);
+			SetTextWithoutEvent(hsvData, String.Format("({0:0.####}, {1:0.####}, {2:0.####})", hsv.Hue, hsv.Saturation, hsv.Value));
 
 			if(!hexadecimalData.ReadOnly)
 			{
@@ -160,13 +155,22 @@ namespace PerpetualPaint
 			switch(textBox.Name)
 			{
 				case NAME_HEXADECIMAL:
-					success = ConvertColors.TryParseHexadecimal(textBox.Text, out newColor);
+					if((textBox.Text.Length == 6 && !textBox.Text.StartsWith("#")) || (textBox.Text.Length == 7 && textBox.Text.StartsWith("#")))
+					{
+						success = ConvertColors.TryParseHexadecimal(textBox.Text, out newColor);
+					}
 					break;
 				case NAME_RGB:
-					success = ConvertColors.TryParseRGB(textBox.Text, out newColor);
+					if(textBox.Text.EndsWith(")"))
+					{
+						success = ConvertColors.TryParseRGB(textBox.Text, out newColor);
+					}
 					break;
 				case NAME_HSV:
-					success = ConvertColors.TryParseHSV(textBox.Text, out newColor);
+					if(textBox.Text.EndsWith(")"))
+					{
+						success = ConvertColors.TryParseHSV(textBox.Text, out newColor);
+					}
 					break;
 			}
 			if(success)
