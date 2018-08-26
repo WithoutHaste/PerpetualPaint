@@ -42,7 +42,7 @@ namespace PerpetualPaint
 
 			saturationValuePanel = new SaturationValuePanel(Color);
 			saturationValuePanel.Location = new Point(margin, huePanel.Location.Y + huePanel.Height + margin);
-			saturationValuePanel.OnColorChange = SaturationValue_OnChange;
+			saturationValuePanel.ColorChanged += new EventHandler(SaturationValue_OnChange);
 			this.Controls.Add(saturationValuePanel);
 
 			Button okButton = new Button();
@@ -192,7 +192,7 @@ namespace PerpetualPaint
 		private TrackBar valueTrackBar;
 		private SaturationValueGradientPanel gradientPanel;
 
-		public EventHandler OnColorChange;
+		public event EventHandler ColorChanged;
 
 		public int Saturation {
 			get {
@@ -258,7 +258,7 @@ namespace PerpetualPaint
 
 			gradientPanel = new SaturationValueGradientPanel(totalColorHeight);
 			gradientPanel.Location = new Point(TRACKBAR_HEIGHT, TRACKBAR_HEIGHT);
-			gradientPanel.OnColorChange = Gradient_OnColorChange;
+			gradientPanel.ColorChanged += new EventHandler(Gradient_OnColorChange);
 			this.Controls.Add(gradientPanel);
 
 			if(startColor.HasValue)
@@ -278,14 +278,18 @@ namespace PerpetualPaint
 
 		private void Saturation_OnValueChanged(object sender, EventArgs e)
 		{
-			if(OnColorChange != null)
-				OnColorChange(this, new EventArgs());
+			if(ColorChanged != null)
+			{
+				ColorChanged(this, new EventArgs());
+			}
 		}
 
 		private void Value_OnValueChanged(object sender, EventArgs e)
 		{
-			if(OnColorChange != null)
-				OnColorChange(this, new EventArgs());
+			if(ColorChanged != null)
+			{
+				ColorChanged(this, new EventArgs());
+			}
 		}
 	}
 
@@ -319,7 +323,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		public EventHandler OnColorChange;
+		public event EventHandler ColorChanged;
 
 		private int swatchWidth;
 		private Bitmap graphicsBitmap;
@@ -343,9 +347,9 @@ namespace PerpetualPaint
 			HSV hsv = ConvertColors.HSVFromColor(color);
 			saturation = (int)(100 * hsv.Saturation);
 			_value = (int)(100 * hsv.Value);
-			if(OnColorChange != null)
+			if(ColorChanged != null)
 			{
-				OnColorChange(this, new EventArgs());
+				ColorChanged(this, new EventArgs());
 			}
 		}
 
