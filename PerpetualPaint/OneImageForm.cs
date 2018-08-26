@@ -607,6 +607,9 @@ namespace PerpetualPaint
 		{
 			this.SuspendLayout();
 
+			bool horizontalScrollAtMax = (scrollPanel.HorizontalScroll.Maximum == scrollPanel.HorizontalScroll.Value + scrollPanel.HorizontalScroll.LargeChange - 1);
+			bool verticalScrollAtMax = (scrollPanel.VerticalScroll.Maximum == scrollPanel.VerticalScroll.Value + scrollPanel.VerticalScroll.LargeChange - 1);
+
 			double previousImageScale = imageScale;
 
 			int zoomedWidth = masterImage.Width;
@@ -659,18 +662,36 @@ namespace PerpetualPaint
 
 			if(imageScale != SCALE_FIT && previousImageScale != newImageScale)
 			{
-				UpdateScrollBars(centerPoint);
+				UpdateScrollBars(centerPoint, horizontalScrollAtMax, verticalScrollAtMax);
 			}
 
 			this.ResumeLayout();
 		}
 
-		private void UpdateScrollBars(Point masterImageCenterPoint)
+		private void UpdateScrollBars(Point masterImageCenterPoint, bool horizontalScrollAtMax, bool verticalScrollAtMax)
 		{
-			scrollPanel.AutoScrollPosition = new Point(
-				(int)((masterImageCenterPoint.X * imageScale) - (scrollPanel.ClientSize.Width / 2)),
-				(int)((masterImageCenterPoint.Y * imageScale) - (scrollPanel.ClientSize.Height / 2))
-				);
+			int x = (int)((masterImageCenterPoint.X * imageScale) - (scrollPanel.ClientSize.Width / 2));
+			if(scrollPanel.HorizontalScroll.Value == 0)
+			{
+				x = 0;
+			}
+			else if(horizontalScrollAtMax)
+			{
+				x = pictureBox.Width;
+			}
+			
+
+			int y = (int)((masterImageCenterPoint.Y * imageScale) - (scrollPanel.ClientSize.Height / 2));
+			if(scrollPanel.VerticalScroll.Value == 0)
+			{
+				y = 0;
+			}
+			else if(verticalScrollAtMax)
+			{
+				y = pictureBox.Height;
+			}
+
+			scrollPanel.AutoScrollPosition = new Point(x, y);
 		}
 
 		private void CalculateValues()
