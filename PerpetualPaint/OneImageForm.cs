@@ -18,7 +18,7 @@ namespace PerpetualPaint
 	{
 		private ToolStrip toolStrip;
 		private Panel palettePanel;
-		private ColorPalettePanel swatchPanel;
+		private ColorPalettePanel colorPalettePanel;
 		private Panel scrollPanel;
 		private StatusPanel statusPanel;
 		private PixelPictureBox pictureBox;
@@ -47,7 +47,11 @@ namespace PerpetualPaint
 			}
 		}
 		private int palettePadding = 15;
-		private Color? selectedColor;
+		private Color? SelectedColor {
+			get {
+				return colorPalettePanel.SelectedColor;
+			}
+		}
 
 		private Queue<ColorAtPoint> requestColorQueue = new Queue<ColorAtPoint>();
 		private RequestColorWorker requestColorWorker;
@@ -184,13 +188,13 @@ namespace PerpetualPaint
 		{
 			toolStrip = new ToolStrip();
 			toolStrip.Dock = DockStyle.Top;
-			toolStrip.Items.Add("Fit", IconManager.ICON_ZOOM_FIT, Image_OnFit);
-			toolStrip.Items.Add("Zoom In", IconManager.ICON_ZOOM_IN, Image_OnZoomIn);
-			toolStrip.Items.Add("Zoom Out", IconManager.ICON_ZOOM_OUT, Image_OnZoomOut);
-			toolStrip.Items.Add("100%", IconManager.ICON_ZOOM_100, Image_OnZoom1);
+			toolStrip.Items.Add("Fit", IconManager.ZOOM_FIT, Image_OnFit);
+			toolStrip.Items.Add("Zoom In", IconManager.ZOOM_IN, Image_OnZoomIn);
+			toolStrip.Items.Add("Zoom Out", IconManager.ZOOM_OUT, Image_OnZoomOut);
+			toolStrip.Items.Add("100%", IconManager.ZOOM_100, Image_OnZoom1);
 			toolStrip.Items.Add(new ToolStripSeparator());
-			toolStrip.Items.Add("Undo", IconManager.ICON_UNDO, Form_OnUndo);
-			toolStrip.Items.Add("Redo", IconManager.ICON_REDO, Form_OnRedo);
+			toolStrip.Items.Add("Undo", IconManager.UNDO, Form_OnUndo);
+			toolStrip.Items.Add("Redo", IconManager.REDO, Form_OnRedo);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -218,11 +222,11 @@ namespace PerpetualPaint
 			widenPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
 			widenPaletteButton.Click += new EventHandler(Form_OnWidenPalette);
 
-			swatchPanel = new ColorPalettePanel(Form_OnClickColor);
-			LayoutHelper.Top(palettePanel).MatchLeft(narrowPaletteButton).MatchRight(widenPaletteButton).Above(narrowPaletteButton, palettePadding).Apply(swatchPanel);
-			swatchPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+			colorPalettePanel = new ColorPalettePanel();
+			LayoutHelper.Top(palettePanel).MatchLeft(narrowPaletteButton).MatchRight(widenPaletteButton).Above(narrowPaletteButton, palettePadding).Apply(colorPalettePanel);
+			colorPalettePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 
-			palettePanel.Controls.Add(swatchPanel);
+			palettePanel.Controls.Add(colorPalettePanel);
 			palettePanel.Controls.Add(narrowPaletteButton);
 			palettePanel.Controls.Add(widenPaletteButton);
 			this.Controls.Add(palettePanel);
@@ -337,26 +341,7 @@ namespace PerpetualPaint
 			SwatchesPerRow++;
 			DisplayPalette();
 		}
-
-		private void Form_OnClickColor(object sender, EventArgs e)
-		{
-			Panel colorPanel = sender as Panel;
-			selectedColor = colorPanel.BackColor;
-
-			foreach(Control child in swatchPanel.Controls)
-			{
-				if(child.BackColor == selectedColor)
-				{
-					child.BackgroundImage = IconManager.ICON_SELECTED_COLOR;
-					child.BackgroundImageLayout = ImageLayout.Stretch;
-				}
-				else
-				{
-					child.BackgroundImage = null;
-				}
-			}
-		}
-
+		
 		private void Form_OnUndo(object sender, EventArgs e)
 		{
 			history.Undo();
@@ -458,7 +443,7 @@ namespace PerpetualPaint
 				return;
 			}
 
-			if(selectedColor == null) return;
+			if(SelectedColor == null) return;
 
 			Point pictureBoxPoint = pictureBox.PointToClient(new Point(MousePosition.X, MousePosition.Y));
 			Point displayPoint;
@@ -489,7 +474,7 @@ namespace PerpetualPaint
 			if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
 
 			Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
-			ColorAtPoint newColor = new ColorAtPoint(selectedColor.Value, masterImagePoint);
+			ColorAtPoint newColor = new ColorAtPoint(SelectedColor.Value, masterImagePoint);
 			RunColorRequest(newColor);
 		}
 
@@ -764,11 +749,11 @@ namespace PerpetualPaint
 			int paletteWidth = (SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + (2 * palettePadding) + ColorPalettePanel.SCROLLBAR_WIDTH;
 
 			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
-			swatchPanel.Size = new Size((SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + ColorPalettePanel.SCROLLBAR_WIDTH, swatchPanel.Size.Height);
+			colorPalettePanel.Size = new Size((SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + ColorPalettePanel.SCROLLBAR_WIDTH, colorPalettePanel.Size.Height);
 			LayoutHelper.RightOf(palettePanel).Bottom(this).Right(this).Height(statusPanel.Height).Apply(statusPanel);
 			LayoutHelper.RightOf(palettePanel).Below(toolStrip).Above(statusPanel).Right(this).Apply(scrollPanel);
 
-			swatchPanel.DisplayColors(colorPalette);
+			colorPalettePanel.DisplayColors(colorPalette);
 		}
 
 		private void UpdateStatusText(string text)

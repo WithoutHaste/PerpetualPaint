@@ -76,7 +76,6 @@
     </Compile>
     <Compile Include="Events\ColorEventArgs.cs" />
     <Compile Include="HistoryActions\RequestColorAction.cs" />
-    <Compile Include="IconManager.cs" />
     <Compile Include="OneImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
