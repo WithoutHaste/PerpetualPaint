@@ -83,6 +83,8 @@
     <Compile Include="Dialogs\ErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Events\ColorEventArgs.cs" />
+    <Compile Include="Events\PaletteEventArgs.cs" />
     <Compile Include="HistoryActions\AddPaletteColorAction.cs" />
     <Compile Include="HistoryActions\RemovePaletteColorAction.cs" />
     <Compile Include="HistoryActions\ReplacePaletteColorAction.cs" />

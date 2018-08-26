@@ -128,11 +128,6 @@ namespace PerpetualPaint
 		private void InitHistory()
 		{
 			history = new History();
-			AddPaletteColorAction.DoFunc = new AddPaletteColorAction.DoOperation(AddColorToPalette);
-			AddPaletteColorAction.UndoFunc = new AddPaletteColorAction.UndoOperation(RemoveColorFromPalette);
-			RemovePaletteColorAction.DoFunc = new RemovePaletteColorAction.DoOperation(RemoveColorFromPalette);
-			RemovePaletteColorAction.UndoFunc = new RemovePaletteColorAction.UndoOperation(AddColorToPalette);
-			ReplacePaletteColorAction.DoUndoFunc = new ReplacePaletteColorAction.Operation(ReplaceColorInPalette);
 		}
 
 		#region Event Handlers
@@ -172,7 +167,11 @@ namespace PerpetualPaint
 					Color newColor = dialog.Color;
 					int index = colorPalette.Count;
 					AddColorToPalette(newColor, index);
-					history.Add(new AddPaletteColorAction(newColor, index));
+
+					AddPaletteColorAction action = new AddPaletteColorAction(newColor, index);
+					action.InsertColor += new PaletteEventHandler(Palette_OnAddColor);
+					action.RemoveColor += new PaletteEventHandler(Palette_OnRemoveColor);
+					history.Add(action);
 				}
 			}
 		}
@@ -225,7 +224,10 @@ namespace PerpetualPaint
 				{
 					Color newColor = dialog.Color;
 					ReplaceColorInPalette(control.TabIndex, newColor);
-					history.Add(new ReplacePaletteColorAction(control.TabIndex, oldColor, newColor));
+
+					ReplacePaletteColorAction action = new ReplacePaletteColorAction(control.TabIndex, oldColor, newColor);
+					action.ReplaceColor += new PaletteEventHandler(Palette_OnReplaceColor);
+					history.Add(action);
 				}
 			}
 		}
@@ -252,10 +254,29 @@ namespace PerpetualPaint
 		{
 			Control control = (sender as MenuItem).GetContextMenu().SourceControl;
 			RemoveColorFromPalette(control.TabIndex);
-			history.Add(new RemovePaletteColorAction(control.BackColor, control.TabIndex));
+
+			RemovePaletteColorAction action = new RemovePaletteColorAction(control.BackColor, control.TabIndex);
+			action.RemoveColor += new PaletteEventHandler(Palette_OnRemoveColor);
+			action.InsertColor += new PaletteEventHandler(Palette_OnAddColor);
+			history.Add(action);
 		}
 
-#endregion
+		private void Palette_OnRemoveColor(object sender, PaletteEventArgs e)
+		{
+			RemoveColorFromPalette(e.Index);
+		}
+
+		private void Palette_OnAddColor(object sender, PaletteEventArgs e)
+		{
+			AddColorToPalette(e.Color, e.Index);
+		}
+
+		private void Palette_OnReplaceColor(object sender, PaletteEventArgs e)
+		{
+			ReplaceColorInPalette(e.Index, e.Color);
+		}
+
+		#endregion
 
 		private void Save(string fullFilename)
 		{

@@ -9,8 +9,7 @@ namespace PerpetualPaint
 {
 	public class RequestColorAction : IHistoryAction
 	{
-		public delegate void OnDo(ColorAtPoint cap);
-		public static OnDo DoFunc;
+		public event ColorEventHandler Action;
 
 		private ColorAtPoint newCap;
 		private ColorAtPoint oldCap;
@@ -23,12 +22,14 @@ namespace PerpetualPaint
 
 		public void Do()
 		{
-			DoFunc(newCap.ToNoHistory());
+			if(Action == null) return;
+			Action(this, new ColorEventArgs(newCap.ToNoHistory()));
 		}
 
 		public void Undo()
 		{
-			DoFunc(oldCap.ToNoHistory());
+			if(Action == null) return;
+			Action(this, new ColorEventArgs(oldCap.ToNoHistory()));
 		}
 	}
 }

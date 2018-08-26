@@ -10,8 +10,7 @@ namespace PerpetualPaint
 {
 	public class ReplacePaletteColorAction : IHistoryAction
 	{
-		public delegate void Operation(int index, Color color);
-		public static Operation DoUndoFunc;
+		public event PaletteEventHandler ReplaceColor;
 
 		private Color oldColor;
 		private Color newColor;
@@ -26,12 +25,14 @@ namespace PerpetualPaint
 
 		public void Do()
 		{
-			DoUndoFunc(index, newColor);
+			if(ReplaceColor == null) return;
+			ReplaceColor(this, new PaletteEventArgs(newColor, index));
 		}
 
 		public void Undo()
 		{
-			DoUndoFunc(index, oldColor);
+			if(ReplaceColor == null) return;
+			ReplaceColor(this, new PaletteEventArgs(oldColor, index));
 		}
 	}
 }

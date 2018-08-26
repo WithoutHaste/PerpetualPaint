@@ -258,7 +258,6 @@ namespace PerpetualPaint
 		private void InitHistory()
 		{
 			history = new History();
-			RequestColorAction.DoFunc = new RequestColorAction.OnDo(RunColorRequest);
 		}
 
 		/// <summary>
@@ -526,6 +525,11 @@ namespace PerpetualPaint
 #endif
 		#endregion
 
+		private void OnHistoryColorRequest(object sender, ColorEventArgs cap)
+		{
+			RunColorRequest(cap.ColorAtPoint);
+		}
+
 		private void RunColorRequest(ColorAtPoint cap)
 		{
 			requestColorQueue.Enqueue(cap);
@@ -549,7 +553,9 @@ namespace PerpetualPaint
 			RequestColorWorkerResult result = (RequestColorWorkerResult)e.Result;
 			if(!(result.NewWhite is ColorAtPoint_NoHistory) && !(result.PreviousWhite is ColorAtPoint_NoHistory))
 			{
-				history.Add(new RequestColorAction(result.NewWhite, result.PreviousWhite));
+				RequestColorAction r = new RequestColorAction(result.NewWhite, result.PreviousWhite);
+				r.Action += new ColorEventHandler(OnHistoryColorRequest);
+				history.Add(r);
 			}
 			masterImage = result.Bitmap;
 			UpdateZoomedImage(imageScale);
