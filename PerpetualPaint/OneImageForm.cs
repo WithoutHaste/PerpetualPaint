@@ -149,6 +149,7 @@ namespace PerpetualPaint
 		{
 			MenuItem fileMenu = new MenuItem("File");
 			fileMenu.MenuItems.Add("Open Image", new EventHandler(Form_OnOpenFile));
+			fileMenu.MenuItems.Add("Save Image", new EventHandler(Form_OnSave));
 			fileMenu.MenuItems.Add("Save Image As", new EventHandler(Form_OnSaveAs));
 
 			MenuItem editMenu = new MenuItem("Edit");
@@ -305,6 +306,11 @@ namespace PerpetualPaint
 		private void Form_OnOpenFile(object sender, EventArgs e)
 		{
 			OpenFile();
+		}
+
+		private void Form_OnSave(object sender, EventArgs e)
+		{
+			Save();
 		}
 
 		private void Form_OnSaveAs(object sender, EventArgs e)
@@ -574,20 +580,36 @@ namespace PerpetualPaint
 			{
 				return;
 			}
+			saveImageFullFilename = saveFileDialog.FileName;
+			Save(saveImageFullFilename);
+		}
+
+		private void Save()
+		{
+			if(saveImageFullFilename == null)
+			{
+				SaveAs();
+			}
+			Save(saveImageFullFilename);
+		}
+
+		private void Save(string fullFilename)
+		{
 			try
 			{
-				string extension = Path.GetExtension(saveFileDialog.FileName);
+				string extension = Path.GetExtension(fullFilename);
+				ImageFormat imageFormat = ImageFormat.Bmp;
 				switch(extension)
 				{
-					case ".bmp": masterImage.Save(saveFileDialog.FileName, ImageFormat.Bmp); break;
-					case ".gif": masterImage.Save(saveFileDialog.FileName, ImageFormat.Gif); break;
+					case ".bmp": imageFormat = ImageFormat.Bmp; break;
+					case ".gif": imageFormat = ImageFormat.Gif; break;
 					case ".jpg":
-					case ".jpeg":
-						masterImage.Save(saveFileDialog.FileName, ImageFormat.Jpeg); break;
-					case ".png": masterImage.Save(saveFileDialog.FileName, ImageFormat.Png); break;
-					case ".tiff": masterImage.Save(saveFileDialog.FileName, ImageFormat.Tiff); break;
+					case ".jpeg": imageFormat = ImageFormat.Jpeg; break;
+					case ".png": imageFormat = ImageFormat.Png; break;
+					case ".tiff": imageFormat = ImageFormat.Tiff; break;
 					default: throw new Exception("File extension not supported: " + extension);
 				}
+				masterImage.Save(fullFilename, imageFormat);
 			}
 			catch(Exception exception)
 			{
@@ -679,7 +701,6 @@ namespace PerpetualPaint
 			{
 				x = pictureBox.Width;
 			}
-			
 
 			int y = (int)((masterImageCenterPoint.Y * imageScale) - (scrollPanel.ClientSize.Height / 2));
 			if(scrollPanel.VerticalScroll.Value == 0)
