@@ -44,6 +44,7 @@ namespace PerpetualPaint
 			this.FormClosing += new FormClosingEventHandler(Form_OnClosing);
 
 			Init();
+			InitMenus();
 			InitHistory();
 		}
 
@@ -59,7 +60,7 @@ namespace PerpetualPaint
 
 			Button addButton = new Button();
 			LayoutHelper.Bottom(this, margin).Left(this, margin).Height(25).Width(80).Apply(addButton);
-			addButton.Text = "Add";
+			addButton.Text = "New Color";
 			addButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
 			addButton.Click += new EventHandler(Form_OnAdd);
 			this.Controls.Add(addButton);
@@ -100,6 +101,28 @@ namespace PerpetualPaint
 			saveButton.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
 			saveButton.Click += new EventHandler(Form_OnSave);
 			this.Controls.Add(saveButton);
+		}
+
+		private void InitMenus()
+		{
+			//only exists for easy keyboard shortcut functionality
+			//so remains hidden
+
+			MenuItem editMenu = new MenuItem("Edit");
+			MenuItem undoAction = new MenuItem("Undo", new EventHandler(Form_OnUndo), Shortcut.CtrlZ);
+			MenuItem redoAction = new MenuItem("Redo", new EventHandler(Form_OnRedo), Shortcut.CtrlY);
+			MenuItem newColor = new MenuItem("New Color", new EventHandler(Form_OnAdd), Shortcut.CtrlN);
+			MenuItem savePalette = new MenuItem("Save Palette", new EventHandler(Form_OnSave), Shortcut.CtrlS);
+			MenuItem saveAsPalette = new MenuItem("Save Palette As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
+			editMenu.MenuItems.Add(undoAction);
+			editMenu.MenuItems.Add(redoAction);
+			editMenu.MenuItems.Add(newColor);
+			editMenu.MenuItems.Add(savePalette);
+			editMenu.MenuItems.Add(saveAsPalette);
+			editMenu.Visible = false;
+
+			this.Menu = new MainMenu();
+			this.Menu.MenuItems.Add(editMenu);
 		}
 
 		private void InitHistory()
