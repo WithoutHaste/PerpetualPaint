@@ -71,23 +71,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorDataPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Dialogs\NewColorDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\EditPaletteDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Dialogs\ErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Events\ColorEventArgs.cs" />
-    <Compile Include="Events\PaletteEventArgs.cs" />
-    <Compile Include="HistoryActions\AddPaletteColorAction.cs" />
-    <Compile Include="HistoryActions\RemovePaletteColorAction.cs" />
-    <Compile Include="HistoryActions\ReplacePaletteColorAction.cs" />
     <Compile Include="HistoryActions\RequestColorAction.cs" />
     <Compile Include="IconManager.cs" />
     <Compile Include="OneImageForm.cs">
@@ -102,9 +89,6 @@
     <Compile Include="RequestColorWorker.cs" />
     <Compile Include="RequestColorWorkerResult.cs" />
     <Compile Include="StatusPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SwatchPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Dialogs\WaitDialog.cs">

@@ -18,7 +18,7 @@ namespace PerpetualPaint
 	{
 		private ToolStrip toolStrip;
 		private Panel palettePanel;
-		private SwatchPanel swatchPanel;
+		private ColorPalettePanel swatchPanel;
 		private Panel scrollPanel;
 		private StatusPanel statusPanel;
 		private PixelPictureBox pictureBox;
@@ -199,7 +199,7 @@ namespace PerpetualPaint
 		private void InitPalette()
 		{
 			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int swatchesWidth = (SwatchPanel.SWATCH_WIDTH * SwatchesPerRow) + scrollBarBuffer;
+			int swatchesWidth = (ColorPalettePanel.SWATCH_WIDTH * SwatchesPerRow) + scrollBarBuffer;
 			int paletteWidth =  swatchesWidth + (2 * palettePadding);
 
 			palettePanel = new Panel();
@@ -208,17 +208,17 @@ namespace PerpetualPaint
 
 			Button narrowPaletteButton = new Button();
 			narrowPaletteButton.Text = "<<";
-			LayoutHelper.Bottom(palettePanel, palettePadding).Left(palettePanel, palettePadding).Width(SwatchPanel.SWATCH_WIDTH).Height(SwatchPanel.SWATCH_WIDTH).Apply(narrowPaletteButton);
+			LayoutHelper.Bottom(palettePanel, palettePadding).Left(palettePanel, palettePadding).Width(ColorPalettePanel.SWATCH_WIDTH).Height(ColorPalettePanel.SWATCH_WIDTH).Apply(narrowPaletteButton);
 			narrowPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
 			narrowPaletteButton.Click += new EventHandler(Form_OnNarrowPalette);
 
 			Button widenPaletteButton = new Button();
 			widenPaletteButton.Text = ">>";
-			LayoutHelper.Bottom(palettePanel, palettePadding).Right(palettePanel, palettePadding).Width(SwatchPanel.SWATCH_WIDTH).Height(SwatchPanel.SWATCH_WIDTH).Apply(widenPaletteButton);
+			LayoutHelper.Bottom(palettePanel, palettePadding).Right(palettePanel, palettePadding).Width(ColorPalettePanel.SWATCH_WIDTH).Height(ColorPalettePanel.SWATCH_WIDTH).Apply(widenPaletteButton);
 			widenPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
 			widenPaletteButton.Click += new EventHandler(Form_OnWidenPalette);
 
-			swatchPanel = new SwatchPanel(Form_OnClickColor);
+			swatchPanel = new ColorPalettePanel(Form_OnClickColor);
 			LayoutHelper.Top(palettePanel).MatchLeft(narrowPaletteButton).MatchRight(widenPaletteButton).Above(narrowPaletteButton, palettePadding).Apply(swatchPanel);
 			swatchPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 
@@ -761,10 +761,10 @@ namespace PerpetualPaint
 
 		private void DisplayPalette()
 		{
-			int paletteWidth = (SwatchesPerRow * SwatchPanel.SWATCH_WIDTH) + (2 * palettePadding) + SwatchPanel.SCROLLBAR_WIDTH;
+			int paletteWidth = (SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + (2 * palettePadding) + ColorPalettePanel.SCROLLBAR_WIDTH;
 
 			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
-			swatchPanel.Size = new Size((SwatchesPerRow * SwatchPanel.SWATCH_WIDTH) + SwatchPanel.SCROLLBAR_WIDTH, swatchPanel.Size.Height);
+			swatchPanel.Size = new Size((SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + ColorPalettePanel.SCROLLBAR_WIDTH, swatchPanel.Size.Height);
 			LayoutHelper.RightOf(palettePanel).Bottom(this).Right(this).Height(statusPanel.Height).Apply(statusPanel);
 			LayoutHelper.RightOf(palettePanel).Below(toolStrip).Above(statusPanel).Right(this).Apply(scrollPanel);
 
