@@ -5,15 +5,39 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WithoutHaste.Drawing.Colors;
+using WithoutHaste.Drawing.Shapes;
 
 namespace PerpetualPaintLibrary
 {
     public static class Utilities
     {
 		public static int MAX_RGB_AS_BLACK = 50;
-		public static int MIN_RGB_AS_WHITE = 230;
+		private static float MAX_VALUE_AS_BLACK {
+			get {
+				Color color = ConvertColors.ColorFromRGB(MAX_RGB_AS_BLACK, MAX_RGB_AS_BLACK, MAX_RGB_AS_BLACK);
+				HSV hsv = ConvertColors.HSVFromColor(color);
+				return hsv.Value;
+			}
+		}
 
-		public static Color GrayscaleToColor(Color grayscale, Color newColor)
+		public static int MIN_RGB_AS_WHITE = 230;
+		private static float MIN_VALUE_AS_WHITE {
+			get {
+				Color color = ConvertColors.ColorFromRGB(MIN_RGB_AS_WHITE, MIN_RGB_AS_WHITE, MIN_RGB_AS_WHITE);
+				HSV hsv = ConvertColors.HSVFromColor(color);
+				return hsv.Value;
+			}
+		}
+
+		/*
+		 * VOCAB
+		 * 
+		 * Color grayscale = color from grayscale image
+		 * Color pureColor = pure "white" color applied to image
+		 * Color color = possibly grayed out color from color image
+		 */
+
+		public static Color GrayscaleToColor(Color grayscale, Color pureColor)
 		{
 			if(ColorIsPartiallyClear(grayscale))
 			{
@@ -25,32 +49,39 @@ namespace PerpetualPaintLibrary
 			}
 			if(ColorIsWhite(grayscale))
 			{
-				return newColor;
+				return pureColor;
 			}
 			HSV grayscaleHSV = ConvertColors.HSVFromColor(grayscale);
-			HSV newColorHSV = ConvertColors.HSVFromColor(newColor);
-			float adjustedValue = grayscaleHSV.Value * newColorHSV.Value * 0.5f;
-			float adjustedSaturation = grayscaleHSV.Value * newColorHSV.Saturation * 0.5f; //cut adjusted saturation in half to force it into the gray range
-			HSV adjustedHSV = new HSV(newColorHSV.Hue, adjustedSaturation, adjustedValue);
+			HSV pureColorHSV = ConvertColors.HSVFromColor(pureColor);
+
+			Range fullRange = new Range(MAX_VALUE_AS_BLACK, 1);
+			Range newRange = new Range(MAX_VALUE_AS_BLACK, pureColorHSV.Value);
+			float adjustedValue = (float)Range.ConvertValue(fullRange, newRange, grayscaleHSV.Value);
+
+			float adjustedSaturation = grayscaleHSV.Value * pureColorHSV.Saturation;
+
+			HSV adjustedHSV = new HSV(pureColorHSV.Hue, adjustedSaturation, adjustedValue);
 			Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
 			return adjustedColor;
 		}
 
-		public static Color ColorToGrayscale(Color color, Color whiteColor)
+		public static Color ColorToGrayscale(Color color, Color pureColor)
 		{
 			if(ColorIsGrayscale(color))
 			{
 				return color;
 			}
-			if(color == whiteColor)
+			if(color == pureColor)
 			{
 				return Color.White;
 			}
-			HSV oldHSV = ConvertColors.HSVFromColor(color);
-			HSV oldWhite = ConvertColors.HSVFromColor(whiteColor);
-			float adjustedValue = oldHSV.Value / oldWhite.Value / 0.5f;
-			if(adjustedValue > 1)
-				adjustedValue = 1;
+			HSV colorHSV = ConvertColors.HSVFromColor(color);
+			HSV pureColorHSV = ConvertColors.HSVFromColor(pureColor);
+
+			Range fullRange = new Range(MAX_VALUE_AS_BLACK, 1);
+			Range newRange = new Range(MAX_VALUE_AS_BLACK, pureColorHSV.Value);
+			float adjustedValue = (float)Range.ConvertValue(newRange, fullRange, colorHSV.Value);
+
 			HSV adjustedHSV = new HSV(0, 0, adjustedValue);
 			Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
 			return adjustedColor;
@@ -88,6 +119,15 @@ namespace PerpetualPaintLibrary
 		{
 			//25% solid => 75% gray
 			return ConvertColors.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f);
+		}
+
+		private static float ConvertRange(Range largeRange, Range smallRange, float value)
+		{
+			if(largeRange.Start != smallRange.Start)
+				throw new NotImplementedException("Not implemented: ConvertRange when ranges have different minimum values.");
+
+			double scale = smallRange.Span / largeRange.Span;
+			return (float)(((value - largeRange.Start) * scale) + largeRange.Start);
 		}
 	}
 }

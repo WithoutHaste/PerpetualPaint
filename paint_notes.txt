@@ -107,6 +107,21 @@ Considered updating Colors library to return System.Drawing.Imaging.ColorPalette
 		you can only get Image.Palette
 	and you cannot change the length of a ColorPalette
 	so sticking with my own
+	
+	
+	
+Converting to gray
+=========================
+Simple conversion
+----------------------
+r   g   b   h   s    v
+000 000 255 240 1.00 1.00 Blue	 OK
+000 128 000 120 1.00 50.2 Green	 too dark too fast
+128 000 128 300 1.00 50.2 Purple too dark too fast
+255 000 000 000 1.00 1.00 Red    OK
+255 165 000 039 1.00 1.00 Orange OK
+255 255 000 060 1.00 1.00 Yellow OK
+	
 
 
 palette file formats

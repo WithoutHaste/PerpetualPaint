@@ -42,6 +42,9 @@
     <Reference Include="WithoutHaste.Drawing.Colors">
       <HintPath>..\..\WithoutHaste.Drawing.Colors\Colors\bin\Release\WithoutHaste.Drawing.Colors.dll</HintPath>
     </Reference>
+    <Reference Include="WithoutHaste.Drawing.Shapes">
+      <HintPath>..\..\WithoutHaste.Drawing.Shapes\Shapes\bin\Release\WithoutHaste.Drawing.Shapes.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Utilities.cs" />
