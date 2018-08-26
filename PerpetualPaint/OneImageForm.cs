@@ -148,9 +148,12 @@ namespace PerpetualPaint
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			fileMenu.MenuItems.Add("Open Image", new EventHandler(Form_OnOpenFile));
-			fileMenu.MenuItems.Add("Save Image", new EventHandler(Form_OnSave));
-			fileMenu.MenuItems.Add("Save Image As", new EventHandler(Form_OnSaveAs));
+			MenuItem openImage = new MenuItem("Open Image", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
+			MenuItem saveImage = new MenuItem("Save Image", new EventHandler(Form_OnSave), Shortcut.CtrlS);
+			MenuItem saveAsImage = new MenuItem("Save Image As", new EventHandler(Form_OnSaveAs));
+			fileMenu.MenuItems.Add(openImage);
+			fileMenu.MenuItems.Add(saveImage);
+			fileMenu.MenuItems.Add(saveAsImage);
 
 			MenuItem editMenu = new MenuItem("Edit");
 			editMenu.MenuItems.Add("Undo", new EventHandler(Form_OnUndo));
@@ -613,14 +616,21 @@ namespace PerpetualPaint
 			}
 			catch(Exception exception)
 			{
-				HandleError("Failed to save file.", exception);
+				if(masterImage.Width > 65500 || masterImage.Height > 65500)
+				{
+					HandleError("Failed to save file. Image is wider or taller than maximum GDI+ can save: 65,500 pixels.", exception);
+				}
+				else
+				{
+					HandleError("Failed to save file.", exception);
+				}
 			}
 		}
 
 		private void UpdateMasterImage(string fullFilename)
 		{
+			masterImage = ImageHelper.SafeLoadBitmap(fullFilename);
 			saveImageFullFilename = fullFilename;
-			masterImage = (Bitmap)Image.FromFile(fullFilename);
 			history.Clear();
 			UpdateZoomedImage(SCALE_FIT);
 		}
