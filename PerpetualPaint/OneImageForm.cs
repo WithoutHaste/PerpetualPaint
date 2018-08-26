@@ -358,11 +358,12 @@ namespace PerpetualPaint
 			{
 				form.StartPosition = FormStartPosition.Manual;
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
-				if(form.ShowDialog() == DialogResult.OK)
-				{
-					PaletteFullFilename = form.FullFilename;
-					LoadPalette();
-				}
+				if(form.ShowDialog() != DialogResult.OK)
+					return;
+				if(form.FullFilename == null)
+					return;
+				PaletteFullFilename = form.FullFilename;
+				LoadPalette();
 			}
 		}
 
@@ -393,11 +394,10 @@ namespace PerpetualPaint
 			{
 				form.StartPosition = FormStartPosition.Manual;
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
-				if(form.ShowDialog() == DialogResult.OK)
-				{
-					PaletteFullFilename = form.FullFilename;
-					LoadPalette();
-				}
+				if(form.ShowDialog() != DialogResult.OK)
+					return;
+				PaletteFullFilename = form.FullFilename;
+				LoadPalette();
 			}
 		}
 
