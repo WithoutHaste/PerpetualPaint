@@ -150,14 +150,16 @@ namespace PerpetualPaint
 			MenuItem fileMenu = new MenuItem("File");
 			MenuItem openImage = new MenuItem("Open Image", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
 			MenuItem saveImage = new MenuItem("Save Image", new EventHandler(Form_OnSave), Shortcut.CtrlS);
-			MenuItem saveAsImage = new MenuItem("Save Image As", new EventHandler(Form_OnSaveAs));
+			MenuItem saveAsImage = new MenuItem("Save Image As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
 			fileMenu.MenuItems.Add(openImage);
 			fileMenu.MenuItems.Add(saveImage);
 			fileMenu.MenuItems.Add(saveAsImage);
 
 			MenuItem editMenu = new MenuItem("Edit");
-			editMenu.MenuItems.Add("Undo", new EventHandler(Form_OnUndo));
-			editMenu.MenuItems.Add("Redo", new EventHandler(Form_OnRedo));
+			MenuItem undoAction = new MenuItem("Undo", new EventHandler(Form_OnUndo), Shortcut.CtrlZ);
+			MenuItem redoAction = new MenuItem("Redo", new EventHandler(Form_OnRedo), Shortcut.CtrlY);
+			editMenu.MenuItems.Add(undoAction);
+			editMenu.MenuItems.Add(redoAction);
 
 			MenuItem paletteMenu = new MenuItem("Palette");
 			paletteMenu.MenuItems.Add("New", new EventHandler(Form_OnNewPalette));
@@ -557,7 +559,7 @@ namespace PerpetualPaint
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			openFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
-			openFileDialog.Title = "Select an Image File";
+			openFileDialog.Title = "Open Image";
 
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
@@ -577,7 +579,7 @@ namespace PerpetualPaint
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			saveFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
-			saveFileDialog.Title = "Select an Image File";
+			saveFileDialog.Title = "Save Image As";
 
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
