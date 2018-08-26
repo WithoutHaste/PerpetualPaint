@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WithoutHaste.Drawing.Colors;
+using PerpetualPaintLibrary;
 
 namespace PerpetualPaint
 {
@@ -94,7 +95,7 @@ namespace PerpetualPaint
 			Point point = request.Point;
 
 			Color oldWhite = Color.White;
-			if(!ColorIsGrayscale(bitmap.GetPixel(point.X, point.Y)))
+			if(!PerpetualPaintLibrary.Utilities.ColorIsGrayscale(bitmap.GetPixel(point.X, point.Y)))
 			{
 				oldWhite = ConvertRegionToGrayscale(point);
 			}
@@ -118,34 +119,13 @@ namespace PerpetualPaint
 				done.Add(p);
 
 				Color oldColor = bitmap.GetPixel(p.X, p.Y);
-				if(ColorIsBlack(oldColor))
+				if(PerpetualPaintLibrary.Utilities.ColorIsBlack(oldColor))
 					continue;
-				if(!ColorIsGrayscale(oldColor))
+				if(!PerpetualPaintLibrary.Utilities.ColorIsGrayscale(oldColor))
 					continue;
 
-				if(ColorIsWhite(oldColor))
-				{
-					bitmap.SetPixel(p.X, p.Y, color);
-				}
-				else
-				{
-					if(ColorIsPartiallyClear(oldColor))
-					{
-						oldColor = ConvertPartiallyClearToGray(oldColor);
-					}
-					//how to apply value to color that has value of its own? in a fully reversible way?
-					//todo: how to make this part easy to test?
-					HSV oldHSV = ConvertColors.HSVFromColor(oldColor);
-					//treating newColor is "white", adjust underlying value on range from newWhite to black
-					HSV newWhite = ConvertColors.HSVFromColor(color);
-					//todo: document that coloring in with black and other very dark color will destroy some of your grayscale gradient
-					//todo: may need to change HSV ranges in library to ints 0-360 and 0-100, since that seems to be how online tools handle it
-					float adjustedValue = oldHSV.Value * newWhite.Value * 0.5f;
-					float adjustedSaturation = oldHSV.Value * newWhite.Saturation * 0.5f; //cut adjusted saturation in half to force it into the gray range
-					HSV adjustedHSV = new HSV(newWhite.Hue, adjustedSaturation, adjustedValue);
-					Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
-					bitmap.SetPixel(p.X, p.Y, adjustedColor);
-				}
+				Color adjustedColor = PerpetualPaintLibrary.Utilities.GrayscaleToColor(oldColor, color);
+				bitmap.SetPixel(p.X, p.Y, adjustedColor);
 
 				Point left = new Point(p.X - 1, p.Y);
 				Point right = new Point(p.X + 1, p.Y);
@@ -166,12 +146,13 @@ namespace PerpetualPaint
 		private Color ConvertRegionToGrayscale(Point point)
 		{
 			HashSet<ColorAtPoint> inRegion = FindRegion(point);
-			Color white = FindPalestColor(inRegion);
+			Color pureColor = FindPalestColor(inRegion);
 			foreach(ColorAtPoint p in inRegion)
 			{
-				ConvertPixelToGrayscale(p, white);
+				Color adjustedColor = PerpetualPaintLibrary.Utilities.ColorToGrayscale(p.Color, pureColor);
+				bitmap.SetPixel(p.Point.X, p.Point.Y, adjustedColor);
 			}
-			return white;
+			return pureColor;
 		}
 
 		/// <summary>
@@ -183,7 +164,7 @@ namespace PerpetualPaint
 			Bitmap localBitmap = new Bitmap(bitmap);
 
 			//todo: why is this using up memory on small color change on cat?
-			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() { new ColorAtPoint(GetPixel(localBitmap, startPoint), startPoint) };
+			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() { new ColorAtPoint(PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, startPoint), startPoint) };
 			while(todo.Count > 0)
 			{
 				ColorAtPoint p = todo.First();
@@ -191,7 +172,7 @@ namespace PerpetualPaint
 				if(inRegion.Contains(p))
 					continue;
 
-				if(ColorIsBlack(p.Color))
+				if(PerpetualPaintLibrary.Utilities.ColorIsBlack(p.Color))
 					continue;
 
 				inRegion.Add(p);
@@ -202,7 +183,7 @@ namespace PerpetualPaint
 				Point down = new Point(p.Point.X, p.Point.Y + 1);
 				if(PointInRange(left))
 				{
-					Color leftColor = GetPixel(localBitmap, left);
+					Color leftColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, left);
 					ColorAtPoint leftCAP = new ColorAtPoint(leftColor, left);
 					if(!todo.Contains(leftCAP))
 					{
@@ -211,7 +192,7 @@ namespace PerpetualPaint
 				}
 				if(PointInRange(right))
 				{
-					Color rightColor = GetPixel(localBitmap, right);
+					Color rightColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, right);
 					ColorAtPoint rightCAP = new ColorAtPoint(rightColor, right);
 					if(!todo.Contains(rightCAP))
 					{
@@ -220,7 +201,7 @@ namespace PerpetualPaint
 				}
 				if(PointInRange(up))
 				{
-					Color upColor = GetPixel(localBitmap, up);
+					Color upColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, up);
 					ColorAtPoint upCAP = new ColorAtPoint(upColor, up);
 					if(!todo.Contains(upCAP))
 					{
@@ -229,7 +210,7 @@ namespace PerpetualPaint
 				}
 				if(PointInRange(down))
 				{
-					Color downColor = GetPixel(localBitmap, down);
+					Color downColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, down);
 					ColorAtPoint downCAP = new ColorAtPoint(downColor, down);
 					if(!todo.Contains(downCAP))
 					{
@@ -258,18 +239,6 @@ namespace PerpetualPaint
 			return color;
 		}
 
-		private void ConvertPixelToGrayscale(ColorAtPoint p, Color white)
-		{
-			HSV oldHSV = ConvertColors.HSVFromColor(p.Color);
-			HSV oldWhite = ConvertColors.HSVFromColor(white);
-			float adjustedValue = oldHSV.Value / oldWhite.Value / 0.5f;
-			if(adjustedValue > 1)
-				adjustedValue = 1;
-			HSV adjustedHSV = new HSV(0, 0, adjustedValue);
-			Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
-			bitmap.SetPixel(p.Point.X, p.Point.Y, adjustedColor);
-		}
-
 		private bool PointInList(List<Point> set, Point point)
 		{
 			foreach(Point p in set)
@@ -286,53 +255,7 @@ namespace PerpetualPaint
 		{
 			return (point.X >= 0 && point.X < bitmap.Width && point.Y >= 0 && point.Y < bitmap.Height);
 		}
-
-		private Color GetPixel(Bitmap bitmap, Point point)
-		{
-			Color color = bitmap.GetPixel(point.X, point.Y);
-			if(ColorIsPartiallyClear(color))
-			{
-				color = ConvertPartiallyClearToGray(color);
-			}
-			return color;
-		}
-
-		//todo: allow variable tolerance with demo of pure white/black image
-		//todo: move color determination static methods to somewhere else
-		private static bool ColorIsClear(Color color)
-		{
-			return (color.A == 0);
-		}
-
-		private static bool ColorIsPartiallyClear(Color color)
-		{
-			return (color.A < 255);
-		}
-
-		private static bool ColorIsBlack(Color color)
-		{
-			if(ColorIsPartiallyClear(color)) return false;
-			return (ColorIsGrayscale(color) && color.R < 50);
-		}
-
-		private static bool ColorIsGrayscale(Color color)
-		{
-			if(ColorIsPartiallyClear(color)) return true;
-			return (color.R == color.G && color.G == color.B);
-		}
-
-		private static bool ColorIsWhite(Color color)
-		{
-			if(ColorIsClear(color)) return true;
-			return (ColorIsGrayscale(color) && color.R > 230);
-		}
-
-		private static Color ConvertPartiallyClearToGray(Color oldColor)
-		{
-			//25% solid => 75% gray
-			return ConvertColors.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f);
-		}
-
+		
 		#endregion
 
 	}

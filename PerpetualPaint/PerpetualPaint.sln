@@ -4,8 +4,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerpetualPaint", "PerpetualPaint.csproj", "{A94AE51D-9899-43B7-A36D-7E9A41DC146E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F764CA75-DCD4-41F7-91A5-1F66126DFA1F} = {F764CA75-DCD4-41F7-91A5-1F66126DFA1F}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerpetualPaintTest", "..\PerpetualPaintTest\PerpetualPaintTest.csproj", "{4F1FBDAC-7C9C-441E-9432-CC13BF02D214}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F764CA75-DCD4-41F7-91A5-1F66126DFA1F} = {F764CA75-DCD4-41F7-91A5-1F66126DFA1F}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerpetualPaintLibrary", "..\PerpetualPaintLibrary\PerpetualPaintLibrary.csproj", "{F764CA75-DCD4-41F7-91A5-1F66126DFA1F}"
 EndProject

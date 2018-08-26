@@ -87,6 +87,16 @@ namespace PerpetualPaintLibrary
 			return adjustedColor;
 		}
 
+		public static Color GetPixel(Bitmap bitmap, System.Drawing.Point point)
+		{
+			Color color = bitmap.GetPixel(point.X, point.Y);
+			if(ColorIsPartiallyClear(color))
+			{
+				color = ConvertPartiallyClearToGray(color);
+			}
+			return color;
+		}
+
 		private static bool ColorIsClear(Color color)
 		{
 			return (color.A == 0);
@@ -97,19 +107,19 @@ namespace PerpetualPaintLibrary
 			return (color.A < 255);
 		}
 
-		private static bool ColorIsBlack(Color color)
+		public static bool ColorIsBlack(Color color)
 		{
 			if(ColorIsPartiallyClear(color)) return false;
 			return (ColorIsGrayscale(color) && color.R < MAX_RGB_AS_BLACK);
 		}
 
-		private static bool ColorIsGrayscale(Color color)
+		public static bool ColorIsGrayscale(Color color)
 		{
 			if(ColorIsPartiallyClear(color)) return true;
 			return (color.R == color.G && color.G == color.B);
 		}
 
-		private static bool ColorIsWhite(Color color)
+		public static bool ColorIsWhite(Color color)
 		{
 			if(ColorIsClear(color)) return true;
 			return (ColorIsGrayscale(color) && color.R > MIN_RGB_AS_WHITE);
