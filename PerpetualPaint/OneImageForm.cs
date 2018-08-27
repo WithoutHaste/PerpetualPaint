@@ -37,7 +37,7 @@ namespace PerpetualPaint
 		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
 		private double zoomUnits = 0.2; //this is the percentage of change
 
-		private int SwatchesPerRow {
+		private int Setting_SwatchesPerRow {
 			get {
 				return Properties.Settings.Default.SwatchesPerRow;
 			}
@@ -66,7 +66,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		private bool FormFullScreen {
+		private bool Setting_FormFullScreen {
 			get {
 				return Properties.Settings.Default.FormFullScreen;
 			}
@@ -76,7 +76,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		private int FormNormalWidth {
+		private int Setting_FormNormalWidth {
 			get {
 				return Properties.Settings.Default.FormNormalWidth;
 			}
@@ -86,7 +86,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		private int FormNormalHeight {
+		private int Setting_FormNormalHeight {
 			get {
 				return Properties.Settings.Default.FormNormalHeight;
 			}
@@ -123,15 +123,15 @@ namespace PerpetualPaint
 		public OneImageForm()
 		{
 			this.Text = "Perpetual Paint";
-			if(FormFullScreen)
+			if(Setting_FormFullScreen)
 			{
 				this.WindowState = FormWindowState.Maximized;
 			}
 			else
 			{
 				this.WindowState = FormWindowState.Normal;
-				this.Width = FormNormalWidth;
-				this.Height = FormNormalHeight;
+				this.Width = Setting_FormNormalWidth;
+				this.Height = Setting_FormNormalHeight;
 			}
 			previousFormWindowState = this.WindowState;
 			this.Resize += new EventHandler(Form_Resize);
@@ -203,7 +203,7 @@ namespace PerpetualPaint
 		private void InitPalette()
 		{
 			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int swatchesWidth = (ColorPalettePanel.SWATCH_WIDTH * SwatchesPerRow) + scrollBarBuffer;
+			int swatchesWidth = (ColorPalettePanel.SWATCH_WIDTH * Setting_SwatchesPerRow) + scrollBarBuffer;
 			int paletteWidth =  swatchesWidth + (2 * palettePadding);
 
 			palettePanel = new Panel();
@@ -288,8 +288,8 @@ namespace PerpetualPaint
 			{
 				if(this.WindowState == FormWindowState.Normal)
 				{
-					FormNormalWidth = this.Width;
-					FormNormalHeight = this.Height;
+					Setting_FormNormalWidth = this.Width;
+					Setting_FormNormalHeight = this.Height;
 				}
 				return;
 			}
@@ -297,12 +297,12 @@ namespace PerpetualPaint
 			switch(this.WindowState)
 			{
 				case FormWindowState.Maximized:
-					FormFullScreen = true;
+					Setting_FormFullScreen = true;
 					break;
 				case FormWindowState.Normal:
-					FormFullScreen = false;
-					this.Width = FormNormalWidth;
-					this.Height = FormNormalHeight;
+					Setting_FormFullScreen = false;
+					this.Width = Setting_FormNormalWidth;
+					this.Height = Setting_FormNormalHeight;
 					break;
 				case FormWindowState.Minimized:
 					//no action
@@ -328,17 +328,17 @@ namespace PerpetualPaint
 
 		private void Form_OnNarrowPalette(object sender, EventArgs e)
 		{
-			if(SwatchesPerRow == MIN_SWATCHES_PER_ROW) return;
+			if(Setting_SwatchesPerRow == MIN_SWATCHES_PER_ROW) return;
 
-			SwatchesPerRow--;
+			Setting_SwatchesPerRow--;
 			DisplayPalette();
 		}
 
 		private void Form_OnWidenPalette(object sender, EventArgs e)
 		{
-			if(SwatchesPerRow == MAX_SWATCHES_PER_ROW) return;
+			if(Setting_SwatchesPerRow == MAX_SWATCHES_PER_ROW) return;
 
-			SwatchesPerRow++;
+			Setting_SwatchesPerRow++;
 			DisplayPalette();
 		}
 		
@@ -746,10 +746,10 @@ namespace PerpetualPaint
 
 		private void DisplayPalette()
 		{
-			int paletteWidth = (SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + (2 * palettePadding) + ColorPalettePanel.SCROLLBAR_WIDTH;
+			int paletteWidth = (Setting_SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + (2 * palettePadding) + ColorPalettePanel.SCROLLBAR_WIDTH;
 
 			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
-			colorPalettePanel.Size = new Size((SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + ColorPalettePanel.SCROLLBAR_WIDTH, colorPalettePanel.Size.Height);
+			colorPalettePanel.Size = new Size((Setting_SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + ColorPalettePanel.SCROLLBAR_WIDTH, colorPalettePanel.Size.Height);
 			LayoutHelper.RightOf(palettePanel).Bottom(this).Right(this).Height(statusPanel.Height).Apply(statusPanel);
 			LayoutHelper.RightOf(palettePanel).Below(toolStrip).Above(statusPanel).Right(this).Apply(scrollPanel);
 
