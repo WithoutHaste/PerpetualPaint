@@ -226,10 +226,10 @@ namespace PerpetualPaint
 		{
 			Bitmap localBitmap = new Bitmap(bitmap);
 			Color color = Color.Black;
-			HSV hsv = ConvertColors.HSVFromColor(color);
+			HSV hsv = ConvertColors.ToHSV(color);
 			foreach(ColorAtPoint p in points)
 			{
-				HSV pHSV = ConvertColors.HSVFromColor(p.Color);
+				HSV pHSV = ConvertColors.ToHSV(p.Color);
 				if(pHSV.Value > hsv.Value)
 				{
 					color = p.Color;

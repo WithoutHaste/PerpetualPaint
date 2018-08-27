@@ -14,8 +14,8 @@ namespace PerpetualPaintLibrary
 		public static int MAX_RGB_AS_BLACK = 50;
 		private static float MAX_VALUE_AS_BLACK {
 			get {
-				Color color = ConvertColors.ColorFromRGB(MAX_RGB_AS_BLACK, MAX_RGB_AS_BLACK, MAX_RGB_AS_BLACK);
-				HSV hsv = ConvertColors.HSVFromColor(color);
+				Color color = ConvertColors.RGBToColor(MAX_RGB_AS_BLACK, MAX_RGB_AS_BLACK, MAX_RGB_AS_BLACK);
+				HSV hsv = ConvertColors.ToHSV(color);
 				return hsv.Value;
 			}
 		}
@@ -23,8 +23,8 @@ namespace PerpetualPaintLibrary
 		public static int MIN_RGB_AS_WHITE = 230;
 		private static float MIN_VALUE_AS_WHITE {
 			get {
-				Color color = ConvertColors.ColorFromRGB(MIN_RGB_AS_WHITE, MIN_RGB_AS_WHITE, MIN_RGB_AS_WHITE);
-				HSV hsv = ConvertColors.HSVFromColor(color);
+				Color color = ConvertColors.RGBToColor(MIN_RGB_AS_WHITE, MIN_RGB_AS_WHITE, MIN_RGB_AS_WHITE);
+				HSV hsv = ConvertColors.ToHSV(color);
 				return hsv.Value;
 			}
 		}
@@ -51,8 +51,8 @@ namespace PerpetualPaintLibrary
 			{
 				return pureColor;
 			}
-			HSV grayscaleHSV = ConvertColors.HSVFromColor(grayscale);
-			HSV pureColorHSV = ConvertColors.HSVFromColor(pureColor);
+			HSV grayscaleHSV = ConvertColors.ToHSV(grayscale);
+			HSV pureColorHSV = ConvertColors.ToHSV(pureColor);
 
 			Range fullRange = new Range(MAX_VALUE_AS_BLACK, 1);
 			Range newRange = new Range(MAX_VALUE_AS_BLACK, pureColorHSV.Value);
@@ -61,7 +61,7 @@ namespace PerpetualPaintLibrary
 			float adjustedSaturation = grayscaleHSV.Value * pureColorHSV.Saturation;
 
 			HSV adjustedHSV = new HSV(pureColorHSV.Hue, adjustedSaturation, adjustedValue);
-			Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
+			Color adjustedColor = ConvertColors.ToColor(adjustedHSV);
 			return adjustedColor;
 		}
 
@@ -75,15 +75,15 @@ namespace PerpetualPaintLibrary
 			{
 				return Color.White;
 			}
-			HSV colorHSV = ConvertColors.HSVFromColor(color);
-			HSV pureColorHSV = ConvertColors.HSVFromColor(pureColor);
+			HSV colorHSV = ConvertColors.ToHSV(color);
+			HSV pureColorHSV = ConvertColors.ToHSV(pureColor);
 
 			Range fullRange = new Range(MAX_VALUE_AS_BLACK, 1);
 			Range newRange = new Range(MAX_VALUE_AS_BLACK, pureColorHSV.Value);
 			float adjustedValue = (float)Range.ConvertValue(newRange, fullRange, colorHSV.Value);
 
 			HSV adjustedHSV = new HSV(0, 0, adjustedValue);
-			Color adjustedColor = ConvertColors.ColorFromHSV(adjustedHSV);
+			Color adjustedColor = ConvertColors.ToColor(adjustedHSV);
 			return adjustedColor;
 		}
 
@@ -128,7 +128,7 @@ namespace PerpetualPaintLibrary
 		private static Color ConvertPartiallyClearToGray(Color oldColor)
 		{
 			//25% solid => 75% gray
-			return ConvertColors.ColorFromHSV(0, 0, (255 - oldColor.A) / 255f);
+			return ConvertColors.HSVToColor(0, 0, (255 - oldColor.A) / 255f);
 		}
 
 		private static float ConvertRange(Range largeRange, Range smallRange, float value)
