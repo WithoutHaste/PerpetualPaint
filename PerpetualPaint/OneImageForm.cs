@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WithoutHaste.Drawing.Colors;
 using WithoutHaste.Windows.GUI;
+using PerpetualPaintLibrary;
 
 namespace PerpetualPaint
 {
@@ -30,6 +31,8 @@ namespace PerpetualPaint
 		private const int DEFAULT_SWATCHES_PER_ROW = 3;
 		private const int MIN_SWATCHES_PER_ROW = 3;
 		private const int MAX_SWATCHES_PER_ROW = 12;
+		private readonly Cursor ADD_COLOR_CURSOR = Cursors.Hand;
+		private readonly Cursor DROPPER_CURSOR = Cursors.Cross;
 
 		private string saveImageFullFilename;
 		private Bitmap masterImage;
@@ -52,6 +55,8 @@ namespace PerpetualPaint
 				return colorPalettePanel.SelectedColor;
 			}
 		}
+
+		private bool isDropperOperation;
 
 		private Queue<ColorAtPoint> requestColorQueue = new Queue<ColorAtPoint>();
 		private RequestColorWorker requestColorWorker;
@@ -195,6 +200,8 @@ namespace PerpetualPaint
 			toolStrip.Items.Add(new ToolStripSeparator());
 			toolStrip.Items.Add("Undo", IconManager.UNDO, Form_OnUndo);
 			toolStrip.Items.Add("Redo", IconManager.REDO, Form_OnRedo);
+			toolStrip.Items.Add(new ToolStripSeparator());
+			toolStrip.Items.Add("Dropper", IconManager.DROPPER, Form_OnDropper);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -252,7 +259,7 @@ namespace PerpetualPaint
 			pictureBox = new PixelPictureBox();
 			pictureBox.Dock = DockStyle.Fill;
 			pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-			pictureBox.Cursor = Cursors.Hand;
+			pictureBox.Cursor = ADD_COLOR_CURSOR;
 			pictureBox.Click += new EventHandler(Image_OnClick);
 
 			scrollPanel.Controls.Add(pictureBox);
@@ -352,6 +359,12 @@ namespace PerpetualPaint
 			history.Redo();
 		}
 
+		private void Form_OnDropper(object sender, EventArgs e)
+		{
+			isDropperOperation = !isDropperOperation;
+			UpdateOperationMode();
+		}
+
 		private void Form_OnNewPalette(object sender, EventArgs e)
 		{
 			using(EditPaletteDialog form = new EditPaletteDialog(null))
@@ -443,36 +456,20 @@ namespace PerpetualPaint
 				return;
 			}
 
-			if(SelectedColor == null) return;
-
-			Point pictureBoxPoint = pictureBox.PointToClient(new Point(MousePosition.X, MousePosition.Y));
-			Point displayPoint;
-			double thisScale = imageScale;
-			if(pictureBox.SizeMode == PictureBoxSizeMode.Zoom)
-			{
-				float widthScale = (float)pictureBox.Width / (float)masterImage.Width;
-				float heightScale = (float)pictureBox.Height / (float)masterImage.Height;
-				thisScale = Math.Min(widthScale, heightScale);
-				int widthDisplay = (int)(masterImage.Width * thisScale);
-				int heightDisplay = (int)(masterImage.Height * thisScale);
-				Point displayOriginPoint = new Point((pictureBox.Width - widthDisplay) / 2, (pictureBox.Height - heightDisplay) / 2); //point of image relative to picturebox
-				displayPoint = new Point(pictureBoxPoint.X - displayOriginPoint.X, pictureBoxPoint.Y - displayOriginPoint.Y);
-			}
-			else
-			{
-				double hScrollPercentage = (double)scrollPanel.HorizontalScroll.Value / (double)(scrollPanel.HorizontalScroll.Maximum + 1 - scrollPanel.HorizontalScroll.LargeChange);
-				double vScrollPercentage = (double)scrollPanel.VerticalScroll.Value / (double)(scrollPanel.VerticalScroll.Maximum + 1 - scrollPanel.VerticalScroll.LargeChange);
-				int hOffscreen = zoomedImage.Width - pictureBox.Width;
-				int vOffscreen = zoomedImage.Height - pictureBox.Height;
-
-				//todo: scrollbar not in use
-
-				displayPoint = new Point(pictureBoxPoint.X + (int)(hOffscreen * hScrollPercentage), pictureBoxPoint.Y + (int)(vOffscreen * vScrollPercentage));
-			}
-			Point masterImagePoint = new Point((int)(displayPoint.X / thisScale), (int)(displayPoint.Y / thisScale));
+			Point screenPoint = new Point(MousePosition.X, MousePosition.Y);
+			Point masterImagePoint = ScreenPointToMasterImagePoint(screenPoint);
 			if(masterImagePoint.X < 0 || masterImagePoint.X >= masterImage.Width) return;
 			if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
 
+			if(isDropperOperation)
+			{
+				Color pureColor = PerpetualPaintLibrary.Utilities.FindPalestColor(masterImage, masterImagePoint);
+				colorPalettePanel.SelectedColor = pureColor;
+				isDropperOperation = false;
+				UpdateOperationMode();
+			}
+
+			if(SelectedColor == null) return;
 			Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
 			ColorAtPoint newColor = new ColorAtPoint(SelectedColor.Value, masterImagePoint);
 			RunColorRequest(newColor);
@@ -509,6 +506,40 @@ namespace PerpetualPaint
 		}
 #endif
 		#endregion
+
+		private Point ScreenPointToMasterImagePoint(Point screenPoint)
+		{
+			Point pictureBoxPoint = pictureBox.PointToClient(screenPoint);
+			Point displayPoint;
+			double thisScale = imageScale;
+			if(pictureBox.SizeMode == PictureBoxSizeMode.Zoom)
+			{
+				float widthScale = (float)pictureBox.Width / (float)masterImage.Width;
+				float heightScale = (float)pictureBox.Height / (float)masterImage.Height;
+				thisScale = Math.Min(widthScale, heightScale);
+				int widthDisplay = (int)(masterImage.Width * thisScale);
+				int heightDisplay = (int)(masterImage.Height * thisScale);
+				Point displayOriginPoint = new Point((pictureBox.Width - widthDisplay) / 2, (pictureBox.Height - heightDisplay) / 2); //point of image relative to picturebox
+				displayPoint = new Point(pictureBoxPoint.X - displayOriginPoint.X, pictureBoxPoint.Y - displayOriginPoint.Y);
+			}
+			else
+			{
+				double hScrollPercentage = (double)scrollPanel.HorizontalScroll.Value / (double)(scrollPanel.HorizontalScroll.Maximum + 1 - scrollPanel.HorizontalScroll.LargeChange);
+				double vScrollPercentage = (double)scrollPanel.VerticalScroll.Value / (double)(scrollPanel.VerticalScroll.Maximum + 1 - scrollPanel.VerticalScroll.LargeChange);
+				int hOffscreen = zoomedImage.Width - pictureBox.Width;
+				int vOffscreen = zoomedImage.Height - pictureBox.Height;
+
+				//todo: scrollbar not in use
+
+				displayPoint = new Point(pictureBoxPoint.X + (int)(hOffscreen * hScrollPercentage), pictureBoxPoint.Y + (int)(vOffscreen * vScrollPercentage));
+			}
+			return new Point((int)(displayPoint.X / thisScale), (int)(displayPoint.Y / thisScale));
+		}
+
+		private void UpdateOperationMode()
+		{
+			pictureBox.Cursor = (isDropperOperation) ? DROPPER_CURSOR : ADD_COLOR_CURSOR;
+		}
 
 		private void OnHistoryColorRequest(object sender, ColorEventArgs cap)
 		{

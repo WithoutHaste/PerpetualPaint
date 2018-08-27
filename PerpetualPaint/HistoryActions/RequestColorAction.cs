@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WithoutHaste.Windows.GUI;
+using PerpetualPaintLibrary;
 
 namespace PerpetualPaint
 {

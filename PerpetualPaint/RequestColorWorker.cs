@@ -131,10 +131,10 @@ namespace PerpetualPaint
 				Point right = new Point(p.X + 1, p.Y);
 				Point up = new Point(p.X, p.Y - 1);
 				Point down = new Point(p.X, p.Y + 1);
-				if(PointInRange(left) && !PointInList(todo, left)) todo.Add(left);
-				if(PointInRange(right) && !PointInList(todo, right)) todo.Add(right);
-				if(PointInRange(up) && !PointInList(todo, up)) todo.Add(up);
-				if(PointInRange(down) && !PointInList(todo, down)) todo.Add(down);
+				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, left) && !PointInList(todo, left)) todo.Add(left);
+				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, right) && !PointInList(todo, right)) todo.Add(right);
+				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, up) && !PointInList(todo, up)) todo.Add(up);
+				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, down) && !PointInList(todo, down)) todo.Add(down);
 			}
 		}
 
@@ -145,8 +145,8 @@ namespace PerpetualPaint
 		/// <returns>The previous "white" color.</returns>
 		private Color ConvertRegionToGrayscale(Point point)
 		{
-			HashSet<ColorAtPoint> inRegion = FindRegion(point);
-			Color pureColor = FindPalestColor(inRegion);
+			HashSet<ColorAtPoint> inRegion = PerpetualPaintLibrary.Utilities.FindRegion(bitmap, point);
+			Color pureColor = PerpetualPaintLibrary.Utilities.FindPalestColor(inRegion);
 			foreach(ColorAtPoint p in inRegion)
 			{
 				Color adjustedColor = PerpetualPaintLibrary.Utilities.ColorToGrayscale(p.Color, pureColor);
@@ -154,91 +154,7 @@ namespace PerpetualPaint
 			}
 			return pureColor;
 		}
-
-		/// <summary>
-		/// Find region as bounded by "black".
-		/// </summary>
-		private HashSet<ColorAtPoint> FindRegion(Point startPoint)
-		{
-			HashSet<ColorAtPoint> inRegion = new HashSet<ColorAtPoint>();
-			Bitmap localBitmap = new Bitmap(bitmap);
-
-			//todo: why is this using up memory on small color change on cat?
-			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() { new ColorAtPoint(PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, startPoint), startPoint) };
-			while(todo.Count > 0)
-			{
-				ColorAtPoint p = todo.First();
-				todo.Remove(p);
-				if(inRegion.Contains(p))
-					continue;
-
-				if(PerpetualPaintLibrary.Utilities.ColorIsBlack(p.Color))
-					continue;
-
-				inRegion.Add(p);
-				//todo: duplicate code
-				Point left = new Point(p.Point.X - 1, p.Point.Y);
-				Point right = new Point(p.Point.X + 1, p.Point.Y);
-				Point up = new Point(p.Point.X, p.Point.Y - 1);
-				Point down = new Point(p.Point.X, p.Point.Y + 1);
-				if(PointInRange(left))
-				{
-					Color leftColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, left);
-					ColorAtPoint leftCAP = new ColorAtPoint(leftColor, left);
-					if(!todo.Contains(leftCAP))
-					{
-						todo.Add(leftCAP);
-					}
-				}
-				if(PointInRange(right))
-				{
-					Color rightColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, right);
-					ColorAtPoint rightCAP = new ColorAtPoint(rightColor, right);
-					if(!todo.Contains(rightCAP))
-					{
-						todo.Add(rightCAP);
-					}
-				}
-				if(PointInRange(up))
-				{
-					Color upColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, up);
-					ColorAtPoint upCAP = new ColorAtPoint(upColor, up);
-					if(!todo.Contains(upCAP))
-					{
-						todo.Add(upCAP);
-					}
-				}
-				if(PointInRange(down))
-				{
-					Color downColor = PerpetualPaintLibrary.Utilities.GetPixel(localBitmap, down);
-					ColorAtPoint downCAP = new ColorAtPoint(downColor, down);
-					if(!todo.Contains(downCAP))
-					{
-						todo.Add(downCAP);
-					}
-				}
-			}
-
-			return inRegion;
-		}
-
-		private Color FindPalestColor(HashSet<ColorAtPoint> points)
-		{
-			Bitmap localBitmap = new Bitmap(bitmap);
-			Color color = Color.Black;
-			HSV hsv = ConvertColors.ToHSV(color);
-			foreach(ColorAtPoint p in points)
-			{
-				HSV pHSV = ConvertColors.ToHSV(p.Color);
-				if(pHSV.Value > hsv.Value)
-				{
-					color = p.Color;
-					hsv = pHSV;
-				}
-			}
-			return color;
-		}
-
+		
 		private bool PointInList(List<Point> set, Point point)
 		{
 			foreach(Point p in set)
@@ -250,12 +166,7 @@ namespace PerpetualPaint
 			}
 			return false;
 		}
-
-		private bool PointInRange(Point point)
-		{
-			return (point.X >= 0 && point.X < bitmap.Width && point.Y >= 0 && point.Y < bitmap.Height);
-		}
-		
+				
 		#endregion
 
 	}

@@ -121,6 +121,12 @@ r   g   b   h   s    v
 255 000 000 000 1.00 1.00 Red    OK
 255 165 000 039 1.00 1.00 Orange OK
 255 255 000 060 1.00 1.00 Yellow OK
+
+
+
+making icons
+==============
+http://www.xiconeditor.com/
 	
 
 
