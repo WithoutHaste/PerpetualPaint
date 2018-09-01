@@ -11,8 +11,6 @@ namespace PerpetualPaint
 {
 	public class WaitDialog : Form
 	{
-		private Button cancelButton;
-
 		public WaitDialog(string message)
 		{
 			InitForm(message);
@@ -27,6 +25,7 @@ namespace PerpetualPaint
 			this.MinimizeBox = false;
 			this.MaximizeBox = false;
 			this.FormBorderStyle = FormBorderStyle.FixedSingle; //don't allow resize
+			this.Shown += new EventHandler(Form_OnShown);
 
 			InitControls(message);
 		}
@@ -35,22 +34,30 @@ namespace PerpetualPaint
 		{
 			int margin = 10;
 
-			cancelButton = new Button();
-			cancelButton.Text = "Cancel Operation";
-			LayoutHelper.Bottom(this, margin).CenterWidth(this, 50).Height(20).Apply(cancelButton);
-			cancelButton.Click += new EventHandler(CancelButton_OnClick);
+			Button okButton = new Button();
+			okButton.Text = "Ok";
+			LayoutHelper.Bottom(this, margin).CenterWidth(this, 50).Height(20).Apply(okButton);
+			okButton.Click += new EventHandler(OkButton_OnClick);
 
 			Label label = new Label();
-			LayoutHelper.Above(cancelButton, margin).Left(this, margin).Top(this, margin).Right(this, margin).Apply(label);
+			LayoutHelper.Above(okButton, margin).Left(this, margin).Top(this, margin).Right(this, margin).Apply(label);
 			label.Text = text;
 
 			this.Controls.Add(label);
-			this.Controls.Add(cancelButton);
+			this.Controls.Add(okButton);
 		}
 
-		private void CancelButton_OnClick(object sender, EventArgs e)
+		private void Form_OnShown(object sender, EventArgs e)
 		{
-			//todo
+			if(this.Owner != null)
+			{
+				this.StartPosition = FormStartPosition.Manual;
+				LayoutHelper.CenterBothInScreen(this, this.Owner);
+			}
+		}
+
+		private void OkButton_OnClick(object sender, EventArgs e)
+		{
 			this.Close();
 		}
 	}

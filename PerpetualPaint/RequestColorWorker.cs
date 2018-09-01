@@ -15,10 +15,9 @@ namespace PerpetualPaint
 	{
 		private BackgroundWorker worker;
 		private Queue<ColorAtPoint> queue;
-		private Bitmap bitmap;
-		private UpdateStatusText updateStatusTextFunc;
+		private MasterImage masterImage;
 
-		public delegate void UpdateStatusText(string text);
+		public event TextEventHandler UpdateStatusText;
 
 		public bool IsBusy {
 			get {
@@ -28,7 +27,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		public RequestColorWorker(Queue<ColorAtPoint> queue, Bitmap bitmap, UpdateStatusText updateStatusTextFunc, RunWorkerCompletedEventHandler completedEventHandler = null)
+		public RequestColorWorker(Queue<ColorAtPoint> queue, MasterImage masterImageWorker, RunWorkerCompletedEventHandler completedEventHandler = null)
 		{
 			this.queue = queue;
 			worker = new BackgroundWorker();
@@ -39,34 +38,30 @@ namespace PerpetualPaint
 				worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(completedEventHandler);
 			}
 			worker.WorkerSupportsCancellation = true;
-
-			//todo: is this the right pattern? should it be adding to an event on OneImageForm?
-			this.updateStatusTextFunc = updateStatusTextFunc;
-
-			Run(bitmap);
+			this.masterImage = masterImageWorker;
 		}
 
-		public void Run(Bitmap bitmap)
+		public void Run(MasterImage masterImageWorker)
 		{
-			this.bitmap = new Bitmap(bitmap);
+			this.masterImage = masterImageWorker;
 			Run();
 		}
 
-		private void Run()
+		public void Run()
 		{
 			if(worker == null)
 				throw new Exception("Worker cannot be run before it exists."); //todo specific exception
 			if(worker.IsBusy)
 				return;
 			worker.RunWorkerAsync();
-			updateStatusTextFunc("Applying color...");
+			UpdateStatusText?.Invoke(this, new TextEventArgs("Applying color..."));
 		}
 
 		private void OnCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
 			if(e.Error != null)
 			{
-				updateStatusTextFunc("Error occurred.");
+				UpdateStatusText?.Invoke(this, new TextEventArgs("Error occurred."));
 				return;
 			}
 			if(queue.Count > 0)
@@ -75,7 +70,7 @@ namespace PerpetualPaint
 			}
 			else
 			{
-				updateStatusTextFunc("");
+				UpdateStatusText?.Invoke(this, new TextEventArgs(""));
 			}
 		}
 
@@ -95,64 +90,30 @@ namespace PerpetualPaint
 			Point point = request.Point;
 
 			Color oldWhite = Color.White;
-			if(!PerpetualPaintLibrary.Utilities.ColorIsGrayscale(bitmap.GetPixel(point.X, point.Y)))
+			if(!PerpetualPaintLibrary.Utilities.ColorIsGrayscale(masterImage.GetPixel(point)))
 			{
 				oldWhite = ConvertRegionToGrayscale(point);
 			}
 
 			ConvertRegionToColor(color, point);
-			e.Result = new RequestColorWorkerResult(new Bitmap(bitmap), request, request.ChangeColor(oldWhite));
+			//todo: refactor for new design - in master image keep partially updated image separate from last complete version
+			e.Result = new RequestColorWorkerResult(masterImage.CleanGetCopy, request, request.ChangeColor(oldWhite));
 		}
 
-		private void ConvertRegionToColor(Color color, Point point)
+		private void ConvertRegionToColor(Color pureColor, Point point)
 		{
-			HashSet<Point> done = new HashSet<Point>();
-			List<Point> todo = new List<Point>() { point };
-			while(todo.Count > 0)
-			{
-				Point p = todo.First();
-				todo.RemoveAt(0);
-				if(done.Contains(p))
-				{
-					continue;
-				}
-				done.Add(p);
-
-				Color oldColor = bitmap.GetPixel(p.X, p.Y);
-				if(PerpetualPaintLibrary.Utilities.ColorIsBlack(oldColor))
-					continue;
-				if(!PerpetualPaintLibrary.Utilities.ColorIsGrayscale(oldColor))
-					continue;
-
-				Color adjustedColor = PerpetualPaintLibrary.Utilities.GrayscaleToColor(oldColor, color);
-				bitmap.SetPixel(p.X, p.Y, adjustedColor);
-
-				Point left = new Point(p.X - 1, p.Y);
-				Point right = new Point(p.X + 1, p.Y);
-				Point up = new Point(p.X, p.Y - 1);
-				Point down = new Point(p.X, p.Y + 1);
-				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, left) && !PointInList(todo, left)) todo.Add(left);
-				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, right) && !PointInList(todo, right)) todo.Add(right);
-				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, up) && !PointInList(todo, up)) todo.Add(up);
-				if(PerpetualPaintLibrary.Utilities.PointInRange(bitmap, down) && !PointInList(todo, down)) todo.Add(down);
-			}
+			masterImage.SetRegion(point, pureColor);
 		}
 
 		/// <summary>
 		/// Convert region from color to grayscale.
 		/// </summary>
 		/// <param name="point">Any point in a black-bounded region.</param>
-		/// <returns>The previous "white" color.</returns>
+		/// <returns>The previous pure color.</returns>
 		private Color ConvertRegionToGrayscale(Point point)
 		{
-			HashSet<ColorAtPoint> inRegion = PerpetualPaintLibrary.Utilities.FindRegion(bitmap, point);
-			Color pureColor = PerpetualPaintLibrary.Utilities.FindPalestColor(inRegion);
-			foreach(ColorAtPoint p in inRegion)
-			{
-				Color adjustedColor = PerpetualPaintLibrary.Utilities.ColorToGrayscale(p.Color, pureColor);
-				bitmap.SetPixel(p.Point.X, p.Point.Y, adjustedColor);
-			}
-			return pureColor;
+			Color oldPureColor = masterImage.SetRegion(point, Color.White);
+			return oldPureColor;
 		}
 		
 		private bool PointInList(List<Point> set, Point point)

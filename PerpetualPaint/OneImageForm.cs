@@ -34,8 +34,7 @@ namespace PerpetualPaint
 		private readonly Cursor ADD_COLOR_CURSOR = Cursors.Hand;
 		private readonly Cursor DROPPER_CURSOR = Cursors.Cross;
 
-		private string saveImageFullFilename;
-		private Bitmap masterImage;
+		private MasterImage masterImage;
 		private Bitmap zoomedImage;
 		private double imageScale = 1; //0.5 means zoomedImage width is half that of masterImage
 		private double zoomUnits = 0.2; //this is the percentage of change
@@ -242,9 +241,8 @@ namespace PerpetualPaint
 		private void InitStatusPanel()
 		{
 			statusPanel = new StatusPanel();
-			LayoutHelper.Bottom(this).RightOf(palettePanel).Right(this).Height(25).Apply(statusPanel);
+			LayoutHelper.Bottom(this).RightOf(palettePanel).Right(this).Height(statusPanel.Height).Apply(statusPanel);
 			statusPanel.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-
 			this.Controls.Add(statusPanel);
 		}
 
@@ -414,6 +412,11 @@ namespace PerpetualPaint
 			}
 		}
 
+		private void Form_UpdateStatusText(object sender, TextEventArgs e)
+		{
+			UpdateStatusText(e.Text);
+		}
+
 		private void Image_OnFit(object sender, EventArgs e)
 		{
 			if(!this.HasImage) return;
@@ -455,24 +458,39 @@ namespace PerpetualPaint
 				OpenFile();
 				return;
 			}
+			if(masterImage.IsBusy)
+			{
+				ShowWaitMessage("Please wait until the image is prepped.");
+				return;
+			}
 
 			Point screenPoint = new Point(MousePosition.X, MousePosition.Y);
 			Point masterImagePoint = ScreenPointToMasterImagePoint(screenPoint);
-			if(masterImagePoint.X < 0 || masterImagePoint.X >= masterImage.Width) return;
-			if(masterImagePoint.Y < 0 || masterImagePoint.Y >= masterImage.Height) return;
+			if(!masterImage.InRange(masterImagePoint)) return;
 
 			if(isDropperOperation)
 			{
-				Color pureColor = PerpetualPaintLibrary.Utilities.FindPalestColor(masterImage, masterImagePoint);
+				Color pureColor = masterImage.PureColor(masterImagePoint);
 				colorPalettePanel.SelectedColor = pureColor;
 				isDropperOperation = false;
 				UpdateOperationMode();
 			}
 
 			if(SelectedColor == null) return;
-			Color currentColor = masterImage.GetPixel(masterImagePoint.X, masterImagePoint.Y);
+			Color currentColor = masterImage.GetPixel(masterImagePoint);
 			ColorAtPoint newColor = new ColorAtPoint(SelectedColor.Value, masterImagePoint);
 			RunColorRequest(newColor);
+		}
+
+		private void Image_OnCancelLoad(object sender, EventArgs e)
+		{
+			masterImage.CancelLoad();
+			masterImage = null;
+		}
+
+		private void OnProgressChanged(object sender, ProgressChangedEventArgs e)
+		{
+			statusPanel.StatusProgress = e.ProgressPercentage;
 		}
 
 #if DEBUG
@@ -551,7 +569,9 @@ namespace PerpetualPaint
 			requestColorQueue.Enqueue(cap);
 			if(requestColorWorker == null)
 			{
-				requestColorWorker = new RequestColorWorker(requestColorQueue, masterImage, UpdateStatusText, OnRequestColorCompleted);
+				requestColorWorker = new RequestColorWorker(requestColorQueue, masterImage, OnRequestColorCompleted);
+				requestColorWorker.UpdateStatusText += new TextEventHandler(Form_UpdateStatusText);
+				requestColorWorker.Run();
 			}
 			else if(!requestColorWorker.IsBusy)
 			{
@@ -573,7 +593,6 @@ namespace PerpetualPaint
 				r.Action += new ColorEventHandler(OnHistoryColorRequest);
 				history.Add(r);
 			}
-			masterImage = result.Bitmap;
 			UpdateZoomedImage(imageScale);
 		}
 
@@ -589,6 +608,8 @@ namespace PerpetualPaint
 			}
 			try
 			{
+				statusPanel.ClearCancels();
+				statusPanel.Cancel += new EventHandler(Image_OnCancelLoad);
 				UpdateMasterImage(openFileDialog.FileName);
 			}
 			catch(FileNotFoundException exception)
@@ -607,17 +628,13 @@ namespace PerpetualPaint
 			{
 				return;
 			}
-			saveImageFullFilename = saveFileDialog.FileName;
-			Save(saveImageFullFilename);
+			masterImage.SaveToFilename = saveFileDialog.FileName;
+			Save();
 		}
 
 		private void Save()
 		{
-			if(saveImageFullFilename == null)
-			{
-				SaveAs();
-			}
-			Save(saveImageFullFilename);
+			Save(masterImage.SaveToFilename);
 		}
 
 		private void Save(string fullFilename)
@@ -636,7 +653,7 @@ namespace PerpetualPaint
 					case ".tiff": imageFormat = ImageFormat.Tiff; break;
 					default: throw new Exception("File extension not supported: " + extension);
 				}
-				masterImage.Save(fullFilename, imageFormat);
+				masterImage.CleanGetCopy.Save(fullFilename, imageFormat);
 			}
 			catch(Exception exception)
 			{
@@ -653,8 +670,14 @@ namespace PerpetualPaint
 
 		private void UpdateMasterImage(string fullFilename)
 		{
-			masterImage = ImageHelper.SafeLoadBitmap(fullFilename);
-			saveImageFullFilename = fullFilename;
+			if(masterImage == null)
+			{
+				masterImage = new MasterImage(fullFilename, OnProgressChanged, Form_UpdateStatusText);
+			}
+			else
+			{
+				masterImage.LoadBitmap(fullFilename);
+			}
 			history.Clear();
 			UpdateZoomedImage(SCALE_FIT);
 		}
@@ -711,7 +734,7 @@ namespace PerpetualPaint
 					graphics.SmoothingMode = SmoothingMode.None;
 					graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
 				}
-				graphics.DrawImage(masterImage, new Rectangle(0, 0, zoomedWidth, zoomedHeight));
+				graphics.DrawImage(masterImage.CleanGetCopy, new Rectangle(0, 0, zoomedWidth, zoomedHeight));
 			}
 			pictureBox.Size = new Size(zoomedImage.Width, zoomedImage.Height);
 			pictureBox.Image = zoomedImage;
@@ -749,18 +772,6 @@ namespace PerpetualPaint
 			scrollPanel.AutoScrollPosition = new Point(x, y);
 		}
 
-		private void CalculateValues()
-		{
-			HashSet<Color> colors = new HashSet<Color>();
-			for(int x = 0; x < masterImage.Width; x++)
-			{
-				for(int y = 0; y < masterImage.Height; y++)
-				{
-					colors.Add(masterImage.GetPixel(x, y));
-				}
-			}
-		}
-
 		private void LoadPalette()
 		{
 			try
@@ -796,7 +807,7 @@ namespace PerpetualPaint
 		{
 			using(WaitDialog form = new WaitDialog(message))
 			{
-				form.ShowDialog();
+				form.ShowDialog(this);
 			}
 		}
 

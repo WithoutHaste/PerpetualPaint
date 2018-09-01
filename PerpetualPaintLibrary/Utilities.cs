@@ -152,6 +152,9 @@ namespace PerpetualPaintLibrary
 
 		public static Color FindPalestColor(HashSet<ColorAtPoint> points)
 		{
+			if(ColorIsGrayscale(points.First().Color))
+				return Color.White;
+
 			Color color = Color.Black;
 			HSV hsv = ConvertColors.ToHSV(color);
 			foreach(ColorAtPoint p in points)
@@ -168,11 +171,13 @@ namespace PerpetualPaintLibrary
 
 		/// <summary>
 		/// Find region as bounded by "black".
+		/// 
+		/// May lock portions of bitmap, so cend in a fresh copy.
 		/// </summary>
-		public static HashSet<ColorAtPoint> FindRegion(Bitmap bitmap, System.Drawing.Point startPoint)
+		public static HashSet<ColorAtPoint> FindRegion(Bitmap localBitmap, System.Drawing.Point startPoint)
 		{
 			HashSet<ColorAtPoint> inRegion = new HashSet<ColorAtPoint>();
-			Bitmap localBitmap = new Bitmap(bitmap);
+			//Bitmap localBitmap = new Bitmap(bitmap);
 
 			//todo: why is this using up memory on small color change on cat?
 			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() {
