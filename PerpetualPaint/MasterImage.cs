@@ -158,6 +158,12 @@ namespace PerpetualPaint
 			{
 				throw e.Error;
 			}
+			if(e.Cancelled)
+			{
+				OnStatusChanged?.Invoke(this, new TextEventArgs("Open image cancelled."));
+				OnProgressChanged?.Invoke(this, new ProgressChangedEventArgs(100, null));
+				return;
+			}
 			regions = (e.Result as RequestRegionResult).Regions;
 			OnStatusChanged?.Invoke(this, new TextEventArgs("Image ready."));
 			if(regions.Count == 0)

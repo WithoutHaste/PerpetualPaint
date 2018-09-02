@@ -486,6 +486,7 @@ namespace PerpetualPaint
 		{
 			masterImage.CancelLoad();
 			masterImage = null;
+			pictureBox.Image = null;
 		}
 
 		private void OnProgressChanged(object sender, ProgressChangedEventArgs e)
