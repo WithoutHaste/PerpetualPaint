@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -199,7 +200,7 @@ namespace PerpetualPaintLibrary
 				System.Drawing.Point right = new System.Drawing.Point(p.Point.X + 1, p.Point.Y);
 				System.Drawing.Point up = new System.Drawing.Point(p.Point.X, p.Point.Y - 1);
 				System.Drawing.Point down = new System.Drawing.Point(p.Point.X, p.Point.Y + 1);
-				if(PointInRange(localBitmap, left))
+				if(localBitmap.InRange(left))
 				{
 					Color leftColor = GetPixel(localBitmap, left);
 					ColorAtPoint leftCAP = new ColorAtPoint(leftColor, left);
@@ -208,7 +209,7 @@ namespace PerpetualPaintLibrary
 						todo.Add(leftCAP);
 					}
 				}
-				if(PointInRange(localBitmap, right))
+				if(localBitmap.InRange(right))
 				{
 					Color rightColor = GetPixel(localBitmap, right);
 					ColorAtPoint rightCAP = new ColorAtPoint(rightColor, right);
@@ -217,7 +218,7 @@ namespace PerpetualPaintLibrary
 						todo.Add(rightCAP);
 					}
 				}
-				if(PointInRange(localBitmap, up))
+				if(localBitmap.InRange(up))
 				{
 					Color upColor = GetPixel(localBitmap, up);
 					ColorAtPoint upCAP = new ColorAtPoint(upColor, up);
@@ -226,7 +227,7 @@ namespace PerpetualPaintLibrary
 						todo.Add(upCAP);
 					}
 				}
-				if(PointInRange(localBitmap, down))
+				if(localBitmap.InRange(down))
 				{
 					Color downColor = GetPixel(localBitmap, down);
 					ColorAtPoint downCAP = new ColorAtPoint(downColor, down);
@@ -240,9 +241,5 @@ namespace PerpetualPaintLibrary
 			return inRegion;
 		}
 
-		public static bool PointInRange(Bitmap bitmap, System.Drawing.Point point)
-		{
-			return (point.X >= 0 && point.X < bitmap.Width && point.Y >= 0 && point.Y < bitmap.Height);
-		}
 	}
 }

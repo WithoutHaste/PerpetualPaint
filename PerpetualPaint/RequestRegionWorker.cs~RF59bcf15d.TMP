@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PerpetualPaintLibrary;
@@ -28,22 +27,32 @@ namespace PerpetualPaint
 
 		//---------------------------------------------------
 
-		public RequestRegionWorker()
+		public RequestRegionWorker(Bitmap bitmap, RunWorkerCompletedEventHandler completedEventHandler = null, ProgressChangedEventHandler progressChangedEventHandler = null)
 		{
+			//this.bitmap = new Bitmap(bitmap);
+			this.outerRunWorkerCompletedEventHandler = completedEventHandler;
+			this.progressChangedEventHandler = progressChangedEventHandler;
+
+			worker = new BackgroundWorker();
+			worker.DoWork += new DoWorkEventHandler(Utilities.FindRegions);
+			worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnCompleted);
+			if(outerRunWorkerCompletedEventHandler != null)
+			{
+				worker.RunWorkerCompleted += outerRunWorkerCompletedEventHandler;
+			}
+			if(progressChangedEventHandler != null)
+			{
+				worker.ProgressChanged += progressChangedEventHandler;
+			}
+			worker.WorkerReportsProgress = true;
+			worker.WorkerSupportsCancellation = true;
+			worker.RunWorkerAsync(new PerpetualPaintLibrary.RequestRegionArgument(new Bitmap(bitmap)));
 		}
 
 		//---------------------------------------------------
 
-		public void Run(Bitmap bitmap)
+		public void Run()
 		{
-			worker = new BackgroundWorker();
-			//worker.DoWork += new DoWorkEventHandler(FindRegionsA);
-			worker.DoWork += new DoWorkEventHandler(FindRegionsB);
-			worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnCompleted);
-			worker.ProgressChanged += ProgressChanged;
-			worker.WorkerReportsProgress = true;
-			worker.WorkerSupportsCancellation = true;
-			worker.RunWorkerAsync(new PerpetualPaintLibrary.RequestRegionArgument(new Bitmap(bitmap)));
 		}
 
 		public void CancelAsync()
@@ -55,8 +64,7 @@ namespace PerpetualPaint
 		}
 
 		//todo: starting with non-all-grayscale image, need to get pure color for each region
-
-		private void FindRegionsA(object sender, DoWorkEventArgs e)
+		private void FindRegions(object sender, DoWorkEventArgs e)
 		{
 			BackgroundWorker worker = (sender as BackgroundWorker);
 			Bitmap bitmap = (e.Argument as RequestRegionArgument).Bitmap;
@@ -65,7 +73,6 @@ namespace PerpetualPaint
 
 			worker.ReportProgress(0);
 			float pixelsTotal = width * height;
-			int progress = 0;
 			List<ImageRegion> regions = new List<ImageRegion>();
 			ImageRegion[] leadingEdge = new ImageRegion[width];
 			for(int y = 0; y < height; y++)
@@ -80,12 +87,7 @@ namespace PerpetualPaint
 					}
 
 					int pixelsDone = (y * height) + x - 1;
-					int newProgress = Math.Min(100, (int)(100f * pixelsDone / pixelsTotal));
-					if(newProgress > progress)
-					{
-						progress = newProgress;
-						worker.ReportProgress(progress);
-					}
+					worker.ReportProgress((int)(100f * pixelsDone / pixelsTotal));
 
 					Point point = new Point(x, y);
 					Color color = Utilities.GetPixel(bitmap, point);
@@ -100,12 +102,9 @@ namespace PerpetualPaint
 						leadingEdge[x - 1].Union(point);
 						if(CanJoinUp(x, y, leadingEdge))
 						{
-							if(leadingEdge[x - 1] != leadingEdge[x])
-							{
-								leadingEdge[x - 1].Union(leadingEdge[x]);
-								regions.Remove(leadingEdge[x]);
-								leadingEdge[x] = leadingEdge[x - 1];
-							}
+							leadingEdge[x - 1].Union(leadingEdge[x]);
+							regions.Remove(leadingEdge[x]);
+							leadingEdge[x] = leadingEdge[x - 1];
 						}
 						leadingEdge[x] = leadingEdge[x - 1];
 					}
@@ -125,7 +124,7 @@ namespace PerpetualPaint
 			worker.ReportProgress(100);
 			e.Result = new RequestRegionResult(regions);
 		}
-
+		
 		private bool CanJoinLeft(int x, ImageRegion[] leadingEdge)
 		{
 			return (x > 0 && leadingEdge[x - 1] != null);
@@ -135,14 +134,10 @@ namespace PerpetualPaint
 		{
 			return (y > 0 && leadingEdge[x] != null);
 		}
-		
-		private void FindRegionsB(object sender, DoWorkEventArgs e)
+		/*
+		private void FindRegions(object sender, DoWorkEventArgs e)
 		{
-			BackgroundWorker worker = (sender as BackgroundWorker);
-			Bitmap bitmap = (e.Argument as RequestRegionArgument).Bitmap;
-
 			worker.ReportProgress(0);
-			List<ImageRegion> regions = new List<ImageRegion>();
 			float pixelsDone = 0;
 			float pixelsTotal = bitmap.Width * bitmap.Height;
 			for(int x = 0; x < bitmap.Width; x++)
@@ -162,7 +157,7 @@ namespace PerpetualPaint
 					HashSet<ColorAtPoint> region = Utilities.FindRegion(bitmap, p);
 					if(region.Count == 0) //blacks
 						continue;
-					regions.Add(new ImageRegion(region));
+					regions.Add(new Region(region));
 					pixelsDone += region.Count;
 					int progress = (int)(100f * (pixelsDone / pixelsTotal));
 					worker.ReportProgress(progress);
@@ -171,10 +166,9 @@ namespace PerpetualPaint
 			worker.ReportProgress(100);
 			e.Result = new RequestRegionResult(regions);
 		}
-		
+		*/
 		private void OnCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
-			Completed?.Invoke(this, e);
 		}
 	}
 }

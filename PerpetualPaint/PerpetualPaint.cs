@@ -13,7 +13,10 @@ namespace PerpetualPaint
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new OneImageForm());
+
+			Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+			OneImageForm form = new OneImageForm();
+			Application.Run(form);
 		}
 	}
 }

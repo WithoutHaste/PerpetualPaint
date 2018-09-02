@@ -61,6 +61,11 @@ namespace PerpetualPaint
 
 		private void Form_OnShown(object sender, EventArgs e)
 		{
+			if(this.Owner != null)
+			{
+				this.StartPosition = FormStartPosition.Manual;
+				LayoutHelper.CenterBothInScreen(this, this.Owner);
+			}
 			okButton.Focus();
 		}
 

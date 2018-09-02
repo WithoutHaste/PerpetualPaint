@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PerpetualPaintLibrary;
@@ -16,7 +17,7 @@ namespace PerpetualPaint
 		private RequestRegionWorker regionWorker;
 		private Bitmap bitmap;
 		private string saveToFilename;
-		private List<Region> regions = new List<Region>();
+		private List<ImageRegion> regions = new List<ImageRegion>();
 
 		//only GetPixel from a clean copy to avoid locking conflicts
 		//only update the clean copy if a SetPixel has occurred
@@ -45,8 +46,8 @@ namespace PerpetualPaint
 		public int Width { get { return CleanGetCopy.Width; } }
 		public int Height { get { return CleanGetCopy.Height; } }
 
-		public event ProgressChangedEventHandler OnProgressChanged;
-		public event TextEventHandler OnStatusChanged;
+		public event ProgressChangedEventHandler ProgressChanged;
+		public event TextEventHandler StatusChanged;
 
 		public bool IsBusy {
 			get {
@@ -56,18 +57,15 @@ namespace PerpetualPaint
 
 		//---------------------------------------------------
 
-		public MasterImage(string filename, ProgressChangedEventHandler progressChangedEventHandler, TextEventHandler statusChangedEventHandler)
+		public MasterImage()
 		{
-			OnProgressChanged += progressChangedEventHandler;
-			OnStatusChanged += statusChangedEventHandler;
-			LoadBitmap(filename);
 		}
 
 		//---------------------------------------------------
 
 		public void LoadBitmap(string filename)
 		{
-			OnStatusChanged?.Invoke(this, new TextEventArgs("Prepping image..."));
+			StatusChanged?.Invoke(this, new TextEventArgs("Prepping image..."));
 			CancelLoad();
 
 			bitmap = ImageHelper.SafeLoadBitmap(filename);
@@ -77,17 +75,21 @@ namespace PerpetualPaint
 			if(bitmap.Width == 0 && bitmap.Height == 0)
 				throw new Exception("Cannot operate on a 0 by 0 bitmap.");
 			regions.Clear();
-			regionWorker = new RequestRegionWorker(bitmap, OnRequestRegionCompleted, new ProgressChangedEventHandler(Worker_OnProgressChanged));
+
+			regionWorker = new RequestRegionWorker();
+			regionWorker.Completed += new RunWorkerCompletedEventHandler(OnRequestRegionCompleted);
+			regionWorker.ProgressChanged += new ProgressChangedEventHandler(Worker_OnProgressChanged);
+			regionWorker.Run(bitmap);
 		}
 
 		private void Worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
-			OnProgressChanged?.Invoke(this, e);
+			ProgressChanged?.Invoke(this, e);
 		}
 
 		public Color SetRegion(Point point, Color pureColor)
 		{
-			Region region = GetRegion(point);
+			ImageRegion region = GetRegion(point);
 			if(region == null)
 				throw new Exception("Point not found in region: " + point);
 
@@ -128,13 +130,13 @@ namespace PerpetualPaint
 		public Color PureColor(Point point)
 		{
 			WaitTillComplete();
-			Region region = GetRegion(point);
+			ImageRegion region = GetRegion(point);
 			if(region == null)
 				throw new Exception("Point not in any region: " + point);
 			return region.PureColor;
 		}
 
-		public Region GetRegion(Point point)
+		public ImageRegion GetRegion(Point point)
 		{
 			if(regionWorker != null && regionWorker.IsBusy)
 				throw new Exception("Don't request regions until processing is complete.");
@@ -160,12 +162,12 @@ namespace PerpetualPaint
 			}
 			if(e.Cancelled)
 			{
-				OnStatusChanged?.Invoke(this, new TextEventArgs("Open image cancelled."));
-				OnProgressChanged?.Invoke(this, new ProgressChangedEventArgs(100, null));
+				StatusChanged?.Invoke(this, new TextEventArgs("Open image cancelled."));
+				ProgressChanged?.Invoke(this, new ProgressChangedEventArgs(100, null));
 				return;
 			}
 			regions = (e.Result as RequestRegionResult).Regions;
-			OnStatusChanged?.Invoke(this, new TextEventArgs("Image ready."));
+			StatusChanged?.Invoke(this, new TextEventArgs("Image ready."));
 			if(regions.Count == 0)
 				throw new Exception("Entire image is in 'black' range.");
 		}

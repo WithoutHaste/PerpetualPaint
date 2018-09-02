@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WithoutHaste.Drawing.Colors;
@@ -139,6 +140,8 @@ namespace PerpetualPaint
 			}
 			previousFormWindowState = this.WindowState;
 			this.Resize += new EventHandler(Form_Resize);
+
+			Application.ThreadException += new ThreadExceptionEventHandler(OnSystemException);
 
 			InitMenus();
 			InitTools();
@@ -494,6 +497,11 @@ namespace PerpetualPaint
 			statusPanel.StatusProgress = e.ProgressPercentage;
 		}
 
+		private void OnSystemException(object sender, ThreadExceptionEventArgs e)
+		{
+			HandleError("Application error occurred.", e.Exception);
+		}
+
 #if DEBUG
 		private void Debug_OnShowErrorMessage(object sender, EventArgs e)
 		{
@@ -673,7 +681,10 @@ namespace PerpetualPaint
 		{
 			if(masterImage == null)
 			{
-				masterImage = new MasterImage(fullFilename, OnProgressChanged, Form_UpdateStatusText);
+				masterImage = new MasterImage();
+				masterImage.ProgressChanged += new ProgressChangedEventHandler(OnProgressChanged);
+				masterImage.StatusChanged += new TextEventHandler(Form_UpdateStatusText);
+				masterImage.LoadBitmap(fullFilename);
 			}
 			else
 			{
@@ -828,9 +839,7 @@ namespace PerpetualPaint
 			}
 			using(ErrorDialog form = new ErrorDialog("Error", message.ToArray()))
 			{
-				form.StartPosition = FormStartPosition.Manual;
-				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
-				form.ShowDialog();
+				form.ShowDialog(this);
 			}
 		}
 	}

@@ -48,6 +48,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorAtPoint.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="ImageRegion.cs" />
+    <Compile Include="RequestRegionArgument.cs" />
+    <Compile Include="RequestRegionResult.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

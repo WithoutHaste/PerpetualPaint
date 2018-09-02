@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PerpetualPaint
+namespace PerpetualPaintLibrary
 {
 	public class RequestRegionResult
 	{
-		public List<Region> Regions;
+		public List<ImageRegion> Regions;
 
-		public RequestRegionResult(List<Region> regions)
+		public RequestRegionResult(List<ImageRegion> regions)
 		{
 			Regions = regions;
 		}

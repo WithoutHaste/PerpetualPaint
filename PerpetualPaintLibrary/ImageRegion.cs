@@ -4,11 +4,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PerpetualPaintLibrary;
 
-namespace PerpetualPaint
+namespace PerpetualPaintLibrary
 {
-	public class Region
+	public class ImageRegion
 	{
 		public HashSet<Point> Points = new HashSet<Point>();
 		public Color PureColor = Color.White;
@@ -18,11 +17,11 @@ namespace PerpetualPaint
 			}
 		}
 
-		public Region()
+		public ImageRegion()
 		{
 		}
 
-		public Region(HashSet<ColorAtPoint> region)
+		public ImageRegion(HashSet<ColorAtPoint> region)
 		{
 			PureColor = Utilities.FindPalestColor(region);
 			Points.UnionWith(region.Select(cap => cap.Point));
@@ -31,6 +30,21 @@ namespace PerpetualPaint
 		public bool Contains(Point point)
 		{
 			return Points.Contains(point);
+		}
+
+		public void Union(Point point)
+		{
+			Points.Add(point);
+		}
+
+		public void Union(ImageRegion region)
+		{
+			Points.UnionWith(region.Points);
+		}
+
+		public override string ToString()
+		{
+			return String.Format("Points: {0}, Color: {1}", Points.Count, PureColor);
 		}
 	}
 }
