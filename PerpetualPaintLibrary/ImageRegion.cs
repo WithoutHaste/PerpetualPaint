@@ -9,7 +9,10 @@ namespace PerpetualPaintLibrary
 {
 	public class ImageRegion
 	{
-		public HashSet<Point> Points = new HashSet<Point>();
+		private static int nextId = 0;
+
+		public int Id { get; private set; }
+		public List<Point> Points = new List<Point>();
 		public Color PureColor = Color.White;
 		public int Count {
 			get {
@@ -19,12 +22,13 @@ namespace PerpetualPaintLibrary
 
 		public ImageRegion()
 		{
+			Id = nextId++;
 		}
 
 		public ImageRegion(HashSet<ColorAtPoint> region)
 		{
 			PureColor = Utilities.FindPalestColor(region);
-			Points.UnionWith(region.Select(cap => cap.Point));
+			Points.AddRange(region.Select(cap => cap.Point));
 		}
 
 		public bool Contains(Point point)
@@ -39,12 +43,12 @@ namespace PerpetualPaintLibrary
 
 		public void Union(ImageRegion region)
 		{
-			Points.UnionWith(region.Points);
+			Points.AddRange(region.Points);
 		}
 
 		public override string ToString()
 		{
-			return String.Format("Points: {0}, Color: {1}", Points.Count, PureColor);
+			return String.Format("Region Id: {0}, Points: {1}, Color: {2}", Id, Points.Count, PureColor);
 		}
 	}
 }

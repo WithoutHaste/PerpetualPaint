@@ -37,8 +37,8 @@ namespace PerpetualPaint
 		public void Run(Bitmap bitmap)
 		{
 			worker = new BackgroundWorker();
-			//worker.DoWork += new DoWorkEventHandler(FindRegionsA);
-			worker.DoWork += new DoWorkEventHandler(FindRegionsB);
+			worker.DoWork += new DoWorkEventHandler(FindRegionsA);
+			//worker.DoWork += new DoWorkEventHandler(FindRegionsB);
 			worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnCompleted);
 			worker.ProgressChanged += ProgressChanged;
 			worker.WorkerReportsProgress = true;
@@ -97,21 +97,18 @@ namespace PerpetualPaint
 
 					if(CanJoinLeft(x, leadingEdge))
 					{
-						leadingEdge[x - 1].Union(point);
 						if(CanJoinUp(x, y, leadingEdge))
 						{
-							if(leadingEdge[x - 1] != leadingEdge[x])
-							{
-								leadingEdge[x - 1].Union(leadingEdge[x]);
-								regions.Remove(leadingEdge[x]);
-								leadingEdge[x] = leadingEdge[x - 1];
-							}
+							JoinLeftAndUp(regions, leadingEdge, point);
 						}
-						leadingEdge[x] = leadingEdge[x - 1];
+						else
+						{
+							JoinLeftOnly(regions, leadingEdge, point);
+						}
 					}
 					else if(CanJoinUp(x, y, leadingEdge))
 					{
-						leadingEdge[x].Union(point);
+						JoinUpOnly(regions, leadingEdge, point);
 					}
 					else
 					{
@@ -135,7 +132,53 @@ namespace PerpetualPaint
 		{
 			return (y > 0 && leadingEdge[x] != null);
 		}
-		
+
+		/// <summary>
+		/// Add point to region on left. Update leading edge to region on left.
+		/// </summary>
+		private void JoinLeftOnly(List<ImageRegion> regions, ImageRegion[] leadingEdge, Point point)
+		{
+			leadingEdge[point.X - 1].Union(point);
+			leadingEdge[point.X] = leadingEdge[point.X - 1];
+		}
+
+		/// <summary>
+		/// Add point to region above. Region above is already on leading edge.
+		/// </summary>
+		private void JoinUpOnly(List<ImageRegion> regions, ImageRegion[] leadingEdge, Point point)
+		{
+			leadingEdge[point.X].Union(point);
+		}
+
+		/// <summary>
+		/// If these are already the same regions, just union in the new point.
+		/// 
+		/// Add point to region on left. Add region above to region on left.
+		/// Update all leading edge references to "region above" to "region on left".
+		/// </summary>
+		private void JoinLeftAndUp(List<ImageRegion> regions, ImageRegion[] leadingEdge, Point point)
+		{
+			if(Object.ReferenceEquals(leadingEdge[point.X - 1], leadingEdge[point.X]))
+			{
+				leadingEdge[point.X - 1].Union(point);
+				return;
+			}
+
+			ImageRegion discardRegion = leadingEdge[point.X];
+			ImageRegion keepRegion = leadingEdge[point.X - 1];
+
+			keepRegion.Union(point);
+			keepRegion.Union(discardRegion);
+			regions.Remove(discardRegion);
+			for(int x = 0; x < leadingEdge.Length; x++)
+			{
+				if(leadingEdge[x] == discardRegion)
+				{
+					leadingEdge[x] = keepRegion;
+				}
+			}
+		}
+
 		private void FindRegionsB(object sender, DoWorkEventArgs e)
 		{
 			BackgroundWorker worker = (sender as BackgroundWorker);
