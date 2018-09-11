@@ -141,16 +141,6 @@ namespace PerpetualPaintLibrary
 			return (float)(((value - largeRange.Start) * scale) + largeRange.Start);
 		}
 
-		public static Color FindPalestColor(Bitmap bitmap, System.Drawing.Point point)
-		{
-			HashSet<ColorAtPoint> inRegion = FindRegion(bitmap, point);
-			if(inRegion.Count == 0)
-			{
-				return Color.White;
-			}
-			return FindPalestColor(inRegion);
-		}
-
 		public static Color FindPalestColor(HashSet<ColorAtPoint> points)
 		{
 			if(ColorIsGrayscale(points.First().Color))
@@ -168,77 +158,6 @@ namespace PerpetualPaintLibrary
 				}
 			}
 			return color;
-		}
-
-		/// <summary>
-		/// Find region as bounded by "black".
-		/// 
-		/// May lock portions of bitmap, so cend in a fresh copy.
-		/// </summary>
-		public static HashSet<ColorAtPoint> FindRegion(Bitmap localBitmap, System.Drawing.Point startPoint)
-		{
-			HashSet<ColorAtPoint> inRegion = new HashSet<ColorAtPoint>();
-			//Bitmap localBitmap = new Bitmap(bitmap);
-
-			//todo: why is this using up memory on small color change on cat?
-			HashSet<ColorAtPoint> todo = new HashSet<ColorAtPoint>() {
-				new ColorAtPoint(GetPixel(localBitmap, startPoint), startPoint)
-			};
-			while(todo.Count > 0)
-			{
-				ColorAtPoint p = todo.First();
-				todo.Remove(p);
-				if(inRegion.Contains(p))
-					continue;
-
-				if(PerpetualPaintLibrary.Utilities.ColorIsBlack(p.Color))
-					continue;
-
-				inRegion.Add(p);
-				//todo: duplicate code
-				System.Drawing.Point left = new System.Drawing.Point(p.Point.X - 1, p.Point.Y);
-				System.Drawing.Point right = new System.Drawing.Point(p.Point.X + 1, p.Point.Y);
-				System.Drawing.Point up = new System.Drawing.Point(p.Point.X, p.Point.Y - 1);
-				System.Drawing.Point down = new System.Drawing.Point(p.Point.X, p.Point.Y + 1);
-				if(localBitmap.InRange(left))
-				{
-					Color leftColor = GetPixel(localBitmap, left);
-					ColorAtPoint leftCAP = new ColorAtPoint(leftColor, left);
-					if(!todo.Contains(leftCAP))
-					{
-						todo.Add(leftCAP);
-					}
-				}
-				if(localBitmap.InRange(right))
-				{
-					Color rightColor = GetPixel(localBitmap, right);
-					ColorAtPoint rightCAP = new ColorAtPoint(rightColor, right);
-					if(!todo.Contains(rightCAP))
-					{
-						todo.Add(rightCAP);
-					}
-				}
-				if(localBitmap.InRange(up))
-				{
-					Color upColor = GetPixel(localBitmap, up);
-					ColorAtPoint upCAP = new ColorAtPoint(upColor, up);
-					if(!todo.Contains(upCAP))
-					{
-						todo.Add(upCAP);
-					}
-				}
-				if(localBitmap.InRange(down))
-				{
-					Color downColor = GetPixel(localBitmap, down);
-					ColorAtPoint downCAP = new ColorAtPoint(downColor, down);
-					if(!todo.Contains(downCAP))
-					{
-						todo.Add(downCAP);
-					}
-				}
-			}
-
-			return inRegion;
 		}
 
 	}

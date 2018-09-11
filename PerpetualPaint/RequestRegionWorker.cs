@@ -179,42 +179,6 @@ namespace PerpetualPaint
 			}
 		}
 
-		private void FindRegionsB(object sender, DoWorkEventArgs e)
-		{
-			BackgroundWorker worker = (sender as BackgroundWorker);
-			Bitmap bitmap = (e.Argument as RequestRegionArgument).Bitmap;
-
-			worker.ReportProgress(0);
-			List<ImageRegion> regions = new List<ImageRegion>();
-			float pixelsDone = 0;
-			float pixelsTotal = bitmap.Width * bitmap.Height;
-			for(int x = 0; x < bitmap.Width; x++)
-			{
-				for(int y = 0; y < bitmap.Height; y++)
-				{
-					if(worker.CancellationPending)
-					{
-						e.Cancel = true;
-						worker.ReportProgress(100);
-						return;
-					}
-
-					Point p = new Point(x, y);
-					if(regions.Any(r => r.Contains(p)))
-						continue;
-					HashSet<ColorAtPoint> region = Utilities.FindRegion(bitmap, p);
-					if(region.Count == 0) //blacks
-						continue;
-					regions.Add(new ImageRegion(region));
-					pixelsDone += region.Count;
-					int progress = (int)(100f * (pixelsDone / pixelsTotal));
-					worker.ReportProgress(progress);
-				}
-			}
-			worker.ReportProgress(100);
-			e.Result = new RequestRegionResult(regions);
-		}
-		
 		private void OnCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
 			Completed?.Invoke(this, e);
