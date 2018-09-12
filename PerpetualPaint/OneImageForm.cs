@@ -140,6 +140,7 @@ namespace PerpetualPaint
 			}
 			previousFormWindowState = this.WindowState;
 			this.Resize += new EventHandler(Form_Resize);
+			this.FormClosing += new FormClosingEventHandler(Form_Closing);
 
 			Application.ThreadException += new ThreadExceptionEventHandler(OnSystemException);
 
@@ -321,6 +322,12 @@ namespace PerpetualPaint
 
 		private void Form_OnOpenFile(object sender, EventArgs e)
 		{
+			bool continueOperation = PossiblySaveChangesBeforeClosingImage();
+			if(!continueOperation)
+			{
+				return;
+			}
+
 			OpenFile();
 		}
 
@@ -418,6 +425,36 @@ namespace PerpetualPaint
 		private void Form_UpdateStatusText(object sender, TextEventArgs e)
 		{
 			UpdateStatusText(e.Text);
+		}
+
+		private void Form_Closing(object sender, FormClosingEventArgs e)
+		{
+			bool continueOperation = PossiblySaveChangesBeforeClosingImage();
+			if(!continueOperation)
+			{
+				e.Cancel = true;
+			}
+		}
+
+		/// <summary>
+		/// Checks with user if they want to save changes to image before closing it.
+		/// </summary>
+		/// <returns>True for continue operation; False for cancel operation.</returns>
+		private bool PossiblySaveChangesBeforeClosingImage()
+		{
+			if(masterImage != null && !masterImage.EditedSinceLastSave)
+				return true;
+
+			DialogResult result = MessageBox.Show("You are about to lose your changes.\nDo you want to save changes before closing the image?", "Save Before Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+			if(result == DialogResult.Yes)
+			{
+				masterImage.Save();
+			}
+			else if(result == DialogResult.Cancel)
+			{
+				return false;
+			}
+			return true;
 		}
 
 		private void Image_OnFit(object sender, EventArgs e)
@@ -637,44 +674,12 @@ namespace PerpetualPaint
 			{
 				return;
 			}
-			masterImage.SaveToFilename = saveFileDialog.FileName;
-			Save();
+			masterImage.SaveAs(saveFileDialog.FileName);
 		}
 
 		private void Save()
 		{
-			Save(masterImage.SaveToFilename);
-		}
-
-		private void Save(string fullFilename)
-		{
-			try
-			{
-				string extension = Path.GetExtension(fullFilename);
-				ImageFormat imageFormat = ImageFormat.Bmp;
-				switch(extension)
-				{
-					case ".bmp": imageFormat = ImageFormat.Bmp; break;
-					case ".gif": imageFormat = ImageFormat.Gif; break;
-					case ".jpg":
-					case ".jpeg": imageFormat = ImageFormat.Jpeg; break;
-					case ".png": imageFormat = ImageFormat.Png; break;
-					case ".tiff": imageFormat = ImageFormat.Tiff; break;
-					default: throw new Exception("File extension not supported: " + extension);
-				}
-				masterImage.CleanGetCopy.Save(fullFilename, imageFormat);
-			}
-			catch(Exception exception)
-			{
-				if(masterImage.Width > 65500 || masterImage.Height > 65500)
-				{
-					HandleError("Failed to save file. Image is wider or taller than maximum GDI+ can save: 65,500 pixels.", exception);
-				}
-				else
-				{
-					HandleError("Failed to save file.", exception);
-				}
-			}
+			masterImage.Save();
 		}
 
 		private void UpdateMasterImage(string fullFilename)

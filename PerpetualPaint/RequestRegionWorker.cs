@@ -15,7 +15,6 @@ namespace PerpetualPaint
 	public class RequestRegionWorker
 	{
 		private BackgroundWorker worker;
-		private Bitmap bitmap;
 
 		public event RunWorkerCompletedEventHandler Completed;
 		public event ProgressChangedEventHandler ProgressChanged;

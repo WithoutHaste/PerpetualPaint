@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -19,16 +21,19 @@ namespace PerpetualPaint
 		private string saveToFilename;
 		private List<ImageRegion> regions = new List<ImageRegion>();
 
-		//only GetPixel from a clean copy to avoid locking conflicts
-		//only update the clean copy if a SetPixel has occurred
-		private bool setHasOccurred = false;
+		public bool EditedSinceLastSave { get; private set; }
+		private bool editedSinceLastCleanCopy = false;
 		private Bitmap cleanGetCopy = null;
+		/// <summary>
+		/// Only GetPixel from a clean copy of bitmap to avoid locking conflicts.
+		/// Only update the clean copy if a SetPixel has occurred.
+		/// </summary>
 		public Bitmap CleanGetCopy {
 			get {
-				if(cleanGetCopy == null || setHasOccurred)
+				if(cleanGetCopy == null || editedSinceLastCleanCopy)
 				{
 					cleanGetCopy = new Bitmap(bitmap);
-					setHasOccurred = false;
+					editedSinceLastCleanCopy = false;
 				}
 				return cleanGetCopy;
 			}
@@ -39,6 +44,7 @@ namespace PerpetualPaint
 				return saveToFilename;
 			}
 			set {
+				//todo: is this the expected behavior when setting SaveToFilename?
 				LoadBitmap(value);
 			}
 		}
@@ -69,7 +75,8 @@ namespace PerpetualPaint
 			CancelLoad();
 
 			bitmap = ImageHelper.SafeLoadBitmap(filename);
-			setHasOccurred = true;
+			editedSinceLastCleanCopy = true;
+			EditedSinceLastSave = false;
 			saveToFilename = filename;
 
 			if(bitmap.Width == 0 && bitmap.Height == 0)
@@ -80,6 +87,41 @@ namespace PerpetualPaint
 			regionWorker.Completed += new RunWorkerCompletedEventHandler(OnRequestRegionCompleted);
 			regionWorker.ProgressChanged += new ProgressChangedEventHandler(Worker_OnProgressChanged);
 			regionWorker.Run(bitmap);
+		}
+
+		public void Save()
+		{
+			SaveAs(SaveToFilename);
+		}
+
+		public void SaveAs(string filename)
+		{
+			try
+			{
+				string extension = Path.GetExtension(filename).ToLower();
+				ImageFormat imageFormat = ImageFormat.Bmp;
+				switch(extension)
+				{
+					case ".bmp": imageFormat = ImageFormat.Bmp; break;
+					case ".gif": imageFormat = ImageFormat.Gif; break;
+					case ".jpg":
+					case ".jpeg": imageFormat = ImageFormat.Jpeg; break;
+					case ".png": imageFormat = ImageFormat.Png; break;
+					case ".tiff": imageFormat = ImageFormat.Tiff; break;
+					default: throw new Exception("File extension not supported: " + extension);
+				}
+				CleanGetCopy.Save(filename, imageFormat);
+				saveToFilename = filename;
+				EditedSinceLastSave = false;
+			}
+			catch(Exception exception)
+			{
+				if(CleanGetCopy.Width > 65500 || CleanGetCopy.Height > 65500)
+				{
+					throw new Exception("Failed to save file. Image is wider or taller than maximum GDI+ can handle: 65,500 pixels.", exception);
+				}
+				throw exception;
+			}
 		}
 
 		private void Worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -114,7 +156,8 @@ namespace PerpetualPaint
 		public void SetPixel(Point point, Color color)
 		{
 			bitmap.SetPixel(point.X, point.Y, color);
-			setHasOccurred = true;
+			editedSinceLastCleanCopy = true;
+			EditedSinceLastSave = true;
 		}
 
 		public Color GetPixel(Point point)

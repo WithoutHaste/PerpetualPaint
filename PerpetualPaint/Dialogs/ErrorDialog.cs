@@ -33,7 +33,7 @@ namespace PerpetualPaint
 			this.Icon = SystemIcons.Error;
 			this.MinimizeBox = false;
 
-			this.Shown += new EventHandler(Form_OnShown);
+			this.Shown += new EventHandler(Form_OnShown); //todo: maybe make little abstract class that just does this CenterInParent behavior, since both dialogs use it?
 
 			InitControls(message);
 		}
