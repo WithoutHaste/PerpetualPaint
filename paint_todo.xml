@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns:c="urn:schemas-microsoft-com:office:component:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x2="http://schemas.microsoft.com/office/excel/2003/xml" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel">
+<Workbook xmlns:c="urn:schemas-microsoft-com:office:component:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:x2="http://schemas.microsoft.com/office/excel/2003/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:schemas-microsoft-com:office:spreadsheet">
   <Styles>
     <Style ss:ID="cellShortDate">
       <NumberFormat ss:Format="Short Date" />
@@ -14,6 +14,11 @@
   </Styles>
   <ss:Worksheet ss:Name="Active">
     <Table>
+      <Column ss:Width="25" />
+      <Column ss:Width="300" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
       <Row>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Id</Data>
@@ -31,11 +36,6 @@
           <Data ss:Type="String">Created</Data>
         </Cell>
       </Row>
-      <Column ss:Width="25" />
-      <Column ss:Width="300" />
-      <Column ss:Width="60" />
-      <Column ss:Width="60" />
-      <Column ss:Width="60" />
       <Row>
         <Cell>
           <Data ss:Type="Number">101</Data>
@@ -220,7 +220,7 @@ save as Version 1</Data>
           <Data ss:Type="Number">17</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">build installer for Version 1 and save it in a separate folder to keep</Data>
+          <Data ss:Type="String">build installer for Version 1 and save it in a separate folder to keep - actually, making the Release in github and saving the installation file with it will be perfect</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -446,10 +446,28 @@ select a file format to use, save in plain text</Data>
       </Row>
       <Row>
         <Cell>
+          <Data ss:Type="Number">120</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">VERSION 2: BITMAP MODE
+see "paint_bitmap_todo.xml" file</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
           <Data ss:Type="Number">25</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">EVERYTHING BELOW HERE IS VERSION 2</Data>
+          <Data ss:Type="String">EVERYTHING BELOW HERE IS VERSION 3 OR LATER</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -687,6 +705,12 @@ http://colorizer.org/</Data>
   </ss:Worksheet>
   <ss:Worksheet ss:Name="Inactive">
     <Table>
+      <Column ss:Width="25" />
+      <Column ss:Width="300" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
       <Row>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Id</Data>
@@ -707,12 +731,6 @@ http://colorizer.org/</Data>
           <Data ss:Type="String">Done</Data>
         </Cell>
       </Row>
-      <Column ss:Width="25" />
-      <Column ss:Width="300" />
-      <Column ss:Width="60" />
-      <Column ss:Width="60" />
-      <Column ss:Width="60" />
-      <Column ss:Width="60" />
       <Row>
         <Cell>
           <Data ss:Type="Number">117</Data>
@@ -2092,7 +2110,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">118</Data>
+          <Data ss:Type="Number">120</Data>
         </Cell>
       </Row>
       <Row>
@@ -2109,7 +2127,16 @@ UPDATED: show status bar message</Data>
         <Cell>
           <Data ss:Type="String">Bug</Data>
         </Cell>
+        <Cell>
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
       </Row>
     </Table>
+    <x:WorksheetOptions />
   </ss:Worksheet>
 </Workbook>

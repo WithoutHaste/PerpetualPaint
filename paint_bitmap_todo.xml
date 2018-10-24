@@ -1,0 +1,415 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns:c="urn:schemas-microsoft-com:office:component:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:x2="http://schemas.microsoft.com/office/excel/2003/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles>
+    <Style ss:ID="cellShortDate">
+      <NumberFormat ss:Format="Short Date" />
+    </Style>
+    <Style ss:ID="header">
+      <Font ss:Bold="1" />
+    </Style>
+    <Style ss:ID="paragraph">
+      <Alignment ss:WrapText="1" />
+    </Style>
+  </Styles>
+  <ss:Worksheet ss:Name="Active">
+    <Table>
+      <Column ss:Width="25" />
+      <Column ss:Width="300" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Row>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Id</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Description</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Status</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Category</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Created</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">5</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">2nd mode in Perpetual Paint: bitmap
+- designed to support me making a color-coded building map easily
+- aim is to the mouse as little as possible</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">4</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">one bit is selected at a time
+- move selection with arrow keys</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">3</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">ctrl-arrow key to jump x number of spaces
+- 5 or 8 default, configurable at application level</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">2</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">alt-arrow key to jump to:
+a) first bit of next different color in that direction, if there is at least one more of the current color contiguous in that direction
+b) last bit of next different color in that direction, if there are no more of the current color contiguous in that direction</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">1</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">single-letter-keys apply color to selected bit
+- configurable at application level (a default) and per project (overrides default)
+- configuration can include a label/description of color's meaning
+ex: Q=black, W=white, ERT=greys, YUIOP=greens, ASDFG=blues, GJKL=purples, ZXCV=reds, B=orange, N=goldenrod, M=yellow</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">6</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">shift-l: label current region of color (based on current bit)
+- labels are displayed (at legible size) over image
+- labels don't have to be unique</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">7</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">shift-a: annotate current region of color (based on current bit)
+- can add any number of annotations to a region
+- annotations are listed by region label along the side of the screen for any region currently visible</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">8</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">shift-arrow/arrow/arrow will select multiple bits</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">9</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">shift-arrow-number_keys-enter will select the specified number of bits in the indicated direction</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">10</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">shift-arrow-number_keys-x_key-number_keys-enter will select the specified rectangle of bits in the indicated direction (first dimension) and the clockwise direction of that for the 2nd dimension</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">11</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">show rulers along top/side with bit count</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">12</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">a selected region can be grouped
+- edit as normal, but it is selected as a group</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">13</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">a selected region (even if not grouped) can be moved around the image and dropped elsewhere</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">14</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">copy/paste selections</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">15</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">project can contain multiple files
+- they can be set as layers (like a blueprint layer) which means they are remain the same size and as you move around on one, you can see where you are on the others at the same time in smaller windows and you can jump up/down layers withouth losing position</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-10-23T00:00:00.000</Data>
+        </Cell>
+      </Row>
+    </Table>
+    <x:WorksheetOptions />
+  </ss:Worksheet>
+  <ss:Worksheet ss:Name="Inactive">
+    <Table>
+      <Column ss:Width="25" />
+      <Column ss:Width="300" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Column ss:Width="60" />
+      <Row>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Id</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Description</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Status</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Category</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Created</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+    </Table>
+    <x:WorksheetOptions />
+  </ss:Worksheet>
+  <ss:Worksheet ss:Name="Config">
+    <Table>
+      <Row>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Status</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Active</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Category</Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+        <Cell ss:StyleID="header">
+          <Data ss:Type="String">Max Id</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Active</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="Number">15</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Inactive</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Bug</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">
+          </Data>
+        </Cell>
+      </Row>
+    </Table>
+    <x:WorksheetOptions />
+  </ss:Worksheet>
+</Workbook>
