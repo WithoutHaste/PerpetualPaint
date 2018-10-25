@@ -294,7 +294,7 @@ ex: Q=black, W=white, ERT=greys, YUIOP=greens, ASDFG=blues, GJKL=purples, ZXCV=r
         </Cell>
         <Cell ss:StyleID="paragraph">
           <Data ss:Type="String">project can contain multiple files
-- they can be set as layers (like a blueprint layer) which means they are remain the same size and as you move around on one, you can see where you are on the others at the same time in smaller windows and you can jump up/down layers withouth losing position</Data>
+- they can be set as layers ("floors") (like a blueprint layer) which means they are remain the same size and as you move around on one, you can see where you are on the others at the same time in smaller windows and you can jump up/down layers withouth losing position</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
