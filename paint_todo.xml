@@ -38,19 +38,37 @@
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">123</Data>
+          <Data ss:Type="Number">128</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">Open File when there is no image open still shows message "you are going to lose your changes"</Data>
+          <Data ss:Type="String">got null filename error on New Palette</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Bug - Minor</Data>
+          <Data ss:Type="String">Bug - Major</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-13T00:00:00.000</Data>
+          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">124</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">when app is thinking, cover form with greyed out "Working" pane that blocks interaction
+instead of an "ok" message popup</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -94,13 +112,22 @@
         <Cell ss:StyleID="paragraph">
           <Data ss:Type="String">save a single-image project to a zip file with special extension
 - greyscale image, color image, name of palette file
-- export to any supported file format</Data>
+- export to any supported file format
+
+looking at System.IO.Packaging.ZipPackage
+-it does not compress - that's ok I just need grouping
+-there may be trouble for other zips to unzip this or for this to unzip another zipped file, but it sounds like it can always handle its own files so that's ok
+
+things to handle
+- palette saved with project
+- palette filename saved with project
+- no palette info saved with project</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Task</Data>
+          <Data ss:Type="String">Feature - Major</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
@@ -119,7 +146,7 @@
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Task</Data>
+          <Data ss:Type="String">Feature - Major</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
@@ -136,7 +163,7 @@
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Task</Data>
+          <Data ss:Type="String">Documentation</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-08-24T00:00:00.000</Data>
@@ -155,10 +182,45 @@
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Task</Data>
+          <Data ss:Type="String">Feature - Minor</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-08-12T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">126</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">allow single-pixel color alterations (grayscale only)
+so user can close/open gaps in lines</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">127</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">brightness/contract editing of grayscale image</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -185,9 +247,7 @@ describe the use-case of converting between palette formats: open file, edit pal
         </Cell>
         <Cell ss:StyleID="paragraph">
           <Data ss:Type="String">include support contact information
--wohaste email
--paint landing page on website
--github page</Data>
+-github page link</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -205,7 +265,7 @@ describe the use-case of converting between palette formats: open file, edit pal
         </Cell>
         <Cell ss:StyleID="paragraph">
           <Data ss:Type="String">include donation information
--patreon</Data>
+-patreon link</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -336,6 +396,23 @@ save as Version 1</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-09-10T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">125</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">use grab-and-drag to move around image</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -784,6 +861,26 @@ http://colorizer.org/</Data>
         </Cell>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">123</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">Open File when there is no image open still shows message "you are going to lose your changes"</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Bug - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-13T00:00:00.000</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2165,7 +2262,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">123</Data>
+          <Data ss:Type="Number">128</Data>
         </Cell>
       </Row>
       <Row>
@@ -2197,8 +2294,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">
-          </Data>
+          <Data ss:Type="String">Inactive</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">
@@ -2222,8 +2318,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">
-          </Data>
+          <Data ss:Type="String">Inactive</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">
@@ -2247,8 +2342,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">
-          </Data>
+          <Data ss:Type="String">Inactive</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">
@@ -2272,8 +2366,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">
-          </Data>
+          <Data ss:Type="String">Inactive</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">
@@ -2297,8 +2390,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">
-          </Data>
+          <Data ss:Type="String">Inactive</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">

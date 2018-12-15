@@ -442,6 +442,8 @@ namespace PerpetualPaint
 		/// <returns>True for continue operation; False for cancel operation.</returns>
 		private bool PossiblySaveChangesBeforeClosingImage()
 		{
+			if(masterImage == null)
+				return true;
 			if(masterImage != null && !masterImage.EditedSinceLastSave)
 				return true;
 

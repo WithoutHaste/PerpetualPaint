@@ -8,7 +8,7 @@ using WithoutHaste.Drawing.Colors;
 namespace PerpetualPaintTest
 {
 	[TestClass]
-	public class TestUtitilities
+	public class UtitilitiesTests
 	{
 		[TestMethod]
 		public void GenerateGradiantSamples()

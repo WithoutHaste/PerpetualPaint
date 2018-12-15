@@ -14,6 +14,9 @@ using WithoutHaste.Windows.GUI;
 
 namespace PerpetualPaint
 {
+	/// <summary>
+	/// The image being edited and displayed.
+	/// </summary>
 	public class MasterImage
 	{
 		private RequestRegionWorker regionWorker;

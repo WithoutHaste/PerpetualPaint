@@ -62,7 +62,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Benchmark.cs" />
-    <Compile Include="TestUtitilities.cs" />
+    <Compile Include="IOTests.cs" />
+    <Compile Include="UtitilitiesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
