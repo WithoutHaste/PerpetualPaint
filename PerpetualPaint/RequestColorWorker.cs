@@ -80,6 +80,9 @@ namespace PerpetualPaint
 
 		#region Color Bitmap
 
+		/// <summary>
+		/// The main worker method: colors in a region of the image.
+		/// </summary>
 		private void ColorPixel(object sender, DoWorkEventArgs e)
 		{
 			if(queue.Count == 0)
@@ -89,12 +92,7 @@ namespace PerpetualPaint
 			Color color = request.Color;
 			Point point = request.Point;
 
-			Color oldWhite = Color.White;
-			if(!PerpetualPaintLibrary.Utilities.ColorIsGrayscale(masterImage.GetPixel(point)))
-			{
-				oldWhite = ConvertRegionToGrayscale(point);
-			}
-
+			Color oldWhite = masterImage.GreyscaleBitmap.GetPixel(point.X, point.Y);
 			ConvertRegionToColor(color, point);
 			//todo: refactor for new design - in master image keep partially updated image separate from last complete version
 			e.Result = new RequestColorWorkerResult(masterImage.CleanGetCopy, request, request.ChangeColor(oldWhite));
@@ -103,17 +101,6 @@ namespace PerpetualPaint
 		private void ConvertRegionToColor(Color pureColor, Point point)
 		{
 			masterImage.SetRegion(point, pureColor);
-		}
-
-		/// <summary>
-		/// Convert region from color to grayscale.
-		/// </summary>
-		/// <param name="point">Any point in a black-bounded region.</param>
-		/// <returns>The previous pure color.</returns>
-		private Color ConvertRegionToGrayscale(Point point)
-		{
-			Color oldPureColor = masterImage.SetRegion(point, Color.White);
-			return oldPureColor;
 		}
 		
 		private bool PointInList(List<Point> set, Point point)

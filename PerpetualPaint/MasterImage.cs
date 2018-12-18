@@ -17,16 +17,20 @@ namespace PerpetualPaint
 	/// <summary>
 	/// The image being edited and displayed.
 	/// </summary>
-	public class MasterImage
+	public class MasterImage : PPProject
 	{
 		private RequestRegionWorker regionWorker;
-		private Bitmap bitmap;
-		private string saveToFilename;
+		private string saveToFilename; //todo: move to PPProject?
 		private List<ImageRegion> regions = new List<ImageRegion>();
 
 		public bool EditedSinceLastSave { get; private set; }
 		private bool editedSinceLastCleanCopy = false;
 		private Bitmap cleanGetCopy = null;
+
+		//todo: this may be a place for a wrapper class
+		//inherit from bitmap, override the get/set pixels
+		//same behaviour, except GetPixel will work like this CleanGetCopy logic, and SetPixel will reset that flag
+
 		/// <summary>
 		/// Only GetPixel from a clean copy of bitmap to avoid locking conflicts.
 		/// Only update the clean copy if a SetPixel has occurred.
@@ -35,7 +39,7 @@ namespace PerpetualPaint
 			get {
 				if(cleanGetCopy == null || editedSinceLastCleanCopy)
 				{
-					cleanGetCopy = new Bitmap(bitmap);
+					cleanGetCopy = new Bitmap(this.ColorBitmap);
 					editedSinceLastCleanCopy = false;
 				}
 				return cleanGetCopy;
@@ -48,12 +52,12 @@ namespace PerpetualPaint
 			}
 			set {
 				//todo: is this the expected behavior when setting SaveToFilename?
-				LoadBitmap(value);
+				Load(value);
 			}
 		}
 
-		public int Width { get { return CleanGetCopy.Width; } }
-		public int Height { get { return CleanGetCopy.Height; } }
+		public int Width { get { return this.GreyscaleBitmap.Width; } }
+		public int Height { get { return this.GreyscaleBitmap.Height; } }
 
 		public event ProgressChangedEventHandler ProgressChanged;
 		public event TextEventHandler StatusChanged;
@@ -72,32 +76,98 @@ namespace PerpetualPaint
 
 		//---------------------------------------------------
 
-		public void LoadBitmap(string filename)
+		public void Load(string filename)
 		{
 			StatusChanged?.Invoke(this, new TextEventArgs("Prepping image..."));
 			CancelLoad();
 
-			bitmap = ImageHelper.SafeLoadBitmap(filename);
+			bool runRegionsOnColorBitmap = false;
+			if(Path.GetExtension(filename) == PROJECT_EXTENSION)
+			{
+				LoadProject(filename);
+			}
+			else
+			{
+				bool isGreyscaleImage = LoadImage(filename);
+				runRegionsOnColorBitmap = !isGreyscaleImage;
+			}
+
 			editedSinceLastCleanCopy = true;
 			EditedSinceLastSave = false;
 			saveToFilename = filename;
 
-			if(bitmap.Width == 0 && bitmap.Height == 0)
-				throw new Exception("Cannot operate on a 0 by 0 bitmap.");
 			regions.Clear();
 
 			regionWorker = new RequestRegionWorker();
 			regionWorker.Completed += new RunWorkerCompletedEventHandler(OnRequestRegionCompleted);
 			regionWorker.ProgressChanged += new ProgressChangedEventHandler(Worker_OnProgressChanged);
-			regionWorker.Run(bitmap);
+			if(runRegionsOnColorBitmap)
+			{
+				regionWorker.Run(this.ColorBitmap);
+				this.GreyscaleBitmap = Utilities.GetGreyscaleOfBitmap(this.ColorBitmap, this.regions); //todo: try may be a timing issue here, where the image is still being worked on but the user is allowed to interact with it
+			}
+			else
+			{
+				regionWorker.Run(this.GreyscaleBitmap);
+			}
+		}
+
+		/// <summary>
+		/// Load a Perpetual Paint Project file.
+		/// </summary>
+		private void LoadProject(string filename)
+		{
+			PerpetualPaintLibrary.IO.LoadProject(filename, this);
+		}
+
+		/// <summary>
+		/// Load a normal image file.
+		/// Handles both greyscale and colored images.
+		/// </summary>
+		/// <returns>True if the image is greyscale. False if the image is colored.</returns>
+		private bool LoadImage(string filename)
+		{
+			Bitmap bitmap = ImageHelper.SafeLoadBitmap(filename);
+			if(bitmap.Width == 0 && bitmap.Height == 0)
+				throw new NotSupportedException("Cannot operate on a 0-pixel by 0-pixel bitmap.");
+
+			this.ColorPalette = null;
+			this.Config = null;
+			if(Utilities.BitmapIsGreyscale(bitmap))
+			{
+				this.GreyscaleBitmap = bitmap;
+				this.ColorBitmap = new Bitmap(bitmap);
+				return true;
+			}
+			else
+			{
+				this.GreyscaleBitmap = null;
+				this.ColorBitmap = bitmap;
+				return false;
+			}
 		}
 
 		public void Save()
 		{
-			SaveAs(SaveToFilename);
+			SaveAsProject(SaveToFilename);
 		}
 
-		public void SaveAs(string filename)
+		/// <summary>
+		/// Save as Perpetual Paint Project.
+		/// </summary>
+		public void SaveAsProject(string filename)
+		{
+			if(Path.GetExtension(filename) != PROJECT_EXTENSION)
+				filename = Path.ChangeExtension(filename, PROJECT_EXTENSION);
+			PerpetualPaintLibrary.IO.ZipProject(filename, this);
+			saveToFilename = filename;
+			EditedSinceLastSave = false;
+		}
+
+		/// <summary>
+		/// Export colored bitmap to any normal image format.
+		/// </summary>
+		public void ExportAs(string filename)
 		{
 			try
 			{
@@ -114,8 +184,6 @@ namespace PerpetualPaint
 					default: throw new Exception("File extension not supported: " + extension);
 				}
 				CleanGetCopy.Save(filename, imageFormat);
-				saveToFilename = filename;
-				EditedSinceLastSave = false;
 			}
 			catch(Exception exception)
 			{
@@ -132,35 +200,21 @@ namespace PerpetualPaint
 			ProgressChanged?.Invoke(this, e);
 		}
 
-		public Color SetRegion(Point point, Color pureColor)
+		//todo: is anything using the return value from SetRegion?
+
+		/// <summary>
+		/// Color in the selected region.
+		/// If the point is not in any region, do nothing.
+		/// </summary>
+		public Color? SetRegion(Point point, Color pureColor)
 		{
 			ImageRegion region = GetRegion(point);
 			if(region == null)
-				throw new Exception("Point not found in region: " + point);
-
-			bool convertToGrayscale = (Utilities.ColorIsWhite(pureColor));
-			Color oldPureColor = region.PureColor;
-			//get all the colors at once so I'm not alternating between GetPixel/SetPixel
-			List<ColorAtPoint> commands = new List<ColorAtPoint>();
-			foreach(Point p in region.Points)
-			{
-				Color oldColor = GetPixel(p);
-				Color adjustedColor = (convertToGrayscale ? Utilities.ColorToGrayscale(oldColor, oldPureColor) : Utilities.GrayscaleToColor(oldColor, pureColor));
-				commands.Add(new ColorAtPoint(adjustedColor, p));
-			}
-			foreach(ColorAtPoint command in commands)
-			{
-				SetPixel(command.Point, command.Color);
-			}
-			region.PureColor = pureColor;
-			return oldPureColor;
-		}
-
-		public void SetPixel(Point point, Color color)
-		{
-			bitmap.SetPixel(point.X, point.Y, color);
+				return null; //point was not in a colorable region
+			Color oldPureColor = Utilities.SetRegion(this.GreyscaleBitmap, this.ColorBitmap, region, pureColor);
 			editedSinceLastCleanCopy = true;
 			EditedSinceLastSave = true;
+			return oldPureColor;
 		}
 
 		public Color GetPixel(Point point)

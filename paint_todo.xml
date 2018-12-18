@@ -38,6 +38,54 @@
       </Row>
       <Row>
         <Cell>
+          <Data ss:Type="Number">121</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">save a single-image project to a zip file with special extension
+- greyscale image, color image, name of palette file
+- export to any supported file format
+
+looking at System.IO.Packaging.ZipPackage
+-it does not compress - that's ok I just need grouping
+-there may be trouble for other zips to unzip this or for this to unzip another zipped file, but it sounds like it can always handle its own files so that's ok
+
+things to handle
+- palette saved with project
+- palette filename saved with project
+- no palette info saved with project</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">131</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">region to color A
+region to color B
+undo
+- region is blanked to white instead of returning to colorA</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Bug - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-18T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
           <Data ss:Type="Number">128</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
@@ -73,6 +121,23 @@ instead of an "ok" message popup</Data>
       </Row>
       <Row>
         <Cell>
+          <Data ss:Type="Number">133</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">on close of program or opening of new file, warning if current palette has not been saved on its own or within another project</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-18T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
           <Data ss:Type="Number">101</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
@@ -103,34 +168,6 @@ instead of an "ok" message popup</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-08-22T00:00:00.000</Data>
-        </Cell>
-      </Row>
-      <Row>
-        <Cell>
-          <Data ss:Type="Number">121</Data>
-        </Cell>
-        <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">save a single-image project to a zip file with special extension
-- greyscale image, color image, name of palette file
-- export to any supported file format
-
-looking at System.IO.Packaging.ZipPackage
--it does not compress - that's ok I just need grouping
--there may be trouble for other zips to unzip this or for this to unzip another zipped file, but it sounds like it can always handle its own files so that's ok
-
-things to handle
-- palette saved with project
-- palette filename saved with project
-- no palette info saved with project</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Todo</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Feature - Major</Data>
-        </Cell>
-        <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -190,6 +227,23 @@ things to handle
       </Row>
       <Row>
         <Cell>
+          <Data ss:Type="Number">129</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">option to generate palette from the pure colors found in an image</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-18T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
           <Data ss:Type="Number">126</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
@@ -211,7 +265,11 @@ so user can close/open gaps in lines</Data>
           <Data ss:Type="Number">127</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">brightness/contract editing of grayscale image</Data>
+          <Data ss:Type="String">LOW PRIORITY - INKSCAPE DOES IT WELL
+WITH LIGHTNESS/CONTRAST or TRACE BITMAP
+EXPORT TO PNG AT 300DPI
+brightness/contract editing of grayscale image
+- similar: for any pixel in the "black" scale, if it is lighter than each of its surrounding "black" pixels, make it the same color as its lightest neighbor</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -221,6 +279,23 @@ so user can close/open gaps in lines</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">132</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">can *.ppp files in folder be given thumbnail of colored image?</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-18T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2262,7 +2337,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">128</Data>
+          <Data ss:Type="Number">133</Data>
         </Cell>
       </Row>
       <Row>

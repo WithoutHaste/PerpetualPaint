@@ -169,7 +169,7 @@ namespace PerpetualPaintTest
 			{
 				for(int y = 0; y < bitmap.Height; y++)
 				{
-					bitmap.SetPixel(x, y, Utilities.ColorToGrayscale(bitmap.GetPixel(x, y), color));
+					bitmap.SetPixel(x, y, Utilities.ColorToGreyscale(bitmap.GetPixel(x, y), color));
 				}
 			}
 			return bitmap;
@@ -182,7 +182,7 @@ namespace PerpetualPaintTest
 			{
 				for(int y = 0; y < bitmap.Height; y++)
 				{
-					bitmap.SetPixel(x, y, Utilities.GrayscaleToColor(bitmap.GetPixel(x, y), color));
+					bitmap.SetPixel(x, y, Utilities.GreyscaleToColor(bitmap.GetPixel(x, y), color));
 				}
 			}
 			return bitmap;

@@ -13,10 +13,16 @@ namespace PerpetualPaintLibrary
 	/// </summary>
 	public class PPProject
 	{
+		public static readonly string PROJECT_EXTENSION = ".ppp";
+
 		public Bitmap GreyscaleBitmap;
 		public Bitmap ColorBitmap;
 		public ColorPalette ColorPalette;
 		public PPPConfig Config;
+
+		public PPProject()
+		{
+		}
 
 		public PPProject(Bitmap greyscaleBitmap, Bitmap colorBitmap)
 		{

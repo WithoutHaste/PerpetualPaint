@@ -160,12 +160,14 @@ namespace PerpetualPaint
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			MenuItem openImage = new MenuItem("Open Image", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
-			MenuItem saveImage = new MenuItem("Save Image", new EventHandler(Form_OnSave), Shortcut.CtrlS);
-			MenuItem saveAsImage = new MenuItem("Save Image As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
-			fileMenu.MenuItems.Add(openImage);
-			fileMenu.MenuItems.Add(saveImage);
-			fileMenu.MenuItems.Add(saveAsImage);
+			MenuItem openProject = new MenuItem("Open Project or Image", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
+			MenuItem saveProject = new MenuItem("Save Project", new EventHandler(Form_OnSave), Shortcut.CtrlS);
+			MenuItem saveAsProject = new MenuItem("Save Project As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
+			MenuItem exportImage = new MenuItem("Export Image", new EventHandler(Form_OnExport));
+			fileMenu.MenuItems.Add(openProject);
+			fileMenu.MenuItems.Add(saveProject);
+			fileMenu.MenuItems.Add(saveAsProject);
+			fileMenu.MenuItems.Add(exportImage);
 
 			MenuItem editMenu = new MenuItem("Edit");
 			MenuItem undoAction = new MenuItem("Undo", new EventHandler(Form_OnUndo), Shortcut.CtrlZ);
@@ -339,6 +341,11 @@ namespace PerpetualPaint
 		private void Form_OnSaveAs(object sender, EventArgs e)
 		{
 			SaveAs();
+		}
+
+		private void Form_OnExport(object sender, EventArgs e)
+		{
+			ExportAs();
 		}
 
 		private void Form_OnNarrowPalette(object sender, EventArgs e)
@@ -519,7 +526,6 @@ namespace PerpetualPaint
 			}
 
 			if(SelectedColor == null) return;
-			Color currentColor = masterImage.GetPixel(masterImagePoint);
 			ColorAtPoint newColor = new ColorAtPoint(SelectedColor.Value, masterImagePoint);
 			RunColorRequest(newColor);
 		}
@@ -647,8 +653,8 @@ namespace PerpetualPaint
 		private void OpenFile()
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
-			openFileDialog.Title = "Open Image";
+			openFileDialog.Filter = "Project and Image Files|*.PPP;*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
+			openFileDialog.Title = "Open Project or Image";
 
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
@@ -666,17 +672,34 @@ namespace PerpetualPaint
 			}
 		}
 
-		private void SaveAs()
+		private void ExportAs()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			saveFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
-			saveFileDialog.Title = "Save Image As";
+			saveFileDialog.Title = "Export Image As";
+			if(masterImage.SaveToFilename != null)
+			{
+				saveFileDialog.FileName = Path.GetFileNameWithoutExtension(masterImage.SaveToFilename);
+			}
 
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
 				return;
 			}
-			masterImage.SaveAs(saveFileDialog.FileName);
+			masterImage.ExportAs(saveFileDialog.FileName);
+		}
+
+		private void SaveAs()
+		{
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "Project Files|*.PPP";
+			saveFileDialog.Title = "Save Project As";
+
+			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+			masterImage.SaveAsProject(saveFileDialog.FileName);
 		}
 
 		private void Save()
@@ -691,11 +714,11 @@ namespace PerpetualPaint
 				masterImage = new MasterImage();
 				masterImage.ProgressChanged += new ProgressChangedEventHandler(OnProgressChanged);
 				masterImage.StatusChanged += new TextEventHandler(Form_UpdateStatusText);
-				masterImage.LoadBitmap(fullFilename);
+				masterImage.Load(fullFilename);
 			}
 			else
 			{
-				masterImage.LoadBitmap(fullFilename);
+				masterImage.Load(fullFilename);
 			}
 			history.Clear();
 			UpdateZoomedImage(SCALE_FIT);

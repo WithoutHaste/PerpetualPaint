@@ -69,32 +69,37 @@ namespace PerpetualPaintLibrary
 			File.WriteAllBytes(zipFilename, zippedBytes);
 		}
 
-		//todo: use more specific exceptions
-		public static PPProject LoadProject(string zipFilename)
+		public static void LoadProject(string zipFilename, PPProject project)
 		{
 			using(Package package = Package.Open(zipFilename, FileMode.Open))
 			{
 				if(!package.PartExists(new Uri(PART_GREYSCALE, UriKind.Relative)))
-					throw new Exception("Project zip file does not include greyscale image.");
+					throw new FileFormatException("Project zip file does not include greyscale image.");
 				if(!package.PartExists(new Uri(PART_COLOR, UriKind.Relative)))
-					throw new Exception("Project zip file does not include color image.");
-				Bitmap greyscaleBitmap = package.GetPart(new Uri(PART_GREYSCALE, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToBitmap();
-				Bitmap colorBitmap = package.GetPart(new Uri(PART_COLOR, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToBitmap();
+					throw new FileFormatException("Project zip file does not include color image.");
+				project.GreyscaleBitmap = package.GetPart(new Uri(PART_GREYSCALE, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToBitmap();
+				project.ColorBitmap = package.GetPart(new Uri(PART_COLOR, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToBitmap();
+				project.ColorPalette = null;
 				if(package.PartExists(new Uri(PART_PALETTE, UriKind.Relative)))
 				{
 					string[] paletteLines = package.GetPart(new Uri(PART_PALETTE, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToText();
 					FormatGPL gpl = new FormatGPL(paletteLines);
-					WithoutHaste.Drawing.Colors.ColorPalette colorPalette = gpl.ColorPalette;
-					return new PPProject(greyscaleBitmap, colorBitmap, colorPalette);
+					project.ColorPalette = gpl.ColorPalette;
 				}
+				project.Config = null;
 				if(package.PartExists(new Uri(PART_CONFIG, UriKind.Relative)))
 				{
 					string[] configLines = package.GetPart(new Uri(PART_CONFIG, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToText();
-					PPPConfig config = new PPPConfig(configLines);
-					return new PPProject(greyscaleBitmap, colorBitmap, config);
+					project.Config = new PPPConfig(configLines);
 				}
-				return new PPProject(greyscaleBitmap, colorBitmap);
 			}
+		}
+
+		public static PPProject LoadProject(string zipFilename)
+		{
+			PPProject project = new PPProject();
+			LoadProject(zipFilename, project);
+			return project;
 		}
 
 		private static void WriteAll(this Stream target, Stream source)
