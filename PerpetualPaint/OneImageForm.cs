@@ -409,7 +409,7 @@ namespace PerpetualPaint
 
 		private void Form_OnNewPalette(object sender, EventArgs e)
 		{
-			using(EditPaletteDialog form = new EditPaletteDialog(null))
+			using(EditPaletteDialog form = new EditPaletteDialog())
 			{
 				form.StartPosition = FormStartPosition.Manual;
 				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
@@ -453,18 +453,35 @@ namespace PerpetualPaint
 
 		private void Form_OnEditPalette(object sender, EventArgs e)
 		{
-			using(EditPaletteDialog form = new EditPaletteDialog(PaletteFullFilename))
+			EditPaletteDialog dialog;
+			if(masterImage != null && masterImage.Config.PaletteOption == PPPConfig.PaletteOptions.SaveFile)
 			{
-				form.StartPosition = FormStartPosition.Manual;
-				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
-				if(form.ShowDialog() != DialogResult.OK)
-					return;
-				PaletteFullFilename = form.FullFilename;
+				dialog = new EditPaletteDialog(masterImage.ColorPalette);
+			}
+			else
+			{
+				dialog = new EditPaletteDialog(PaletteFullFilename);
+			}
+			dialog.StartPosition = FormStartPosition.Manual;
+			dialog.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
+			if(dialog.ShowDialog() != DialogResult.OK)
+				return;
+
+			if(masterImage != null && masterImage.Config.PaletteOption == PPPConfig.PaletteOptions.SaveFile)
+			{
+				colorPalette = dialog.ColorPalette;
+				masterImage.UpdatePaletteOption(colorPalette, null);
+				DisplayPalette();
+			}
+			else
+			{
+				PaletteFullFilename = dialog.FullFilename;
 				LoadPalette();
-				if(masterImage != null)
-				{
-					masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
-				}
+			}
+
+			if(masterImage != null)
+			{
+				masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
 			}
 		}
 
