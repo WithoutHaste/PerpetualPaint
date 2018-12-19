@@ -74,6 +74,9 @@
     <Compile Include="Dialogs\ErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Dialogs\ProjectOptionsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Events\ColorEventArgs.cs" />
     <Compile Include="Events\TextEventArgs.cs" />
     <Compile Include="HistoryActions\RequestColorAction.cs" />

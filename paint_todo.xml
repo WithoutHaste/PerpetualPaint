@@ -38,30 +38,21 @@
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">121</Data>
+          <Data ss:Type="Number">134</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">save a single-image project to a zip file with special extension
-- greyscale image, color image, name of palette file
-- export to any supported file format
-
-looking at System.IO.Packaging.ZipPackage
--it does not compress - that's ok I just need grouping
--there may be trouble for other zips to unzip this or for this to unzip another zipped file, but it sounds like it can always handle its own files so that's ok
-
-things to handle
-- palette saved with project
-- palette filename saved with project
-- no palette info saved with project</Data>
+          <Data ss:Type="String">on edit palette
+when full palete is saved with project
+do not require filename</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Feature - Major</Data>
+          <Data ss:Type="String">Bug - Major</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
+          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -936,6 +927,37 @@ http://colorizer.org/</Data>
         </Cell>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">121</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">save a single-image project to a zip file with special extension
+- greyscale image, color image, name of palette file
+- export to any supported file format
+
+looking at System.IO.Packaging.ZipPackage
+-it does not compress - that's ok I just need grouping
+-there may be trouble for other zips to unzip this or for this to unzip another zipped file, but it sounds like it can always handle its own files so that's ok
+
+things to handle
+- palette saved with project
+- palette filename saved with project
+- no palette info saved with project</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2337,7 +2359,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">133</Data>
+          <Data ss:Type="Number">134</Data>
         </Cell>
       </Row>
       <Row>

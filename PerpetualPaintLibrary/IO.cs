@@ -19,6 +19,11 @@ namespace PerpetualPaintLibrary
 		private static string PART_PALETTE = "/palette.gpl";
 		private static string PART_CONFIG = "/config.txt";
 
+		private static Uri URI_PART_GREYSCALE { get { return new Uri(PART_GREYSCALE, UriKind.Relative); } }
+		private static Uri URI_PART_COLOR { get { return new Uri(PART_COLOR, UriKind.Relative); } }
+		private static Uri URI_PART_PALETTE { get { return new Uri(PART_PALETTE, UriKind.Relative); } }
+		private static Uri URI_PART_CONFIG { get { return new Uri(PART_CONFIG, UriKind.Relative); } }
+
 		/// <summary>
 		/// Saved a zipped Perpetual Paint Project file.
 		/// </summary>
@@ -37,19 +42,19 @@ namespace PerpetualPaintLibrary
 			{
 				using(Package package = Package.Open(zipStream, FileMode.Create))
 				{
-					PackagePart greyscaleDocument = package.CreatePart(new Uri(PART_GREYSCALE, UriKind.Relative), "");
+					PackagePart greyscaleDocument = package.CreatePart(URI_PART_GREYSCALE, "");
 					using(MemoryStream dataStream = new MemoryStream(project.GreyscaleBitmap.ToByteArray()))
 					{
 						greyscaleDocument.GetStream().WriteAll(dataStream);
 					}
-					PackagePart colorDocument = package.CreatePart(new Uri(PART_COLOR, UriKind.Relative), "");
+					PackagePart colorDocument = package.CreatePart(URI_PART_COLOR, "");
 					using(MemoryStream dataStream = new MemoryStream(project.ColorBitmap.ToByteArray()))
 					{
 						colorDocument.GetStream().WriteAll(dataStream);
 					}
 					if(project.ColorPalette != null)
 					{
-						PackagePart paletteDocument = package.CreatePart(new Uri(PART_PALETTE, UriKind.Relative), "");
+						PackagePart paletteDocument = package.CreatePart(URI_PART_PALETTE, "");
 						using(MemoryStream dataStream = new MemoryStream(FormatGPL.ToTextFormat(project.ColorPalette).ToByteArray()))
 						{
 							paletteDocument.GetStream().WriteAll(dataStream);
@@ -57,7 +62,7 @@ namespace PerpetualPaintLibrary
 					}
 					if(project.Config != null)
 					{
-						PackagePart configDocument = package.CreatePart(new Uri(PART_CONFIG, UriKind.Relative), "");
+						PackagePart configDocument = package.CreatePart(URI_PART_CONFIG, "");
 						using(MemoryStream dataStream = new MemoryStream(project.Config.ToTextFormat().ToByteArray()))
 						{
 							configDocument.GetStream().WriteAll(dataStream);
@@ -73,23 +78,23 @@ namespace PerpetualPaintLibrary
 		{
 			using(Package package = Package.Open(zipFilename, FileMode.Open))
 			{
-				if(!package.PartExists(new Uri(PART_GREYSCALE, UriKind.Relative)))
+				if(!package.PartExists(URI_PART_GREYSCALE))
 					throw new FileFormatException("Project zip file does not include greyscale image.");
-				if(!package.PartExists(new Uri(PART_COLOR, UriKind.Relative)))
+				if(!package.PartExists(URI_PART_COLOR))
 					throw new FileFormatException("Project zip file does not include color image.");
-				project.GreyscaleBitmap = package.GetPart(new Uri(PART_GREYSCALE, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToBitmap();
-				project.ColorBitmap = package.GetPart(new Uri(PART_COLOR, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToBitmap();
+				project.GreyscaleBitmap = package.GetPart(URI_PART_GREYSCALE).GetStream().StreamToByteArray().ByteArrayToBitmap();
+				project.ColorBitmap = package.GetPart(URI_PART_COLOR).GetStream().StreamToByteArray().ByteArrayToBitmap();
 				project.ColorPalette = null;
-				if(package.PartExists(new Uri(PART_PALETTE, UriKind.Relative)))
+				if(package.PartExists(URI_PART_PALETTE))
 				{
-					string[] paletteLines = package.GetPart(new Uri(PART_PALETTE, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToText();
+					string[] paletteLines = package.GetPart(URI_PART_PALETTE).GetStream().StreamToByteArray().ByteArrayToText();
 					FormatGPL gpl = new FormatGPL(paletteLines);
 					project.ColorPalette = gpl.ColorPalette;
 				}
 				project.Config = null;
-				if(package.PartExists(new Uri(PART_CONFIG, UriKind.Relative)))
+				if(package.PartExists(URI_PART_CONFIG))
 				{
-					string[] configLines = package.GetPart(new Uri(PART_CONFIG, UriKind.Relative)).GetStream().StreamToByteArray().ByteArrayToText();
+					string[] configLines = package.GetPart(URI_PART_CONFIG).GetStream().StreamToByteArray().ByteArrayToText();
 					project.Config = new PPPConfig(configLines);
 				}
 			}

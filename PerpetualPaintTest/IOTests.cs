@@ -84,7 +84,7 @@ namespace PerpetualPaintTest
 			Assert.IsNotNull(result.Config);
 			Assert.IsTrue(ColorsMatch(grey, result.GreyscaleBitmap.GetPixel(0, 0)));
 			Assert.IsTrue(ColorsMatch(color, result.ColorBitmap.GetPixel(0, 0)));
-			Assert.AreEqual(config.PaletteFilename, result.Config.PaletteFilename);
+			Assert.AreEqual(config.PaletteFileName, result.Config.PaletteFileName);
 		}
 
 		private Bitmap MakeBitmap(Color color)

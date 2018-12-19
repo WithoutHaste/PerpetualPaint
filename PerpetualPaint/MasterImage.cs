@@ -132,7 +132,7 @@ namespace PerpetualPaint
 				throw new NotSupportedException("Cannot operate on a 0-pixel by 0-pixel bitmap.");
 
 			this.ColorPalette = null;
-			this.Config = null;
+			this.Config = new PPPConfig();
 			if(Utilities.BitmapIsGreyscale(bitmap))
 			{
 				this.GreyscaleBitmap = bitmap;
@@ -193,6 +193,43 @@ namespace PerpetualPaint
 				}
 				throw exception;
 			}
+		}
+
+		public void SetPaletteOption(PPPConfig.PaletteOptions paletteOption, WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
+		{
+			Config.PaletteOption = paletteOption;
+			switch(Config.PaletteOption)
+			{
+				case PPPConfig.PaletteOptions.SaveNothing:
+					Config.PaletteFileName = null;
+					ColorPalette = null;
+					break;
+				case PPPConfig.PaletteOptions.SaveFile:
+					Config.PaletteFileName = null;
+					ColorPalette = colorPalette;
+					break;
+				case PPPConfig.PaletteOptions.SaveFileName:
+					Config.PaletteFileName = paletteFileName;
+					ColorPalette = null;
+					break;
+			}
+			EditedSinceLastSave = true;
+		}
+
+		public void UpdatePaletteOption(WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
+		{
+			switch(Config.PaletteOption)
+			{
+				case PPPConfig.PaletteOptions.SaveNothing:
+					return;
+				case PPPConfig.PaletteOptions.SaveFile:
+					ColorPalette = colorPalette;
+					break;
+				case PPPConfig.PaletteOptions.SaveFileName:
+					Config.PaletteFileName = paletteFileName;
+					break;
+			}
+			EditedSinceLastSave = true;
 		}
 
 		private void Worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)

@@ -164,10 +164,12 @@ namespace PerpetualPaint
 			MenuItem saveProject = new MenuItem("Save Project", new EventHandler(Form_OnSave), Shortcut.CtrlS);
 			MenuItem saveAsProject = new MenuItem("Save Project As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
 			MenuItem exportImage = new MenuItem("Export Image", new EventHandler(Form_OnExport));
+			MenuItem projectOptions = new MenuItem("Project Options", new EventHandler(Form_OnEditProjectOptions));
 			fileMenu.MenuItems.Add(openProject);
 			fileMenu.MenuItems.Add(saveProject);
 			fileMenu.MenuItems.Add(saveAsProject);
 			fileMenu.MenuItems.Add(exportImage);
+			fileMenu.MenuItems.Add(projectOptions);
 
 			MenuItem editMenu = new MenuItem("Edit");
 			MenuItem undoAction = new MenuItem("Undo", new EventHandler(Form_OnUndo), Shortcut.CtrlZ);
@@ -335,17 +337,42 @@ namespace PerpetualPaint
 
 		private void Form_OnSave(object sender, EventArgs e)
 		{
+			if(masterImage == null)
+			{
+				MessageBox.Show("There is no image to save.", "Error Saving", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
 			Save();
 		}
 
 		private void Form_OnSaveAs(object sender, EventArgs e)
 		{
+			if(masterImage == null)
+			{
+				MessageBox.Show("There is no image to save.", "Error Saving", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
 			SaveAs();
 		}
 
 		private void Form_OnExport(object sender, EventArgs e)
 		{
+			if(masterImage == null)
+			{
+				MessageBox.Show("There is no image to export.", "Error Exporting", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
 			ExportAs();
+		}
+
+		private void Form_OnEditProjectOptions(object sender, EventArgs e)
+		{
+			if(masterImage == null)
+			{
+				MessageBox.Show("There is no project to edit.", "Error Editing Options", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+			EditProjectOptions();
 		}
 
 		private void Form_OnNarrowPalette(object sender, EventArgs e)
@@ -392,6 +419,10 @@ namespace PerpetualPaint
 					return;
 				PaletteFullFilename = form.FullFilename;
 				LoadPalette();
+				if(masterImage != null)
+				{
+					masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+				}
 			}
 		}
 
@@ -414,6 +445,10 @@ namespace PerpetualPaint
 			{
 				HandleError("Failed to open file.", exception);
 			}
+			if(masterImage != null)
+			{
+				masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+			}
 		}
 
 		private void Form_OnEditPalette(object sender, EventArgs e)
@@ -426,6 +461,10 @@ namespace PerpetualPaint
 					return;
 				PaletteFullFilename = form.FullFilename;
 				LoadPalette();
+				if(masterImage != null)
+				{
+					masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+				}
 			}
 		}
 
@@ -670,6 +709,17 @@ namespace PerpetualPaint
 			{
 				HandleError("Failed to open file.", exception);
 			}
+			switch(masterImage.Config.PaletteOption)
+			{
+				case PPPConfig.PaletteOptions.SaveFile:
+					colorPalette = masterImage.ColorPalette;
+					DisplayPalette();
+					break;
+				case PPPConfig.PaletteOptions.SaveFileName:
+					PaletteFullFilename = masterImage.Config.PaletteFileName;
+					LoadPalette();
+					break;
+			}
 		}
 
 		private void ExportAs()
@@ -694,17 +744,42 @@ namespace PerpetualPaint
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			saveFileDialog.Filter = "Project Files|*.PPP";
 			saveFileDialog.Title = "Save Project As";
-
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
 				return;
 			}
+			if(!EditProjectOptions())
+			{
+				return;
+			}
+
 			masterImage.SaveAsProject(saveFileDialog.FileName);
 		}
 
 		private void Save()
 		{
-			masterImage.Save();
+			if(Path.GetExtension(masterImage.SaveToFilename) != PPProject.PROJECT_EXTENSION)
+			{
+				SaveAs();
+			}
+			else
+			{
+				masterImage.Save();
+			}
+		}
+
+		/// <summary>
+		/// Returns true if the operation is OK, returns false if the operation is Canceled.
+		/// </summary>
+		private bool EditProjectOptions()
+		{
+			using(ProjectOptionsDialog form = new ProjectOptionsDialog(masterImage.Config))
+			{
+				if(form.ShowDialog(this) != DialogResult.OK)
+					return false;
+				masterImage.SetPaletteOption(form.PaletteOption, colorPalette, PaletteFullFilename);
+			}
+			return true;
 		}
 
 		private void UpdateMasterImage(string fullFilename)
