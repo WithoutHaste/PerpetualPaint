@@ -38,11 +38,15 @@
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">124</Data>
+          <Data ss:Type="Number">135</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">when app is thinking, cover form with greyed out "Working" pane that blocks interaction
-instead of an "ok" message popup</Data>
+          <Data ss:Type="String">collection view:
+- in secondary window
+- load multiple images/projects into the view
+- see grid layout of images
+- select an image to open it in normal window to edit
+- changes to image in main window are reflected in collection window</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -51,32 +55,21 @@ instead of an "ok" message popup</Data>
           <Data ss:Type="String">Feature - Major</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
+          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">133</Data>
+          <Data ss:Type="Number">136</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">on close of program or opening of new file, warning if current palette has not been saved on its own or within another project</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Todo</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Feature - Major</Data>
-        </Cell>
-        <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-18T00:00:00.000</Data>
-        </Cell>
-      </Row>
-      <Row>
-        <Cell>
-          <Data ss:Type="Number">101</Data>
-        </Cell>
-        <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">walk through Edit Palette panels and events and make sure its all right</Data>
+          <Data ss:Type="String">thinking about file extension:
+ppp - Perpetual Paint Project - one image
+ppc - Perpetual Paint Collection - grouped images
+- Perpetual Paint Bitmap - one bitmap
+---- could still be a ppp, just edited in Bitmap Mode instead of Outline Mode; and without a greyscale version; could be differentiated in the Config
+- Perpetual Paint Bitmap Collection - grouped bitmaps
+---- could still be a ppc, again</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -85,24 +78,7 @@ instead of an "ok" message popup</Data>
           <Data ss:Type="String">Task</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-08-26T00:00:00.000</Data>
-        </Cell>
-      </Row>
-      <Row>
-        <Cell>
-          <Data ss:Type="Number">51</Data>
-        </Cell>
-        <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">replace Rabbit with smaller and better divided sample image</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Todo</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Task</Data>
-        </Cell>
-        <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-08-22T00:00:00.000</Data>
+          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -126,6 +102,40 @@ instead of an "ok" message popup</Data>
       </Row>
       <Row>
         <Cell>
+          <Data ss:Type="Number">133</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">on close of program or opening of new file, warning if current palette has not been saved on its own or within another project</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-18T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">51</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">replace Rabbit with smaller and better divided sample image</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-08-22T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
           <Data ss:Type="Number">76</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
@@ -139,6 +149,23 @@ instead of an "ok" message popup</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-08-24T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">137</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">note that all images are saved as bitmaps</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Documentation</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -218,10 +245,33 @@ brightness/contract editing of grayscale image
       </Row>
       <Row>
         <Cell>
+          <Data ss:Type="Number">124</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">when app is thinking, cover form with greyed out "Working" pane that blocks interaction
+instead of an "ok" message popup</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-14T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
           <Data ss:Type="Number">132</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">can *.ppp files in folder be given thumbnail of colored image?</Data>
+          <Data ss:Type="String">can *.ppp files in folder be given thumbnail of colored image?
+https://stackoverflow.com/questions/2695411/coerce-windows-to-show-a-thumbnail-for-my-custom-file-type
+
+https://docs.microsoft.com/en-us/windows/desktop/shell/handlers
+
+https://docs.microsoft.com/en-us/windows/desktop/api/Thumbcache/nn-thumbcache-ithumbnailprovider</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -2368,7 +2418,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">134</Data>
+          <Data ss:Type="Number">137</Data>
         </Cell>
       </Row>
       <Row>
