@@ -92,10 +92,11 @@ namespace PerpetualPaint
 			Color color = request.Color;
 			Point point = request.Point;
 
-			Color oldWhite = masterImage.GreyscaleBitmap.GetPixel(point.X, point.Y);
+			Color oldPureColor = masterImage.CleanGetCopy.GetPixel(point.X, point.Y);
 			ConvertRegionToColor(color, point);
 			//todo: refactor for new design - in master image keep partially updated image separate from last complete version
-			e.Result = new RequestColorWorkerResult(masterImage.CleanGetCopy, request, request.ChangeColor(oldWhite));
+			//todo cont: basically, a buffered version to edit on, and a completed version that can always be displayed
+			e.Result = new RequestColorWorkerResult(masterImage.CleanGetCopy, request, request.ChangeColor(oldPureColor));
 		}
 
 		private void ConvertRegionToColor(Color pureColor, Point point)
