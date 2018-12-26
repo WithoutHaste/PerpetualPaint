@@ -12,22 +12,22 @@ namespace PerpetualPaint
 {
 	public class ProjectOptionsDialog : Form
 	{
-		public PPPConfig.PaletteOptions PaletteOption {
+		public PPConfig.PaletteOptions PaletteOption {
 			get {
-				foreach(PPPConfig.PaletteOptions option in paletteOptionRadioButtons.Keys)
+				foreach(PPConfig.PaletteOptions option in paletteOptionRadioButtons.Keys)
 				{
 					if(paletteOptionRadioButtons[option].Checked)
 						return option;
 				}
-				return PPPConfig.PaletteOptions.SaveNothing;
+				return PPConfig.PaletteOptions.SaveNothing;
 			}
 		}
 
-		private PPPConfig.PaletteOptions paletteOption { get; set; }
+		private PPConfig.PaletteOptions paletteOption { get; set; }
 
-		private Dictionary<PPPConfig.PaletteOptions, RadioButton> paletteOptionRadioButtons = new Dictionary<PPPConfig.PaletteOptions, RadioButton>();
+		private Dictionary<PPConfig.PaletteOptions, RadioButton> paletteOptionRadioButtons = new Dictionary<PPConfig.PaletteOptions, RadioButton>();
 
-		public ProjectOptionsDialog(PPPConfig config)
+		public ProjectOptionsDialog(PPConfig config)
 		{
 			paletteOption = config.PaletteOption;
 			InitForm();
@@ -56,15 +56,15 @@ namespace PerpetualPaint
 
 			RadioButton radio1 = new RadioButton();
 			radio1.Text = "Do not save any palette information with the project.";
-			paletteOptionRadioButtons[PPPConfig.PaletteOptions.SaveNothing] = radio1;
+			paletteOptionRadioButtons[PPConfig.PaletteOptions.SaveNothing] = radio1;
 
 			RadioButton radio2 = new RadioButton();
 			radio2.Text = "Save filename of the palette with the project.";
-			paletteOptionRadioButtons[PPPConfig.PaletteOptions.SaveFileName] = radio2;
+			paletteOptionRadioButtons[PPConfig.PaletteOptions.SaveFileName] = radio2;
 
 			RadioButton radio3 = new RadioButton();
 			radio3.Text = "Save entire palette file with the project.";
-			paletteOptionRadioButtons[PPPConfig.PaletteOptions.SaveFile] = radio3;
+			paletteOptionRadioButtons[PPConfig.PaletteOptions.SaveFile] = radio3;
 
 			LayoutHelper.Top(this, margin).Left(this, margin).Right(this, margin).Height(radioHeight).Apply(radio1);
 			this.Controls.Add(radio1);

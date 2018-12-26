@@ -70,7 +70,7 @@ namespace PerpetualPaintTest
 			string zipFilename = "testProject.ppp";
 			Bitmap greyscaleBitmap = MakeBitmap(grey);
 			Bitmap colorBitmap = MakeBitmap(color);
-			PPPConfig config = new PPPConfig("path\\palette_filename.gpl");
+			PPConfig config = new PPConfig("path\\palette_filename.gpl");
 			PPProject project = new PPProject(greyscaleBitmap, colorBitmap, config);
 			//act
 			PerpetualPaintLibrary.IO.ZipProject(zipFilename, project);

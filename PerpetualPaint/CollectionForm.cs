@@ -28,8 +28,8 @@ namespace PerpetualPaint
 		/// <summary>Layout panel for the images.</summary>
 		private FlowLayoutPanel flowPanel;
 
-		/// <summary>Projects in the collection, in the same order as shown in <see cref='flowPanel'/>.</summary>
-		private List<PPProject> projects = new List<PPProject>();
+		/// <summary>The collection being displayed.</summary>
+		private PPCollection collection = new PPCollection();
 
 		public CollectionForm()
 		{
@@ -77,61 +77,67 @@ namespace PerpetualPaint
 
 		private void Form_OnOpen(object sender, EventArgs e)
 		{
-			//todo
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION_UPPERCASE;
+			openFileDialog.Title = "Open Collection";
+			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+
+			collection = PPCollection.Load(openFileDialog.FileName);
+
+			flowPanel.Controls.Clear();
+			foreach(PPProject project in collection.Projects)
+			{
+				DisplayProject(project);
+			}
 		}
 
 		private void Form_OnAdd(object sender, EventArgs e)
 		{
 			//todo: is there a way to combine this with the similar from OneImageForm
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Project and Image Files|*.PPP;*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
+			openFileDialog.Filter = "Project and Image Files|*" + PPProject.PROJECT_EXTENSION_UPPERCASE + ";*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
 			openFileDialog.Title = "Open Project or Image";
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
 				return;
 			}
-			string filename = openFileDialog.FileName;
 
-			PPProject project = new PPProject();
-			if(Path.GetExtension(filename) == PPProject.PROJECT_EXTENSION)
-			{
-				PerpetualPaintLibrary.IO.LoadProject(filename, project);
-				projects.Add(project);
-			}
-			else
-			{
-				//todo: more code similar to MasterImage.LoadImage
-				Bitmap bitmap = ImageHelper.SafeLoadBitmap(filename);
-				if(bitmap.Width == 0 && bitmap.Height == 0)
-					throw new NotSupportedException("Cannot operate on a 0-pixel by 0-pixel bitmap.");
-
-				if(Utilities.BitmapIsGreyscale(bitmap))
-				{
-					project.GreyscaleBitmap = bitmap;
-				}
-				else
-				{
-					project.ColorBitmap = bitmap;
-				}
-			}
-			projects.Add(project);
-
-			PictureBox pictureBox = new PictureBox();
-			pictureBox.Width = IMAGE_WIDTH;
-			pictureBox.Height = IMAGE_WIDTH;
-			pictureBox.Image = project.GetThumbnail(pictureBox.Width, pictureBox.Height);
-			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-			flowPanel.Controls.Add(pictureBox);
+			PPProject project = collection.LoadProject(openFileDialog.FileName);
+			DisplayProject(project);
 		}
 
 		private void Form_OnSave(object sender, EventArgs e)
 		{
-			//todo
+			if(!SetAllProjectFileNames())
+				return;
+
+			if(String.IsNullOrEmpty(collection.SaveToFileName))
+				Form_OnSaveAs(sender, e);
+			else
+				collection.Save();
 		}
 
 		private void Form_OnSaveAs(object sender, EventArgs e)
 		{
-			//todo
+			if(!SetAllProjectFileNames())
+				return;
+
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION_UPPERCASE;
+			saveFileDialog.Title = "Save Collection";
+			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+			if(!EditProjectOptions())
+			{
+				return;
+			}
+
+			collection.SaveAs(saveFileDialog.FileName);
 		}
 
 		private void Form_Closing(object sender, FormClosingEventArgs e)
@@ -144,6 +150,55 @@ namespace PerpetualPaint
 		}
 
 		#endregion
+
+		private void DisplayProject(PPProject project)
+		{
+			PictureBox pictureBox = new PictureBox();
+			pictureBox.Width = IMAGE_WIDTH;
+			pictureBox.Height = IMAGE_WIDTH;
+			pictureBox.Image = project.GetThumbnail(pictureBox.Width, pictureBox.Height);
+			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+			flowPanel.Controls.Add(pictureBox);
+		}
+
+		/// <summary>
+		/// Returns true if the operation is OK, returns false if the operation is Canceled.
+		/// </summary>
+		private bool EditProjectOptions()
+		{
+			using(ProjectOptionsDialog form = new ProjectOptionsDialog(collection.Config))
+			{
+				if(form.ShowDialog(this) != DialogResult.OK)
+					return false;
+				collection.SetPaletteOption(form.PaletteOption);
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// If any projects have no filename,
+		/// gets all those from the user and saves those files.
+		/// </summary>
+		/// <returns>Returns True for continue operation, returns False for cancel operation.</returns>
+		private bool SetAllProjectFileNames()
+		{
+			List<PPProject> projects = collection.Projects.Where(p => String.IsNullOrEmpty(p.SaveToFileName)).ToList();
+			if(projects.Count == 0)
+				return true;
+
+			using(SaveProjectsDialog dialog = new SaveProjectsDialog(projects.Select(p => p.GetThumbnail(150, 150)).ToArray()))
+			{
+				bool gotFileNames = (dialog.ShowDialog() == DialogResult.OK);
+				if(!gotFileNames)
+					return false;
+
+				for(int i = 0; i < projects.Count; i++)
+				{
+					projects[i].SetFileName(dialog.FileNames[i]);
+				}
+			}
+			return true;
+		}
 
 		/// <summary>
 		/// Checks with user if they want to save changes to collection before closing it.

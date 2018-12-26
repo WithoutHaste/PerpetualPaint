@@ -18,11 +18,13 @@ namespace PerpetualPaintLibrary
 		private static string PART_COLOR = "/color.bmp";
 		private static string PART_PALETTE = "/palette.gpl";
 		private static string PART_CONFIG = "/config.txt";
+		private static string PART_COLLECTION = "/collection.txt";
 
 		private static Uri URI_PART_GREYSCALE { get { return new Uri(PART_GREYSCALE, UriKind.Relative); } }
 		private static Uri URI_PART_COLOR { get { return new Uri(PART_COLOR, UriKind.Relative); } }
 		private static Uri URI_PART_PALETTE { get { return new Uri(PART_PALETTE, UriKind.Relative); } }
 		private static Uri URI_PART_CONFIG { get { return new Uri(PART_CONFIG, UriKind.Relative); } }
+		private static Uri URI_PART_COLLECTION { get { return new Uri(PART_COLLECTION, UriKind.Relative); } }
 
 		/// <summary>
 		/// Saved a zipped Perpetual Paint Project file.
@@ -95,7 +97,7 @@ namespace PerpetualPaintLibrary
 				if(package.PartExists(URI_PART_CONFIG))
 				{
 					string[] configLines = package.GetPart(URI_PART_CONFIG).GetStream().StreamToByteArray().ByteArrayToText();
-					project.Config = new PPPConfig(configLines);
+					project.Config = new PPConfig(configLines);
 				}
 			}
 		}
@@ -106,6 +108,77 @@ namespace PerpetualPaintLibrary
 			LoadProject(zipFilename, project);
 			return project;
 		}
+
+		/// <summary>
+		/// Saved a zipped Perpetual Paint Collection file.
+		/// </summary>
+		/// <remarks>
+		/// Creates or overwrites <paramref name='zipFilename'/>.
+		/// 
+		/// Handles:
+		/// - include entire palette
+		/// - include filename of palette (in config)
+		/// - include no palette information
+		/// </remarks>
+		public static void ZipCollection(string zipFilename, PPCollection collection)
+		{
+			byte[] zippedBytes;
+			using(MemoryStream zipStream = new MemoryStream())
+			{
+				using(Package package = Package.Open(zipStream, FileMode.Create))
+				{
+					PackagePart collectionDocument = package.CreatePart(URI_PART_COLLECTION, "");
+					using(MemoryStream dataStream = new MemoryStream(collection.ToTextFormat().ToByteArray()))
+					{
+						collectionDocument.GetStream().WriteAll(dataStream);
+					}
+					if(collection.ColorPalette != null)
+					{
+						PackagePart paletteDocument = package.CreatePart(URI_PART_PALETTE, "");
+						using(MemoryStream dataStream = new MemoryStream(FormatGPL.ToTextFormat(collection.ColorPalette).ToByteArray()))
+						{
+							paletteDocument.GetStream().WriteAll(dataStream);
+						}
+					}
+					if(collection.Config != null)
+					{
+						PackagePart configDocument = package.CreatePart(URI_PART_CONFIG, "");
+						using(MemoryStream dataStream = new MemoryStream(collection.Config.ToTextFormat().ToByteArray()))
+						{
+							configDocument.GetStream().WriteAll(dataStream);
+						}
+					}
+				}
+				zippedBytes = zipStream.ToArray();
+			}
+			File.WriteAllBytes(zipFilename, zippedBytes);
+		}
+
+		public static PPCollection LoadCollection(string zipFilename)
+		{
+			using(Package package = Package.Open(zipFilename, FileMode.Open))
+			{
+				if(!package.PartExists(URI_PART_COLLECTION))
+					throw new FileFormatException("Collection zip file does not include list of projects.");
+				string[] projectFileNames = package.GetPart(URI_PART_COLLECTION).GetStream().StreamToByteArray().ByteArrayToText();
+				WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null;
+				if(package.PartExists(URI_PART_PALETTE))
+				{
+					string[] paletteLines = package.GetPart(URI_PART_PALETTE).GetStream().StreamToByteArray().ByteArrayToText();
+					FormatGPL gpl = new FormatGPL(paletteLines);
+					colorPalette = gpl.ColorPalette;
+				}
+				PPConfig config = null;
+				if(package.PartExists(URI_PART_CONFIG))
+				{
+					string[] configLines = package.GetPart(URI_PART_CONFIG).GetStream().StreamToByteArray().ByteArrayToText();
+					config = new PPConfig(configLines);
+				}
+				return new PPCollection(projectFileNames, config, colorPalette);
+			}
+		}
+
+		#region Low Level
 
 		private static void WriteAll(this Stream target, Stream source)
 		{
@@ -173,5 +246,7 @@ namespace PerpetualPaintLibrary
 		{
 			return System.Text.Encoding.UTF8.GetString(data).Split('\n');
 		}
+
+		#endregion
 	}
 }

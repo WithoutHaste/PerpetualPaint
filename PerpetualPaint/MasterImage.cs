@@ -20,10 +20,8 @@ namespace PerpetualPaint
 	public class MasterImage : PPProject
 	{
 		private RequestRegionWorker regionWorker;
-		private string saveToFilename; //todo: move to PPProject?
 		private List<ImageRegion> regions = new List<ImageRegion>();
 
-		public bool EditedSinceLastSave { get; private set; }
 		private bool editedSinceLastCleanCopy = false;
 		private Bitmap cleanGetCopy = null;
 
@@ -43,16 +41,6 @@ namespace PerpetualPaint
 					editedSinceLastCleanCopy = false;
 				}
 				return cleanGetCopy;
-			}
-		}
-
-		public string SaveToFilename {
-			get {
-				return saveToFilename;
-			}
-			set {
-				//todo: is this the expected behavior when setting SaveToFilename?
-				Load(value);
 			}
 		}
 
@@ -91,10 +79,7 @@ namespace PerpetualPaint
 				bool isGreyscaleImage = LoadImage(filename);
 				runRegionsOnColorBitmap = !isGreyscaleImage;
 			}
-
 			editedSinceLastCleanCopy = true;
-			EditedSinceLastSave = false;
-			saveToFilename = filename;
 
 			regions.Clear();
 
@@ -110,58 +95,6 @@ namespace PerpetualPaint
 			{
 				regionWorker.Run(this.GreyscaleBitmap);
 			}
-		}
-
-		/// <summary>
-		/// Load a Perpetual Paint Project file.
-		/// </summary>
-		private void LoadProject(string filename)
-		{
-			PerpetualPaintLibrary.IO.LoadProject(filename, this);
-		}
-
-		/// <summary>
-		/// Load a normal image file.
-		/// Handles both greyscale and colored images.
-		/// </summary>
-		/// <returns>True if the image is greyscale. False if the image is colored.</returns>
-		private bool LoadImage(string filename)
-		{
-			Bitmap bitmap = ImageHelper.SafeLoadBitmap(filename);
-			if(bitmap.Width == 0 && bitmap.Height == 0)
-				throw new NotSupportedException("Cannot operate on a 0-pixel by 0-pixel bitmap.");
-
-			this.ColorPalette = null;
-			this.Config = new PPPConfig();
-			if(Utilities.BitmapIsGreyscale(bitmap))
-			{
-				this.GreyscaleBitmap = bitmap;
-				this.ColorBitmap = new Bitmap(bitmap);
-				return true;
-			}
-			else
-			{
-				this.GreyscaleBitmap = null;
-				this.ColorBitmap = bitmap;
-				return false;
-			}
-		}
-
-		public void Save()
-		{
-			SaveAsProject(SaveToFilename);
-		}
-
-		/// <summary>
-		/// Save as Perpetual Paint Project.
-		/// </summary>
-		public void SaveAsProject(string filename)
-		{
-			if(Path.GetExtension(filename) != PROJECT_EXTENSION)
-				filename = Path.ChangeExtension(filename, PROJECT_EXTENSION);
-			PerpetualPaintLibrary.IO.ZipProject(filename, this);
-			saveToFilename = filename;
-			EditedSinceLastSave = false;
 		}
 
 		/// <summary>
@@ -195,20 +128,20 @@ namespace PerpetualPaint
 			}
 		}
 
-		public void SetPaletteOption(PPPConfig.PaletteOptions paletteOption, WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
+		public void SetPaletteOption(PPConfig.PaletteOptions paletteOption, WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
 		{
 			Config.PaletteOption = paletteOption;
 			switch(Config.PaletteOption)
 			{
-				case PPPConfig.PaletteOptions.SaveNothing:
+				case PPConfig.PaletteOptions.SaveNothing:
 					Config.PaletteFileName = null;
 					ColorPalette = null;
 					break;
-				case PPPConfig.PaletteOptions.SaveFile:
+				case PPConfig.PaletteOptions.SaveFile:
 					Config.PaletteFileName = null;
 					ColorPalette = colorPalette;
 					break;
-				case PPPConfig.PaletteOptions.SaveFileName:
+				case PPConfig.PaletteOptions.SaveFileName:
 					Config.PaletteFileName = paletteFileName;
 					ColorPalette = null;
 					break;
@@ -220,12 +153,12 @@ namespace PerpetualPaint
 		{
 			switch(Config.PaletteOption)
 			{
-				case PPPConfig.PaletteOptions.SaveNothing:
+				case PPConfig.PaletteOptions.SaveNothing:
 					return;
-				case PPPConfig.PaletteOptions.SaveFile:
+				case PPConfig.PaletteOptions.SaveFile:
 					ColorPalette = colorPalette;
 					break;
-				case PPPConfig.PaletteOptions.SaveFileName:
+				case PPConfig.PaletteOptions.SaveFileName:
 					Config.PaletteFileName = paletteFileName;
 					break;
 			}

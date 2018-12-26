@@ -56,7 +56,8 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="ImageRegion.cs" />
     <Compile Include="IO.cs" />
-    <Compile Include="PPPConfig.cs" />
+    <Compile Include="PPCollection.cs" />
+    <Compile Include="PPConfig.cs" />
     <Compile Include="PPProject.cs" />
     <Compile Include="RequestRegionArgument.cs" />
     <Compile Include="RequestRegionResult.cs" />

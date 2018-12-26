@@ -8,9 +8,9 @@ using WithoutHaste.Drawing.Colors;
 namespace PerpetualPaintLibrary
 {
 	/// <summary>
-	/// Perpetual Paint Project Configuration
+	/// Perpetual Paint Configuration, for projects and collections.
 	/// </summary>
-	public class PPPConfig
+	public class PPConfig
 	{
 		public enum PaletteOptions : int {
 			/// <summary>Don't save any information about the palette with the project.</summary>
@@ -30,7 +30,7 @@ namespace PerpetualPaintLibrary
 		/// <summary>
 		/// Initialize configuration by specifying values.
 		/// </summary>
-		public PPPConfig(PaletteOptions paletteOption = PaletteOptions.SaveNothing, string paletteFileName = null)
+		public PPConfig(PaletteOptions paletteOption = PaletteOptions.SaveNothing, string paletteFileName = null)
 		{
 			PaletteOption = paletteOption;
 			PaletteFileName = paletteFileName;
@@ -39,7 +39,7 @@ namespace PerpetualPaintLibrary
 		/// <summary>
 		/// Initialize configuration from lines from a saved file.
 		/// </summary>
-		public PPPConfig(string[] fileLines)
+		public PPConfig(string[] fileLines)
 		{
 			foreach(string line in fileLines)
 			{

@@ -471,7 +471,7 @@ namespace PerpetualPaint
 		private void Form_OnEditPalette(object sender, EventArgs e)
 		{
 			EditPaletteDialog dialog;
-			if(masterImage != null && masterImage.Config.PaletteOption == PPPConfig.PaletteOptions.SaveFile)
+			if(masterImage != null && masterImage.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
 			{
 				dialog = new EditPaletteDialog(masterImage.ColorPalette);
 			}
@@ -484,7 +484,7 @@ namespace PerpetualPaint
 			if(dialog.ShowDialog() != DialogResult.OK)
 				return;
 
-			if(masterImage != null && masterImage.Config.PaletteOption == PPPConfig.PaletteOptions.SaveFile)
+			if(masterImage != null && masterImage.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
 			{
 				colorPalette = dialog.ColorPalette;
 				masterImage.UpdatePaletteOption(colorPalette, null);
@@ -726,7 +726,7 @@ namespace PerpetualPaint
 		private void OpenFile()
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Project and Image Files|*.PPP;*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
+			openFileDialog.Filter = "Project and Image Files|*" + PPProject.PROJECT_EXTENSION_UPPERCASE + ";*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
 			openFileDialog.Title = "Open Project or Image";
 
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
@@ -745,11 +745,11 @@ namespace PerpetualPaint
 			}
 			switch(masterImage.Config.PaletteOption)
 			{
-				case PPPConfig.PaletteOptions.SaveFile:
+				case PPConfig.PaletteOptions.SaveFile:
 					colorPalette = masterImage.ColorPalette;
 					DisplayPalette();
 					break;
-				case PPPConfig.PaletteOptions.SaveFileName:
+				case PPConfig.PaletteOptions.SaveFileName:
 					PaletteFullFilename = masterImage.Config.PaletteFileName;
 					LoadPalette();
 					break;
@@ -761,9 +761,9 @@ namespace PerpetualPaint
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			saveFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
 			saveFileDialog.Title = "Export Image As";
-			if(masterImage.SaveToFilename != null)
+			if(masterImage.SaveToFileName != null)
 			{
-				saveFileDialog.FileName = Path.GetFileNameWithoutExtension(masterImage.SaveToFilename);
+				saveFileDialog.FileName = Path.GetFileNameWithoutExtension(masterImage.SaveToFileName);
 			}
 
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
@@ -776,7 +776,7 @@ namespace PerpetualPaint
 		private void SaveAs()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "Project Files|*.PPP";
+			saveFileDialog.Filter = "Project Files|*" + PPProject.PROJECT_EXTENSION_UPPERCASE;
 			saveFileDialog.Title = "Save Project As";
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
@@ -787,12 +787,12 @@ namespace PerpetualPaint
 				return;
 			}
 
-			masterImage.SaveAsProject(saveFileDialog.FileName);
+			masterImage.SaveAs(saveFileDialog.FileName);
 		}
 
 		private void Save()
 		{
-			if(Path.GetExtension(masterImage.SaveToFilename) != PPProject.PROJECT_EXTENSION)
+			if(Path.GetExtension(masterImage.SaveToFileName) != PPProject.PROJECT_EXTENSION)
 			{
 				SaveAs();
 			}

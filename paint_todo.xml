@@ -44,13 +44,36 @@
           <Data ss:Type="String">collection view:
 - save collection as list of projects
 -- if a project is not saved already, prompt to save it first
-- open collection from file</Data>
+--- show scolling list of the thumbnails that don't save filenames, that user can set the filenames on
+-- save collection-level palette as full file?
+-- save collection-level palette as filename?
+-- don't save any collection-level palette info?
+- open collection from file
+- prompt to save collection on close if needed</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">141</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">collection view:
+- dont allow adding the same project (by filename) to the collection twice</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Bug - Minor</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
@@ -77,25 +100,20 @@
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">136</Data>
+          <Data ss:Type="Number">140</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">thinking about file extension:
-ppp - Perpetual Paint Project - one image
-ppc - Perpetual Paint Collection - grouped images
-- Perpetual Paint Bitmap - one bitmap
----- could still be a ppp, just edited in Bitmap Mode instead of Outline Mode; and without a greyscale version; could be differentiated in the Config
-- Perpetual Paint Bitmap Collection - grouped bitmaps
----- could still be a ppc, again</Data>
+          <Data ss:Type="String">collection view:
+- drag and drop to re-order projects</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Task</Data>
+          <Data ss:Type="String">Feature - Minor</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
+          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -938,6 +956,32 @@ http://colorizer.org/</Data>
         </Cell>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">136</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">thinking about file extension:
+ppp - Perpetual Paint Project - one image
+ppc - Perpetual Paint Collection - grouped images
+- Perpetual Paint Bitmap - one bitmap
+---- could still be a ppp, just edited in Bitmap Mode instead of Outline Mode; and without a greyscale version; could be differentiated in the Config
+- Perpetual Paint Bitmap Collection - grouped bitmaps
+---- could still be a ppc, again</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Task</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2458,7 +2502,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">139</Data>
+          <Data ss:Type="Number">141</Data>
         </Cell>
       </Row>
       <Row>
