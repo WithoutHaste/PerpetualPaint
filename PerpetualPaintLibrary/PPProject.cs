@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WithoutHaste.Drawing.Colors;
+using WithoutHaste.Windows.GUI;
 
 namespace PerpetualPaintLibrary
 {
@@ -47,5 +48,17 @@ namespace PerpetualPaintLibrary
 			ColorPalette = null;
 			Config = config;
 		}
+
+		/// <summary>Returns a thumbnail of the <see cref='ColorBitmap'/>.</summary>
+		/// <remarks>
+		/// If <see cref='ColorBitmap'/> is not available, it will use <see cref='GreyscaleBitmap'/> instead.
+		/// If neither is available, will use a blank image.
+		/// </remarks>
+		public Bitmap GetThumbnail(int maxWidth, int maxHeight)
+		{
+			Bitmap origin = (ColorBitmap ?? GreyscaleBitmap) ?? new Bitmap(100, 100);
+			return ImageHelper.GetThumbnail(origin, maxWidth, maxHeight);
+		}
+
 	}
 }

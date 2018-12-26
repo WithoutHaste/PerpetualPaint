@@ -38,13 +38,30 @@
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">135</Data>
+          <Data ss:Type="Number">139</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
           <Data ss:Type="String">collection view:
-- in secondary window
-- load multiple images/projects into the view
-- see grid layout of images
+- save collection as list of projects
+-- if a project is not saved already, prompt to save it first
+- open collection from file</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">138</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">collection view:
 - select an image to open it in normal window to edit
 - changes to image in main window are reflected in collection window</Data>
         </Cell>
@@ -55,7 +72,7 @@
           <Data ss:Type="String">Feature - Major</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
+          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -921,6 +938,29 @@ http://colorizer.org/</Data>
         </Cell>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">135</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">collection view:
+- in secondary window
+- load multiple images/projects into the view
+- see grid layout of images</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-19T00:00:00.000</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2418,7 +2458,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">137</Data>
+          <Data ss:Type="Number">139</Data>
         </Cell>
       </Row>
       <Row>

@@ -123,6 +123,8 @@ namespace PerpetualPaint
 			}
 		}
 
+		private CollectionForm collectionForm = null;
+
 		//--------------------------------------------------
 
 		public OneImageForm()
@@ -160,11 +162,13 @@ namespace PerpetualPaint
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			MenuItem openProject = new MenuItem("Open Project or Image", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
+			MenuItem newCollection = new MenuItem("New Collection", new EventHandler(Form_OnNewCollection));
+			MenuItem openProject = new MenuItem("Open Image/Project/Collection", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
 			MenuItem saveProject = new MenuItem("Save Project", new EventHandler(Form_OnSave), Shortcut.CtrlS);
 			MenuItem saveAsProject = new MenuItem("Save Project As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
 			MenuItem exportImage = new MenuItem("Export Image", new EventHandler(Form_OnExport));
 			MenuItem projectOptions = new MenuItem("Project Options", new EventHandler(Form_OnEditProjectOptions));
+			fileMenu.MenuItems.Add(newCollection);
 			fileMenu.MenuItems.Add(openProject);
 			fileMenu.MenuItems.Add(saveProject);
 			fileMenu.MenuItems.Add(saveAsProject);
@@ -322,6 +326,19 @@ namespace PerpetualPaint
 					break;
 			}
 			previousFormWindowState = this.WindowState;
+		}
+
+		private void Form_OnNewCollection(object sender, EventArgs e)
+		{
+			if(collectionForm == null)
+			{
+				collectionForm = new CollectionForm();
+				collectionForm.ShowDialog();
+			}
+			else
+			{
+				throw new NotImplementedException("Not implemented: close previous collection and open new one.");
+			}
 		}
 
 		private void Form_OnOpenFile(object sender, EventArgs e)

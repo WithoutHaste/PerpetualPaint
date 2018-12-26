@@ -71,6 +71,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Dialogs\ErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>

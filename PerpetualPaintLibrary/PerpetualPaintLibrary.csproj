@@ -47,6 +47,9 @@
     <Reference Include="WithoutHaste.Drawing.Shapes">
       <HintPath>..\..\WithoutHaste.Drawing.Shapes\Shapes\bin\Release\WithoutHaste.Drawing.Shapes.dll</HintPath>
     </Reference>
+    <Reference Include="WithoutHaste.Windows.GUI">
+      <HintPath>..\..\WithoutHaste.Windows.GUI\GUI\bin\Release\WithoutHaste.Windows.GUI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorAtPoint.cs" />
