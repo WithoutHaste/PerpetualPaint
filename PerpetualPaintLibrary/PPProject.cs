@@ -27,6 +27,8 @@ namespace PerpetualPaintLibrary
 
 		public bool EditedSinceLastSave { get; protected set; }
 
+		public string LoadedFromFileName { get; protected set; }
+
 		public PPProject()
 		{
 		}
@@ -73,6 +75,7 @@ namespace PerpetualPaintLibrary
 			IO.LoadProject(fullFileName, this);
 			EditedSinceLastSave = false;
 			SaveToFileName = fullFileName;
+			LoadedFromFileName = fullFileName;
 		}
 
 		/// <summary>
@@ -110,6 +113,7 @@ namespace PerpetualPaintLibrary
 			}
 			EditedSinceLastSave = true;
 			SaveToFileName = null; //do not assume file name should be the same as the image file name
+			LoadedFromFileName = fullFileName;
 
 			return imageIsGreyscale;
 		}
@@ -153,5 +157,14 @@ namespace PerpetualPaintLibrary
 			return ImageHelper.GetThumbnail(origin, maxWidth, maxHeight);
 		}
 
+		/// <summary>
+		/// Returns true if these projects are from the same file.
+		/// </summary>
+		public bool FromSameFile(PPProject other)
+		{
+			if(!String.IsNullOrEmpty(this.LoadedFromFileName))
+				return (this.LoadedFromFileName == other.LoadedFromFileName);
+			return false;
+		}
 	}
 }

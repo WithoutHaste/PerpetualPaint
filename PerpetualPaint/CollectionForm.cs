@@ -102,20 +102,24 @@ namespace PerpetualPaint
 			//todo: is there a way to combine this with the similar from OneImageForm
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			openFileDialog.Filter = "Project and Image Files|*" + PPProject.PROJECT_EXTENSION + ";*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
-			openFileDialog.Title = "Open Project or Image";
+			openFileDialog.Title = "Open Projects or Images";
+			openFileDialog.Multiselect = true;
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
 				return;
 			}
 
-			try
+			foreach(string fileName in openFileDialog.FileNames)
 			{
-				PPProject project = collection.LoadProject(openFileDialog.FileName);
-				DisplayProject(project);
-			}
-			catch(DuplicateException)
-			{
-				MessageBox.Show("The file is already in the collection.", "Duplicate File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				try
+				{
+					PPProject project = collection.LoadProject(fileName);
+					DisplayProject(project);
+				}
+				catch(DuplicateException)
+				{
+					MessageBox.Show("Skipping '" + fileName + "'. The file is already in the collection.", "Duplicate File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 			}
 		}
 

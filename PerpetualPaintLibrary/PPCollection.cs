@@ -88,7 +88,7 @@ namespace PerpetualPaintLibrary
 		/// <exception cref='DuplicateException'>Tried to add duplicate file to collection.</exception>
 		public void AddProject(PPProject project)
 		{
-			if(projects.Any(p => p.SaveToFileName == project.SaveToFileName))
+			if(projects.Any(p => p.FromSameFile(project)))
 				throw new DuplicateException("File is already in the collection.");
 
 			projects.Add(project);
