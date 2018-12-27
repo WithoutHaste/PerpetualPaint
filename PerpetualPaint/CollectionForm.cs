@@ -126,6 +126,18 @@ namespace PerpetualPaint
 			}
 		}
 
+		private void Project_OnMouseEnter(object sender, EventArgs e)
+		{
+			Control control = (sender as Control);
+			control.BackColor = Color.LightCyan;
+		}
+
+		private void Project_OnMouseLeave(object sender, EventArgs e)
+		{
+			Control control = (sender as Control);
+			control.BackColor = SystemColors.Control;
+		}
+
 		#endregion
 
 		public void OpenCollection(string fileName)
@@ -140,11 +152,18 @@ namespace PerpetualPaint
 
 		private void DisplayProject(PPProject project)
 		{
+			int padding = 4;
+
 			PictureBox pictureBox = new PictureBox();
-			pictureBox.Width = THUMBNAIL_SIZE;
-			pictureBox.Height = THUMBNAIL_SIZE;
+			pictureBox.Width = THUMBNAIL_SIZE + padding + padding;
+			pictureBox.Height = THUMBNAIL_SIZE + padding + padding;
 			pictureBox.Image = project.GetThumbnail(pictureBox.Width, pictureBox.Height);
 			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+
+			pictureBox.Cursor = Cursors.Hand;
+			pictureBox.MouseEnter += new EventHandler(Project_OnMouseEnter);
+			pictureBox.MouseLeave += new EventHandler(Project_OnMouseLeave);
+
 			flowPanel.Controls.Add(pictureBox);
 		}
 
