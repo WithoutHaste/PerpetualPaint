@@ -36,8 +36,8 @@ namespace PerpetualPaint
 		private void InitForm()
 		{
 			this.Text = "Save Projects";
-			this.Width = 500;
-			this.Height = 800;
+			this.Width = 400;
+			this.Height = 500;
 			this.Icon = SystemIcons.Application;
 			this.MinimizeBox = false;
 			this.MaximizeBox = false;
@@ -51,7 +51,7 @@ namespace PerpetualPaint
 		{
 			int margin = 10;
 			int buttonHeight = 20;
-			int buttonWidth = 50;
+			int buttonWidth = 150;
 
 			Button okButton = new Button();
 			okButton.Text = "Save Projects";
@@ -64,24 +64,64 @@ namespace PerpetualPaint
 			cancelButton.Text = "Cancel";
 			LayoutHelper.MatchTop(okButton).Right(this, margin).Width(buttonWidth).Height(buttonHeight).Apply(cancelButton);
 			cancelButton.Click += new EventHandler(CancelButton_OnClick);
-			okButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+			cancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
 			this.Controls.Add(cancelButton);
+
+			Label instructionLabel = new Label();
+			instructionLabel.Text = "Some of the projects in this collection have not been saved.\n\nSet the save location for each project.";
+			LayoutHelper.Left(this, margin).Right(this, margin).Top(this, margin).Height(40).Apply(instructionLabel);
+			instructionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+			this.Controls.Add(instructionLabel);
 
 			Panel scrollPanel = new Panel();
 			scrollPanel.AutoScroll = true;
-			LayoutHelper.Left(this, margin).Right(this, margin).Top(this, margin).Above(okButton, margin).Apply(scrollPanel);
+			LayoutHelper.Left(this, margin).Right(this, margin).Below(instructionLabel, margin).Above(okButton, margin).Apply(scrollPanel);
 			scrollPanel.Anchor = LayoutHelper.AnchorAll;
 			this.Controls.Add(scrollPanel);
 
+			int maxThumbnailWidth = thumbnails.Max(t => t.Width);
+			int maxThumbnailHeight = thumbnails.Max(t => t.Height);
+			int maxScrollHeight = 0;
 			for(int i = 0; i < thumbnails.Length; i++)
 			{
 				Bitmap thumbnail = thumbnails[i];
+
+				Panel projectPanel = new Panel();
+
 				PictureBox pictureBox = new PictureBox();
-				pictureBox.Width = thumbnail.Width;
-				pictureBox.Height = thumbnail.Height;
 				pictureBox.Image = thumbnail;
-				LayoutHelper.Left(scrollPanel, margin).FloatTop(scrollPanel, margin).Apply(pictureBox);
-				scrollPanel.Controls.Add(pictureBox);
+				pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+				LayoutHelper.Left(projectPanel, margin).Top(projectPanel, margin).Width(maxThumbnailWidth).Height(thumbnail.Height).Apply(pictureBox);
+				pictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+				projectPanel.Controls.Add(pictureBox);
+
+				Button setFileNameButton = new Button();
+				setFileNameButton.TabIndex = i;
+				setFileNameButton.Text = "Set Save Location";
+				LayoutHelper.RightOf(pictureBox, margin).MatchTop(pictureBox).Width(buttonWidth).Height(buttonHeight).Apply(setFileNameButton);
+				setFileNameButton.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+				setFileNameButton.Click += new EventHandler(SetFileNameButton_OnClick);
+				projectPanel.Controls.Add(setFileNameButton);
+
+				Label fileNameLabel = new Label();
+				fileNameLabel.TabIndex = i;
+				fileNameLabel.TabStop = false;
+				fileNameLabel.Text = "<<no file name>>";
+				LayoutHelper.Left(projectPanel, margin).Below(pictureBox, margin).MatchWidth(projectPanel).Height(20).Apply(fileNameLabel);
+				fileNameLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+				projectPanel.Controls.Add(fileNameLabel);
+
+				LayoutHelper.Left(scrollPanel).FloatTop(scrollPanel).MatchWidth(scrollPanel).Height(fileNameLabel.Top + fileNameLabel.Height).Apply(projectPanel);
+				projectPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+				scrollPanel.Controls.Add(projectPanel);
+				maxScrollHeight = projectPanel.Top + projectPanel.Height + margin;
+			}
+
+			//shorten dialog if it is unnecessarily tall
+			int scrollPanelBottom = scrollPanel.Top + maxScrollHeight;
+			if(scrollPanelBottom < okButton.Top - margin)
+			{
+				this.Height -= (okButton.Top - margin - scrollPanelBottom);
 			}
 		}
 
@@ -92,6 +132,34 @@ namespace PerpetualPaint
 				this.StartPosition = FormStartPosition.Manual;
 				LayoutHelper.CenterBothInScreen(this, this.Owner);
 			}
+		}
+
+		private void SetFileNameButton_OnClick(object sender, EventArgs e)
+		{
+			Button button = (sender as Button);
+			int index = button.TabIndex;
+
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "Project Files|*" + PPProject.PROJECT_EXTENSION;
+			saveFileDialog.Title = "Save Project As";
+			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+
+			FileNames[index] = saveFileDialog.FileName;
+			Label label = GetFileNameLabel(button.Parent);
+			label.Text = FileNames[index];
+		}
+
+		private Label GetFileNameLabel(Control parent)
+		{
+			foreach(Control control in parent.Controls)
+			{
+				if(control is Label)
+					return (control as Label);
+			}
+			return null;
 		}
 
 		private void OkButton_OnClick(object sender, EventArgs e)

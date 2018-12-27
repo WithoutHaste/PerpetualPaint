@@ -163,7 +163,7 @@ namespace PerpetualPaint
 		{
 			MenuItem fileMenu = new MenuItem("File");
 			MenuItem newCollection = new MenuItem("New Collection", new EventHandler(Form_OnNewCollection));
-			MenuItem openProject = new MenuItem("Open Image/Project/Collection", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
+			MenuItem openProject = new MenuItem("Open Project, Collection, or Image", new EventHandler(Form_OnOpenFile), Shortcut.CtrlO);
 			MenuItem saveProject = new MenuItem("Save Project", new EventHandler(Form_OnSave), Shortcut.CtrlS);
 			MenuItem saveAsProject = new MenuItem("Save Project As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
 			MenuItem exportImage = new MenuItem("Export Image", new EventHandler(Form_OnExport));
@@ -330,15 +330,7 @@ namespace PerpetualPaint
 
 		private void Form_OnNewCollection(object sender, EventArgs e)
 		{
-			if(collectionForm == null)
-			{
-				collectionForm = new CollectionForm();
-				collectionForm.ShowDialog();
-			}
-			else
-			{
-				throw new NotImplementedException("Not implemented: close previous collection and open new one.");
-			}
+			OpenCollection(null);
 		}
 
 		private void Form_OnOpenFile(object sender, EventArgs e)
@@ -528,13 +520,13 @@ namespace PerpetualPaint
 				return true;
 
 			DialogResult result = MessageBox.Show("You are about to lose your changes.\nDo you want to save changes before closing the image?", "Save Before Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-			if(result == DialogResult.Yes)
+			switch(result)
 			{
-				masterImage.Save();
-			}
-			else if(result == DialogResult.Cancel)
-			{
-				return false;
+				case DialogResult.Cancel: return false;
+				case DialogResult.No: return true;
+				case DialogResult.Yes: 
+					masterImage.Save();
+					return true;
 			}
 			return true;
 		}
@@ -726,13 +718,20 @@ namespace PerpetualPaint
 		private void OpenFile()
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Project and Image Files|*" + PPProject.PROJECT_EXTENSION_UPPERCASE + ";*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
-			openFileDialog.Title = "Open Project or Image";
+			openFileDialog.Filter = "Supported Files|*" + PPProject.PROJECT_EXTENSION + ";*" + PPCollection.COLLECTION_EXTENSION + ";*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
+			openFileDialog.Title = "Open Project, Collection, or Image";
 
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
 				return;
 			}
+
+			if(Path.GetExtension(openFileDialog.FileName) == PPCollection.COLLECTION_EXTENSION)
+			{
+				OpenCollection(openFileDialog.FileName);
+				return;
+			}
+
 			try
 			{
 				statusPanel.ClearCancels();
@@ -756,6 +755,19 @@ namespace PerpetualPaint
 			}
 		}
 
+		private void OpenCollection(string fileName)
+		{
+			if(collectionForm == null)
+			{
+				collectionForm = new CollectionForm(fileName);
+				collectionForm.ShowDialog();
+			}
+			else
+			{
+				collectionForm.OpenCollection(fileName);
+			}
+		}
+
 		private void ExportAs()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -776,7 +788,7 @@ namespace PerpetualPaint
 		private void SaveAs()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "Project Files|*" + PPProject.PROJECT_EXTENSION_UPPERCASE;
+			saveFileDialog.Filter = "Project Files|*" + PPProject.PROJECT_EXTENSION;
 			saveFileDialog.Title = "Save Project As";
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{

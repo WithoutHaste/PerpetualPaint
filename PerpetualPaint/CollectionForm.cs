@@ -22,8 +22,8 @@ namespace PerpetualPaint
 		/// <summary>Width of vertical scroll bar.</summary>
 		public static readonly int SCROLLBAR_WIDTH = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
 
-		/// <summary>Maximum width and height of each image.</summary>
-		public static readonly int IMAGE_WIDTH = 100;
+		/// <summary>Maximum width and height of each thumbnail image.</summary>
+		public static readonly int THUMBNAIL_SIZE = 100;
 
 		/// <summary>Layout panel for the images.</summary>
 		private FlowLayoutPanel flowPanel;
@@ -31,7 +31,7 @@ namespace PerpetualPaint
 		/// <summary>The collection being displayed.</summary>
 		private PPCollection collection = new PPCollection();
 
-		public CollectionForm()
+		public CollectionForm(string fileName = null)
 		{
 			this.Text = "Collection";
 			this.WindowState = FormWindowState.Normal;
@@ -41,6 +41,11 @@ namespace PerpetualPaint
 
 			InitMenus();
 			InitControls();
+
+			if(!String.IsNullOrEmpty(fileName))
+			{
+				OpenCollection(fileName);
+			}
 		}
 
 		#region Init
@@ -78,27 +83,20 @@ namespace PerpetualPaint
 		private void Form_OnOpen(object sender, EventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION_UPPERCASE;
+			openFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION;
 			openFileDialog.Title = "Open Collection";
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
 				return;
 			}
-
-			collection = PPCollection.Load(openFileDialog.FileName);
-
-			flowPanel.Controls.Clear();
-			foreach(PPProject project in collection.Projects)
-			{
-				DisplayProject(project);
-			}
+			OpenCollection(openFileDialog.FileName);
 		}
 
 		private void Form_OnAdd(object sender, EventArgs e)
 		{
 			//todo: is there a way to combine this with the similar from OneImageForm
 			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Project and Image Files|*" + PPProject.PROJECT_EXTENSION_UPPERCASE + ";*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
+			openFileDialog.Filter = "Project and Image Files|*" + PPProject.PROJECT_EXTENSION + ";*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
 			openFileDialog.Title = "Open Project or Image";
 			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 			{
@@ -111,33 +109,12 @@ namespace PerpetualPaint
 
 		private void Form_OnSave(object sender, EventArgs e)
 		{
-			if(!SetAllProjectFileNames())
-				return;
-
-			if(String.IsNullOrEmpty(collection.SaveToFileName))
-				Form_OnSaveAs(sender, e);
-			else
-				collection.Save();
+			Save();
 		}
 
 		private void Form_OnSaveAs(object sender, EventArgs e)
 		{
-			if(!SetAllProjectFileNames())
-				return;
-
-			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION_UPPERCASE;
-			saveFileDialog.Title = "Save Collection";
-			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-			{
-				return;
-			}
-			if(!EditProjectOptions())
-			{
-				return;
-			}
-
-			collection.SaveAs(saveFileDialog.FileName);
+			SaveAs();
 		}
 
 		private void Form_Closing(object sender, FormClosingEventArgs e)
@@ -151,14 +128,63 @@ namespace PerpetualPaint
 
 		#endregion
 
+		public void OpenCollection(string fileName)
+		{
+			collection = PPCollection.Load(fileName);
+			flowPanel.Controls.Clear();
+			foreach(PPProject project in collection.Projects)
+			{
+				DisplayProject(project);
+			}
+		}
+
 		private void DisplayProject(PPProject project)
 		{
 			PictureBox pictureBox = new PictureBox();
-			pictureBox.Width = IMAGE_WIDTH;
-			pictureBox.Height = IMAGE_WIDTH;
+			pictureBox.Width = THUMBNAIL_SIZE;
+			pictureBox.Height = THUMBNAIL_SIZE;
 			pictureBox.Image = project.GetThumbnail(pictureBox.Width, pictureBox.Height);
 			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
 			flowPanel.Controls.Add(pictureBox);
+		}
+
+		/// <summary>
+		/// Returns True if the operation continues, False if the operation is cancelled.
+		/// </summary>
+		private bool Save()
+		{
+			if(!SetAllProjectFileNames())
+				return false;
+
+			if(String.IsNullOrEmpty(collection.SaveToFileName))
+				return SaveAs();
+			else
+				collection.Save();
+			return true;
+		}
+
+		/// <summary>
+		/// Returns True if the operation continues, False if the operation is cancelled.
+		/// </summary>
+		private bool SaveAs()
+		{
+			if(!SetAllProjectFileNames())
+				return false;
+
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION;
+			saveFileDialog.Title = "Save Collection";
+			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return false;
+			}
+			if(!EditProjectOptions())
+			{
+				return false;
+			}
+
+			collection.SaveAs(saveFileDialog.FileName);
+			return true;
 		}
 
 		/// <summary>
@@ -186,7 +212,8 @@ namespace PerpetualPaint
 			if(projects.Count == 0)
 				return true;
 
-			using(SaveProjectsDialog dialog = new SaveProjectsDialog(projects.Select(p => p.GetThumbnail(150, 150)).ToArray()))
+			Bitmap[] thumbnails = projects.Select(p => p.GetThumbnail(300, 300)).ToArray();
+			using(SaveProjectsDialog dialog = new SaveProjectsDialog(thumbnails))
 			{
 				bool gotFileNames = (dialog.ShowDialog() == DialogResult.OK);
 				if(!gotFileNames)
@@ -206,7 +233,16 @@ namespace PerpetualPaint
 		/// <returns>True for continue operation; False for cancel operation.</returns>
 		private bool PossiblySaveChangesBeforeClosingCollection()
 		{
-			//todo: implement check if collection should be saved
+			if(collection == null)
+				return true;
+			DialogResult result = MessageBox.Show("You are about to lose your changes.\nDo you want to save changes before closing the image?", "Save Before Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+			switch(result)
+			{
+				case DialogResult.Cancel: return false;
+				case DialogResult.No: return true;
+				case DialogResult.Yes:
+					return Save();
+			}
 			return true;
 		}
 	}

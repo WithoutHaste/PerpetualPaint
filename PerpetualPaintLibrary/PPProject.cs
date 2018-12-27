@@ -16,7 +16,7 @@ namespace PerpetualPaintLibrary
 	public class PPProject
 	{
 		public static readonly string PROJECT_EXTENSION = ".ppp";
-		public static readonly string PROJECT_EXTENSION_UPPERCASE = PROJECT_EXTENSION.ToUpper();
+		//public static readonly string PROJECT_EXTENSION_UPPERCASE = PROJECT_EXTENSION.ToUpper();
 
 		public Bitmap GreyscaleBitmap;
 		public Bitmap ColorBitmap;
@@ -109,7 +109,7 @@ namespace PerpetualPaintLibrary
 				ColorBitmap = bitmap;
 			}
 			EditedSinceLastSave = true;
-			SaveToFileName = fullFileName;
+			SaveToFileName = null; //do not assume file name should be the same as the image file name
 
 			return imageIsGreyscale;
 		}

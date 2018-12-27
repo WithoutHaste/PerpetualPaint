@@ -38,18 +38,12 @@
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">139</Data>
+          <Data ss:Type="Number">143</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
           <Data ss:Type="String">collection view:
-- save collection as list of projects
--- if a project is not saved already, prompt to save it first
---- show scolling list of the thumbnails that don't save filenames, that user can set the filenames on
--- save collection-level palette as full file?
--- save collection-level palette as filename?
--- don't save any collection-level palette info?
-- open collection from file
-- prompt to save collection on close if needed</Data>
+- save collection level palette filename
+- save collection level palette file</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -58,7 +52,7 @@
           <Data ss:Type="String">Feature - Major</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
+          <Data ss:Type="DateTime">2018-12-27T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -96,6 +90,60 @@
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">144</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">collection view:
+indicate collection has been saved and not edited since last save</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-27T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">145</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">one image view:
+indicate project has been saved and not edited since last save</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-27T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">142</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">collection view:
+- add multiple projects/images at once with multiselect in open file dialog</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-27T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -956,6 +1004,34 @@ http://colorizer.org/</Data>
         </Cell>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">139</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">collection view:
+- save collection as list of projects
+-- if a project is not saved already, prompt to save it first
+--- show scolling list of the thumbnails that don't save filenames, that user can set the filenames on
+-- save collection-level palette as full file?
+-- save collection-level palette as filename?
+-- don't save any collection-level palette info?
+- open collection from file
+- prompt to save collection on close if needed</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-26T00:00:00.000</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-27T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2502,7 +2578,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">141</Data>
+          <Data ss:Type="Number">145</Data>
         </Cell>
       </Row>
       <Row>

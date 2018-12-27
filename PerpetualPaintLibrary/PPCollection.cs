@@ -16,7 +16,7 @@ namespace PerpetualPaintLibrary
 	public class PPCollection
 	{
 		public static readonly string COLLECTION_EXTENSION = ".ppc";
-		public static readonly string COLLECTION_EXTENSION_UPPERCASE = COLLECTION_EXTENSION.ToUpper();
+		//public static readonly string COLLECTION_EXTENSION_UPPERCASE = COLLECTION_EXTENSION.ToUpper();
 
 		/// <summary>
 		/// Ordered list of projects in the collection.
