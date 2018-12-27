@@ -60,6 +60,7 @@
     <Compile Include="PPCollection.cs" />
     <Compile Include="PPConfig.cs" />
     <Compile Include="PPProject.cs" />
+    <Compile Include="ProjectEventArgs.cs" />
     <Compile Include="RequestRegionArgument.cs" />
     <Compile Include="RequestRegionResult.cs" />
     <Compile Include="Utilities.cs" />

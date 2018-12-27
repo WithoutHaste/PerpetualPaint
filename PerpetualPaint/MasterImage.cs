@@ -17,8 +17,10 @@ namespace PerpetualPaint
 	/// <summary>
 	/// The image being edited and displayed.
 	/// </summary>
-	public class MasterImage : PPProject
+	public class MasterImage
 	{
+		public PPProject Project { get; protected set; }
+
 		private RequestRegionWorker regionWorker;
 		private List<ImageRegion> regions = new List<ImageRegion>();
 
@@ -37,15 +39,15 @@ namespace PerpetualPaint
 			get {
 				if(cleanGetCopy == null || editedSinceLastCleanCopy)
 				{
-					cleanGetCopy = new Bitmap(this.ColorBitmap);
+					cleanGetCopy = new Bitmap(Project.ColorBitmap);
 					editedSinceLastCleanCopy = false;
 				}
 				return cleanGetCopy;
 			}
 		}
 
-		public int Width { get { return this.GreyscaleBitmap.Width; } }
-		public int Height { get { return this.GreyscaleBitmap.Height; } }
+		public int Width { get { return Project.GreyscaleBitmap.Width; } }
+		public int Height { get { return Project.GreyscaleBitmap.Height; } }
 
 		public event ProgressChangedEventHandler ProgressChanged;
 		public event TextEventHandler StatusChanged;
@@ -69,14 +71,17 @@ namespace PerpetualPaint
 			StatusChanged?.Invoke(this, new TextEventArgs("Prepping image..."));
 			CancelLoad();
 
+			if(Project == null)
+				Project = new PPProject();
+
 			bool runRegionsOnColorBitmap = false;
-			if(Path.GetExtension(filename) == PROJECT_EXTENSION)
+			if(Path.GetExtension(filename) == PPProject.PROJECT_EXTENSION)
 			{
-				LoadProject(filename);
+				Project.LoadProject(filename);
 			}
 			else
 			{
-				bool isGreyscaleImage = LoadImage(filename);
+				bool isGreyscaleImage = Project.LoadImage(filename);
 				runRegionsOnColorBitmap = !isGreyscaleImage;
 			}
 			editedSinceLastCleanCopy = true;
@@ -88,12 +93,12 @@ namespace PerpetualPaint
 			regionWorker.ProgressChanged += new ProgressChangedEventHandler(Worker_OnProgressChanged);
 			if(runRegionsOnColorBitmap)
 			{
-				regionWorker.Run(this.ColorBitmap);
-				this.GreyscaleBitmap = Utilities.GetGreyscaleOfBitmap(this.ColorBitmap, this.regions); //todo: try may be a timing issue here, where the image is still being worked on but the user is allowed to interact with it
+				regionWorker.Run(Project.ColorBitmap);
+				Project.GreyscaleBitmap = Utilities.GetGreyscaleOfBitmap(Project.ColorBitmap, this.regions); //todo: try may be a timing issue here, where the image is still being worked on but the user is allowed to interact with it
 			}
 			else
 			{
-				regionWorker.Run(this.GreyscaleBitmap);
+				regionWorker.Run(Project.GreyscaleBitmap);
 			}
 		}
 
@@ -128,43 +133,6 @@ namespace PerpetualPaint
 			}
 		}
 
-		public void SetPaletteOption(PPConfig.PaletteOptions paletteOption, WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
-		{
-			Config.PaletteOption = paletteOption;
-			switch(Config.PaletteOption)
-			{
-				case PPConfig.PaletteOptions.SaveNothing:
-					Config.PaletteFileName = null;
-					ColorPalette = null;
-					break;
-				case PPConfig.PaletteOptions.SaveFile:
-					Config.PaletteFileName = null;
-					ColorPalette = colorPalette;
-					break;
-				case PPConfig.PaletteOptions.SaveFileName:
-					Config.PaletteFileName = paletteFileName;
-					ColorPalette = null;
-					break;
-			}
-			EditedSinceLastSave = true;
-		}
-
-		public void UpdatePaletteOption(WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
-		{
-			switch(Config.PaletteOption)
-			{
-				case PPConfig.PaletteOptions.SaveNothing:
-					return;
-				case PPConfig.PaletteOptions.SaveFile:
-					ColorPalette = colorPalette;
-					break;
-				case PPConfig.PaletteOptions.SaveFileName:
-					Config.PaletteFileName = paletteFileName;
-					break;
-			}
-			EditedSinceLastSave = true;
-		}
-
 		private void Worker_OnProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
 			ProgressChanged?.Invoke(this, e);
@@ -181,9 +149,9 @@ namespace PerpetualPaint
 			ImageRegion region = GetRegion(point);
 			if(region == null)
 				return null; //point was not in a colorable region
-			Color oldPureColor = Utilities.SetRegion(this.GreyscaleBitmap, this.ColorBitmap, region, pureColor);
+			Color oldPureColor = Utilities.SetRegion(Project.GreyscaleBitmap, Project.ColorBitmap, region, pureColor);
 			editedSinceLastCleanCopy = true;
-			EditedSinceLastSave = true;
+			Project.Edited();
 			return oldPureColor;
 		}
 

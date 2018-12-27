@@ -166,5 +166,53 @@ namespace PerpetualPaintLibrary
 				return (this.LoadedFromFileName == other.LoadedFromFileName);
 			return false;
 		}
+
+		/// <summary>
+		/// Tells the project it has been edited.
+		/// </summary>
+		public void Edited()
+		{
+			EditedSinceLastSave = true;
+		}
+
+		/// <summary>
+		/// Set palette settings and values.
+		/// </summary>
+		public void SetPaletteOption(PPConfig.PaletteOptions paletteOption, WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
+		{
+			Config.PaletteOption = paletteOption;
+			switch(Config.PaletteOption)
+			{
+				case PPConfig.PaletteOptions.SaveNothing:
+					Config.PaletteFileName = null;
+					ColorPalette = null;
+					break;
+				case PPConfig.PaletteOptions.SaveFile:
+					Config.PaletteFileName = null;
+					ColorPalette = colorPalette;
+					break;
+				case PPConfig.PaletteOptions.SaveFileName:
+					Config.PaletteFileName = paletteFileName;
+					ColorPalette = null;
+					break;
+			}
+			EditedSinceLastSave = true;
+		}
+
+		public void UpdatePaletteOption(WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
+		{
+			switch(Config.PaletteOption)
+			{
+				case PPConfig.PaletteOptions.SaveNothing:
+					return;
+				case PPConfig.PaletteOptions.SaveFile:
+					ColorPalette = colorPalette;
+					break;
+				case PPConfig.PaletteOptions.SaveFileName:
+					Config.PaletteFileName = paletteFileName;
+					break;
+			}
+			EditedSinceLastSave = true;
+		}
 	}
 }

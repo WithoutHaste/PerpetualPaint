@@ -430,7 +430,7 @@ namespace PerpetualPaint
 				LoadPalette();
 				if(masterImage != null)
 				{
-					masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+					masterImage.Project.UpdatePaletteOption(colorPalette, PaletteFullFilename);
 				}
 			}
 		}
@@ -456,16 +456,16 @@ namespace PerpetualPaint
 			}
 			if(masterImage != null)
 			{
-				masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+				masterImage.Project.UpdatePaletteOption(colorPalette, PaletteFullFilename);
 			}
 		}
 
 		private void Form_OnEditPalette(object sender, EventArgs e)
 		{
 			EditPaletteDialog dialog;
-			if(masterImage != null && masterImage.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
+			if(masterImage != null && masterImage.Project.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
 			{
-				dialog = new EditPaletteDialog(masterImage.ColorPalette);
+				dialog = new EditPaletteDialog(masterImage.Project.ColorPalette);
 			}
 			else
 			{
@@ -476,10 +476,10 @@ namespace PerpetualPaint
 			if(dialog.ShowDialog() != DialogResult.OK)
 				return;
 
-			if(masterImage != null && masterImage.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
+			if(masterImage != null && masterImage.Project.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
 			{
 				colorPalette = dialog.ColorPalette;
-				masterImage.UpdatePaletteOption(colorPalette, null);
+				masterImage.Project.UpdatePaletteOption(colorPalette, null);
 				DisplayPalette();
 			}
 			else
@@ -490,7 +490,7 @@ namespace PerpetualPaint
 
 			if(masterImage != null)
 			{
-				masterImage.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+				masterImage.Project.UpdatePaletteOption(colorPalette, PaletteFullFilename);
 			}
 		}
 
@@ -516,7 +516,7 @@ namespace PerpetualPaint
 		{
 			if(masterImage == null)
 				return true;
-			if(masterImage != null && !masterImage.EditedSinceLastSave)
+			if(masterImage != null && !masterImage.Project.EditedSinceLastSave)
 				return true;
 
 			DialogResult result = MessageBox.Show("You are about to lose your changes.\nDo you want to save changes before closing the image?", "Save Before Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
@@ -525,7 +525,7 @@ namespace PerpetualPaint
 				case DialogResult.Cancel: return false;
 				case DialogResult.No: return true;
 				case DialogResult.Yes: 
-					masterImage.Save();
+					masterImage.Project.Save();
 					return true;
 			}
 			return true;
@@ -749,14 +749,14 @@ namespace PerpetualPaint
 			{
 				HandleError("Failed to open file.", exception);
 			}
-			switch(masterImage.Config.PaletteOption)
+			switch(masterImage.Project.Config.PaletteOption)
 			{
 				case PPConfig.PaletteOptions.SaveFile:
-					colorPalette = masterImage.ColorPalette;
+					colorPalette = masterImage.Project.ColorPalette;
 					DisplayPalette();
 					break;
 				case PPConfig.PaletteOptions.SaveFileName:
-					PaletteFullFilename = masterImage.Config.PaletteFileName;
+					PaletteFullFilename = masterImage.Project.Config.PaletteFileName;
 					LoadPalette();
 					break;
 			}
@@ -781,9 +781,9 @@ namespace PerpetualPaint
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			saveFileDialog.Filter = "Image Files|*.BMP;*.PNG;*.JPG;*.JPEG;*.GIF;*.TIFF";
 			saveFileDialog.Title = "Export Image As";
-			if(masterImage.SaveToFileName != null)
+			if(masterImage.Project.SaveToFileName != null)
 			{
-				saveFileDialog.FileName = Path.GetFileNameWithoutExtension(masterImage.SaveToFileName);
+				saveFileDialog.FileName = Path.GetFileNameWithoutExtension(masterImage.Project.SaveToFileName);
 			}
 
 			if(saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
@@ -807,18 +807,18 @@ namespace PerpetualPaint
 				return;
 			}
 
-			masterImage.SaveAs(saveFileDialog.FileName);
+			masterImage.Project.SaveAs(saveFileDialog.FileName);
 		}
 
 		private void Save()
 		{
-			if(Path.GetExtension(masterImage.SaveToFileName) != PPProject.PROJECT_EXTENSION)
+			if(Path.GetExtension(masterImage.Project.SaveToFileName) != PPProject.PROJECT_EXTENSION)
 			{
 				SaveAs();
 			}
 			else
 			{
-				masterImage.Save();
+				masterImage.Project.Save();
 			}
 		}
 
@@ -827,11 +827,11 @@ namespace PerpetualPaint
 		/// </summary>
 		private bool EditProjectOptions()
 		{
-			using(ProjectOptionsDialog form = new ProjectOptionsDialog(masterImage.Config))
+			using(ProjectOptionsDialog form = new ProjectOptionsDialog(masterImage.Project.Config))
 			{
 				if(form.ShowDialog(this) != DialogResult.OK)
 					return false;
-				masterImage.SetPaletteOption(form.PaletteOption, colorPalette, PaletteFullFilename);
+				masterImage.Project.SetPaletteOption(form.PaletteOption, colorPalette, PaletteFullFilename);
 			}
 			return true;
 		}
