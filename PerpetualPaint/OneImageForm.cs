@@ -604,9 +604,13 @@ namespace PerpetualPaint
 
 		private void Collection_OnProjectSelected(object sender, ProjectEventArgs e)
 		{
-			//todo: how to raise PPProject to MasterImage level?
-			//can't
-			//MasterImage will have to be updated to point to PPProject instead of inheriting from it
+			UpdateMasterImage(project:e.Project);
+			//todo: possibly load palette from collection, too
+		}
+
+		private void MasterImage_OnProjectEdited(object sender, ProjectEventArgs e)
+		{
+			collectionForm?.UpdateProject(e.Project);
 		}
 
 		private void OnProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -768,7 +772,7 @@ namespace PerpetualPaint
 			{
 				collectionForm = new CollectionForm(fileName);
 				collectionForm.ProjectSelected += new ProjectEventHandler(Collection_OnProjectSelected);
-				collectionForm.ShowDialog();
+				collectionForm.Show();
 			}
 			else
 			{
@@ -836,19 +840,23 @@ namespace PerpetualPaint
 			return true;
 		}
 
-		private void UpdateMasterImage(string fullFilename)
+		/// <summary>
+		/// Initialize master image (if needed) and update it with the new file.
+		/// Can either specify a file name, or provide the full project.
+		/// </summary>
+		private void UpdateMasterImage(string fileName = null, PPProject project = null)
 		{
 			if(masterImage == null)
 			{
 				masterImage = new MasterImage();
 				masterImage.ProgressChanged += new ProgressChangedEventHandler(OnProgressChanged);
 				masterImage.StatusChanged += new TextEventHandler(Form_UpdateStatusText);
-				masterImage.Load(fullFilename);
+				masterImage.ProjectEdited += new ProjectEventHandler(MasterImage_OnProjectEdited);
 			}
-			else
-			{
-				masterImage.Load(fullFilename);
-			}
+
+			if(fileName != null) masterImage.Load(fileName);
+			else masterImage.SetProject(project);
+
 			history.Clear();
 			UpdateZoomedImage(SCALE_FIT);
 		}

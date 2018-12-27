@@ -20,6 +20,7 @@ namespace PerpetualPaint
 	public class MasterImage
 	{
 		public PPProject Project { get; protected set; }
+		public event ProjectEventHandler ProjectEdited;
 
 		private RequestRegionWorker regionWorker;
 		private List<ImageRegion> regions = new List<ImageRegion>();
@@ -65,6 +66,41 @@ namespace PerpetualPaint
 		}
 
 		//---------------------------------------------------
+
+		private void TriggerProjectEdited()
+		{
+			if(ProjectEdited == null) return;
+			ProjectEdited(this, new ProjectEventArgs(Project));
+		}
+
+		public void SetProject(PPProject project)
+		{
+			//todo: refactor: SetProject and Load are almost the same function
+
+			StatusChanged?.Invoke(this, new TextEventArgs("Prepping image..."));
+			CancelLoad();
+
+			Project = project;
+
+			bool runRegionsOnColorBitmap = (project.GreyscaleBitmap == null);
+			editedSinceLastCleanCopy = true;
+
+			regions.Clear();
+
+			regionWorker = new RequestRegionWorker();
+			regionWorker.Completed += new RunWorkerCompletedEventHandler(OnRequestRegionCompleted);
+			regionWorker.ProgressChanged += new ProgressChangedEventHandler(Worker_OnProgressChanged);
+			if(runRegionsOnColorBitmap)
+			{
+				regionWorker.Run(Project.ColorBitmap);
+				Project.GreyscaleBitmap = Utilities.GetGreyscaleOfBitmap(Project.ColorBitmap, this.regions); //todo: try may be a timing issue here, where the image is still being worked on but the user is allowed to interact with it
+				Project.Edited();
+			}
+			else
+			{
+				regionWorker.Run(Project.GreyscaleBitmap);
+			}
+		}
 
 		public void Load(string filename)
 		{
@@ -152,6 +188,7 @@ namespace PerpetualPaint
 			Color oldPureColor = Utilities.SetRegion(Project.GreyscaleBitmap, Project.ColorBitmap, region, pureColor);
 			editedSinceLastCleanCopy = true;
 			Project.Edited();
+			TriggerProjectEdited();
 			return oldPureColor;
 		}
 

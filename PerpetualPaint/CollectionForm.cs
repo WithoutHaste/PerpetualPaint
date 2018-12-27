@@ -211,7 +211,7 @@ namespace PerpetualPaint
 			PictureBox pictureBox = new PictureBox();
 			pictureBox.Width = THUMBNAIL_SIZE + padding + padding;
 			pictureBox.Height = THUMBNAIL_SIZE + padding + padding;
-			pictureBox.Image = project.GetThumbnail(pictureBox.Width, pictureBox.Height);
+			pictureBox.Image = project.GetThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
 			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
 
 			pictureBox.Cursor = Cursors.Hand;
@@ -352,6 +352,28 @@ namespace PerpetualPaint
 		private bool IsSelected(int index)
 		{
 			return (selectedProjectIndex == index);
+		}
+
+		/// <summary>
+		/// Tells collection form that project open here has been edited in OneImageForm.
+		/// Update the thumbnail.
+		/// </summary>
+		public void UpdateProject(PPProject project)
+		{
+			int index = Array.IndexOf(collection.Projects, project);
+			if(index == -1)
+				return;
+			int i = 0;
+			foreach(Control control in flowPanel.Controls)
+			{
+				if(i == index)
+				{
+					PictureBox pictureBox = (control as PictureBox);
+					pictureBox.Image = project.GetThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+					return;
+				}
+				i++;
+			}
 		}
 	}
 }
