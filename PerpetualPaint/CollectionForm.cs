@@ -35,6 +35,8 @@ namespace PerpetualPaint
 
 		private int selectedProjectIndex = -1;
 
+		public event ProjectEventHandler ProjectSelected;
+
 		public CollectionForm(string fileName = null)
 		{
 			this.Text = "Collection";
@@ -81,6 +83,17 @@ namespace PerpetualPaint
 			LayoutHelper.Left(this, 0).Right(this, 0).Top(this, 0).Bottom(this, 0).Apply(flowPanel);
 			flowPanel.Anchor = LayoutHelper.AnchorAll;
 			this.Controls.Add(flowPanel);
+		}
+
+		#endregion
+
+		#region Event Triggers
+
+		private void TriggerProjectSelected()
+		{
+			if(ProjectSelected == null)
+				return;
+			ProjectSelected(collection, new ProjectEventArgs(collection.Projects[selectedProjectIndex]));
 		}
 
 		#endregion
@@ -329,6 +342,8 @@ namespace PerpetualPaint
 					control.BackColor = SystemColors.Control;
 				}
 			}
+
+			TriggerProjectSelected();
 		}
 
 		/// <summary>

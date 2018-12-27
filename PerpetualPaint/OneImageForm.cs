@@ -602,6 +602,13 @@ namespace PerpetualPaint
 			pictureBox.Image = null;
 		}
 
+		private void Collection_OnProjectSelected(object sender, ProjectEventArgs e)
+		{
+			//todo: how to raise PPProject to MasterImage level?
+			//can't
+			//MasterImage will have to be updated to point to PPProject instead of inheriting from it
+		}
+
 		private void OnProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
 			statusPanel.StatusProgress = e.ProgressPercentage;
@@ -760,6 +767,7 @@ namespace PerpetualPaint
 			if(collectionForm == null)
 			{
 				collectionForm = new CollectionForm(fileName);
+				collectionForm.ProjectSelected += new ProjectEventHandler(Collection_OnProjectSelected);
 				collectionForm.ShowDialog();
 			}
 			else
