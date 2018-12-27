@@ -31,6 +31,8 @@ namespace PerpetualPaint
 		/// <summary>The collection being displayed.</summary>
 		private PPCollection collection = new PPCollection();
 
+		private ContextMenu projectContextMenu;
+
 		public CollectionForm(string fileName = null)
 		{
 			this.Text = "Collection";
@@ -64,6 +66,9 @@ namespace PerpetualPaint
 
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
+
+			projectContextMenu = new ContextMenu();
+			projectContextMenu.MenuItems.Add("Remove", Project_OnRemove);
 		}
 
 		private void InitControls()
@@ -138,6 +143,20 @@ namespace PerpetualPaint
 			control.BackColor = SystemColors.Control;
 		}
 
+		private void Project_OnRemove(object sender, EventArgs e)
+		{
+			Control control = (sender as MenuItem).GetContextMenu().SourceControl;
+			collection.RemoveProjectAt(control.TabIndex);
+			flowPanel.Controls.Remove(control);
+
+			int index = 0;
+			foreach(Control child in flowPanel.Controls)
+			{
+				child.TabIndex = index;
+				index++;
+			}
+		}
+
 		#endregion
 
 		public void OpenCollection(string fileName)
@@ -163,6 +182,8 @@ namespace PerpetualPaint
 			pictureBox.Cursor = Cursors.Hand;
 			pictureBox.MouseEnter += new EventHandler(Project_OnMouseEnter);
 			pictureBox.MouseLeave += new EventHandler(Project_OnMouseLeave);
+
+			pictureBox.ContextMenu = projectContextMenu;
 
 			flowPanel.Controls.Add(pictureBox);
 		}

@@ -91,6 +91,15 @@ namespace PerpetualPaintLibrary
 		}
 
 		/// <summary>
+		/// Remove project from collection by 0-based index.
+		/// </summary>
+		public void RemoveProjectAt(int index)
+		{
+			projects.RemoveAt(index);
+			EditedSinceLastSave = true;
+		}
+
+		/// <summary>
 		/// Save project file as <paramref name='fullFileName'/>.
 		/// Saves all project files first.
 		/// </summary>
