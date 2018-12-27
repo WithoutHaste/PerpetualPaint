@@ -33,6 +33,8 @@ namespace PerpetualPaint
 
 		private ContextMenu projectContextMenu;
 
+		private int selectedProjectIndex = -1;
+
 		public CollectionForm(string fileName = null)
 		{
 			this.Text = "Collection";
@@ -151,7 +153,10 @@ namespace PerpetualPaint
 		private void Project_OnMouseLeave(object sender, EventArgs e)
 		{
 			Control control = (sender as Control);
-			control.BackColor = SystemColors.Control;
+			if(IsSelected(control.TabIndex))
+				control.BackColor = Color.Gold;
+			else
+				control.BackColor = SystemColors.Control;
 		}
 
 		private void Project_OnRemove(object sender, EventArgs e)
@@ -166,6 +171,12 @@ namespace PerpetualPaint
 				child.TabIndex = index;
 				index++;
 			}
+		}
+
+		private void Project_OnClick(object sender, EventArgs e)
+		{
+			Control control = (sender as Control);
+			SetSelection(control.TabIndex);
 		}
 
 		#endregion
@@ -193,6 +204,7 @@ namespace PerpetualPaint
 			pictureBox.Cursor = Cursors.Hand;
 			pictureBox.MouseEnter += new EventHandler(Project_OnMouseEnter);
 			pictureBox.MouseLeave += new EventHandler(Project_OnMouseLeave);
+			pictureBox.Click += new EventHandler(Project_OnClick);
 
 			pictureBox.ContextMenu = projectContextMenu;
 
@@ -295,6 +307,36 @@ namespace PerpetualPaint
 					return Save();
 			}
 			return true;
+		}
+
+		//todo: copy colors example image from https://stackoverflow.com/questions/4556559/is-there-an-online-example-of-all-the-colours-in-system-drawing-color to code notes
+
+		/// <summary>
+		/// Set which project is selected by 0-based index;
+		/// </summary>
+		private void SetSelection(int index)
+		{
+			selectedProjectIndex = index;
+
+			foreach(Control control in flowPanel.Controls)
+			{
+				if(IsSelected(control.TabIndex))
+				{
+					control.BackColor = Color.Gold;
+				}
+				else
+				{
+					control.BackColor = SystemColors.Control;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Returns true if this is the selected index.
+		/// </summary>
+		private bool IsSelected(int index)
+		{
+			return (selectedProjectIndex == index);
 		}
 	}
 }
