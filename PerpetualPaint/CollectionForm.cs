@@ -108,8 +108,15 @@ namespace PerpetualPaint
 				return;
 			}
 
-			PPProject project = collection.LoadProject(openFileDialog.FileName);
-			DisplayProject(project);
+			try
+			{
+				PPProject project = collection.LoadProject(openFileDialog.FileName);
+				DisplayProject(project);
+			}
+			catch(DuplicateException)
+			{
+				MessageBox.Show("The file is already in the collection.", "Duplicate File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 
 		private void Form_OnSave(object sender, EventArgs e)

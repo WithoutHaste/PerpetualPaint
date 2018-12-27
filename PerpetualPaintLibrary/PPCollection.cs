@@ -64,6 +64,7 @@ namespace PerpetualPaintLibrary
 		/// Load and add project from file.
 		/// </summary>
 		/// <returns>Returns the new project.</returns>
+		/// <exception cref='DuplicateException'>Tried to add duplicate file to collection.</exception>
 		public PPProject LoadProject(string fullFileName)
 		{
 			if(String.IsNullOrEmpty(fullFileName))
@@ -84,8 +85,12 @@ namespace PerpetualPaintLibrary
 		/// <summary>
 		/// Add project to collection.
 		/// </summary>
+		/// <exception cref='DuplicateException'>Tried to add duplicate file to collection.</exception>
 		public void AddProject(PPProject project)
 		{
+			if(projects.Any(p => p.SaveToFileName == project.SaveToFileName))
+				throw new DuplicateException("File is already in the collection.");
+
 			projects.Add(project);
 			EditedSinceLastSave = true;
 		}
