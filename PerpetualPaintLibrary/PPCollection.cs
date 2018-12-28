@@ -15,6 +15,11 @@ namespace PerpetualPaintLibrary
 	/// </summary>
 	public class PPCollection
 	{
+		/// <summary>
+		/// Triggered when collection is saved or is edited.
+		/// </summary>
+		public event EventHandler StatusChanged;
+
 		public static readonly string COLLECTION_EXTENSION = ".ppc";
 		//public static readonly string COLLECTION_EXTENSION_UPPERCASE = COLLECTION_EXTENSION.ToUpper();
 
@@ -33,12 +38,29 @@ namespace PerpetualPaintLibrary
 
 		public string SaveToFileName { get; protected set; }
 
-		public bool EditedSinceLastSave { get; protected set; }
+		public bool EditedSinceLastSave {
+			get {
+				return editedSinceLastSave;
+			}
+			protected set {
+				bool previousValue = editedSinceLastSave;
+				editedSinceLastSave = value;
+				if(previousValue != value) TriggerStatusChanged();
+			}
+		}
+		private bool editedSinceLastSave;
 
+		/// <summary>
+		/// Create empty collection.
+		/// </summary>
 		public PPCollection()
 		{
+			EditedSinceLastSave = false;
 		}
 
+		/// <summary>
+		/// Create new collection from existing data.
+		/// </summary>
 		public PPCollection(string[] projectFileNames, PPConfig config, ColorPalette colorPalette)
 		{
 			Config = config;
@@ -48,6 +70,12 @@ namespace PerpetualPaintLibrary
 			}
 			ColorPalette = colorPalette;
 			EditedSinceLastSave = true;
+		}
+
+		private void TriggerStatusChanged()
+		{
+			if(StatusChanged == null) return;
+			StatusChanged(this, new EventArgs());
 		}
 
 		/// <summary>

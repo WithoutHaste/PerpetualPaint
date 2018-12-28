@@ -25,11 +25,13 @@ namespace PerpetualPaint
 		/// <summary>Maximum width and height of each thumbnail image.</summary>
 		public static readonly int THUMBNAIL_SIZE = 100;
 
+		private ToolStrip toolStrip;
+		private ToolStripItem saveToolStripItem;
 		/// <summary>Layout panel for the images.</summary>
 		private FlowLayoutPanel flowPanel;
 
 		/// <summary>The collection being displayed.</summary>
-		private PPCollection collection = new PPCollection();
+		private PPCollection collection;
 
 		private ContextMenu projectContextMenu;
 
@@ -46,7 +48,11 @@ namespace PerpetualPaint
 			this.FormClosing += new FormClosingEventHandler(Form_Closing);
 
 			InitMenus();
+			InitTools();
 			InitControls();
+
+			collection = new PPCollection();
+			SetupCollection();
 
 			if(!String.IsNullOrEmpty(fileName))
 			{
@@ -59,9 +65,9 @@ namespace PerpetualPaint
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			MenuItem openCollection = new MenuItem("Open Collection", new EventHandler(Form_OnOpen));
-			MenuItem addProject = new MenuItem("Add Image/Project", new EventHandler(Form_OnAdd));
-			MenuItem saveCollection = new MenuItem("Save Collection", new EventHandler(Form_OnSave), Shortcut.CtrlS);
+			MenuItem openCollection = new MenuItem("Open Collection", new EventHandler(Form_OnOpenCollection));
+			MenuItem addProject = new MenuItem("Add Image/Project", new EventHandler(Form_OnAddProject));
+			MenuItem saveCollection = new MenuItem("Save Collection", new EventHandler(Form_OnSaveCollection), Shortcut.CtrlS);
 			MenuItem saveAsCollection = new MenuItem("Save Collection As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
 			fileMenu.MenuItems.Add(openCollection);
 			fileMenu.MenuItems.Add(addProject);
@@ -73,6 +79,22 @@ namespace PerpetualPaint
 
 			projectContextMenu = new ContextMenu();
 			projectContextMenu.MenuItems.Add("Remove", Project_OnRemove);
+		}
+
+		private void InitTools()
+		{
+			toolStrip = new ToolStrip();
+			toolStrip.Dock = DockStyle.Top;
+			//todo:
+			//toolStrip.Items.Add("New", IconManager.NEW_FOLDER, Form_OnNewCollection);
+			toolStrip.Items.Add("Open", IconManager.OPEN_FILE, Form_OnOpenCollection);
+			saveToolStripItem = toolStrip.Items.Add("Save", IconManager.SAVE, Form_OnSaveCollection);
+			toolStrip.Items.Add(new ToolStripSeparator());
+			//todo:
+			//toolStrip.Items.Add("New", IconManager.NEW_FILE, Form_OnNewProject);
+			toolStrip.Items.Add("Add", IconManager.ADD, Form_OnAddProject);
+
+			this.Controls.Add(toolStrip);
 		}
 
 		private void InitControls()
@@ -100,7 +122,7 @@ namespace PerpetualPaint
 
 		#region Event Handlers
 
-		private void Form_OnOpen(object sender, EventArgs e)
+		private void Form_OnOpenCollection(object sender, EventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			openFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION;
@@ -112,7 +134,7 @@ namespace PerpetualPaint
 			OpenCollection(openFileDialog.FileName);
 		}
 
-		private void Form_OnAdd(object sender, EventArgs e)
+		private void Form_OnAddProject(object sender, EventArgs e)
 		{
 			//todo: is there a way to combine this with the similar from OneImageForm
 			OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -138,7 +160,7 @@ namespace PerpetualPaint
 			}
 		}
 
-		private void Form_OnSave(object sender, EventArgs e)
+		private void Form_OnSaveCollection(object sender, EventArgs e)
 		{
 			Save();
 		}
@@ -155,6 +177,15 @@ namespace PerpetualPaint
 			{
 				e.Cancel = true;
 			}
+		}
+
+		private void Collection_OnStatusChanged(object sender, EventArgs e)
+		{
+			PPCollection collection = (sender as PPCollection);
+			if(collection.EditedSinceLastSave)
+				saveToolStripItem.Image = IconManager.SAVE_RED;
+			else
+				saveToolStripItem.Image = IconManager.SAVE;
 		}
 
 		private void Project_OnMouseEnter(object sender, EventArgs e)
@@ -194,9 +225,17 @@ namespace PerpetualPaint
 
 		#endregion
 
+		private void SetupCollection()
+		{
+			Collection_OnStatusChanged(collection, new EventArgs());
+			collection.StatusChanged += new EventHandler(Collection_OnStatusChanged);
+		}
+
 		public void OpenCollection(string fileName)
 		{
 			collection = PPCollection.Load(fileName);
+			SetupCollection();
+
 			flowPanel.Controls.Clear();
 			foreach(PPProject project in collection.Projects)
 			{
