@@ -768,11 +768,11 @@ namespace PerpetualPaint
 
 		private void OpenCollection(string fileName)
 		{
-			if(collectionForm == null)
+			if(collectionForm == null || collectionForm.IsDisposed)
 			{
 				collectionForm = new CollectionForm(fileName);
 				collectionForm.ProjectSelected += new ProjectEventHandler(Collection_OnProjectSelected);
-				collectionForm.Show();
+				collectionForm.Show(this);
 			}
 			else
 			{

@@ -93,25 +93,6 @@ indicate project has been saved and not edited since last save</Data>
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">122</Data>
-        </Cell>
-        <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">group multiple projects into one collection as a config file
-- list of the project files
-- optional single overriding palette file</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Todo</Data>
-        </Cell>
-        <Cell>
-          <Data ss:Type="String">Feature - Major</Data>
-        </Cell>
-        <Cell ss:StyleID="cellShortDate">
-          <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
-        </Cell>
-      </Row>
-      <Row>
-        <Cell>
           <Data ss:Type="Number">133</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
@@ -132,7 +113,8 @@ indicate project has been saved and not edited since last save</Data>
           <Data ss:Type="Number">51</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">replace Rabbit with smaller and better divided sample image</Data>
+          <Data ss:Type="String">replace Rabbit with smaller and better divided sample image
+also add a sample that uses lots of gradients</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
@@ -931,6 +913,28 @@ http://colorizer.org/</Data>
         </Cell>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">122</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">group multiple projects into one collection as a config file
+- list of the project files
+- optional single overriding palette file</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Major</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-05T00:00:00.000</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-28T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>

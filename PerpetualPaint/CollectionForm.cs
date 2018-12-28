@@ -65,10 +65,12 @@ namespace PerpetualPaint
 		private void InitMenus()
 		{
 			MenuItem fileMenu = new MenuItem("File");
-			MenuItem openCollection = new MenuItem("Open Collection", new EventHandler(Form_OnOpenCollection));
-			MenuItem addProject = new MenuItem("Add Image/Project", new EventHandler(Form_OnAddProject));
-			MenuItem saveCollection = new MenuItem("Save Collection", new EventHandler(Form_OnSaveCollection), Shortcut.CtrlS);
-			MenuItem saveAsCollection = new MenuItem("Save Collection As", new EventHandler(Form_OnSaveAs), Shortcut.F12);
+			MenuItem newCollection = new MenuItem("New Collection", new EventHandler(Collection_OnNew));
+			MenuItem openCollection = new MenuItem("Open Collection", new EventHandler(Collection_OnOpen));
+			MenuItem addProject = new MenuItem("Add Image/Project", new EventHandler(Collection_OnAddProject));
+			MenuItem saveCollection = new MenuItem("Save Collection", new EventHandler(Colleciton_OnSave), Shortcut.CtrlS);
+			MenuItem saveAsCollection = new MenuItem("Save Collection As", new EventHandler(Collection_OnSaveAs), Shortcut.F12);
+			fileMenu.MenuItems.Add(newCollection);
 			fileMenu.MenuItems.Add(openCollection);
 			fileMenu.MenuItems.Add(addProject);
 			fileMenu.MenuItems.Add(saveCollection);
@@ -85,14 +87,13 @@ namespace PerpetualPaint
 		{
 			toolStrip = new ToolStrip();
 			toolStrip.Dock = DockStyle.Top;
-			//todo:
-			//toolStrip.Items.Add("New", IconManager.NEW_FOLDER, Form_OnNewCollection);
-			toolStrip.Items.Add("Open", IconManager.OPEN_FILE, Form_OnOpenCollection);
-			saveToolStripItem = toolStrip.Items.Add("Save", IconManager.SAVE, Form_OnSaveCollection);
+			toolStrip.Items.Add("New", IconManager.NEW_FOLDER, Collection_OnNew);
+			toolStrip.Items.Add("Open", IconManager.OPEN_FILE, Collection_OnOpen);
+			saveToolStripItem = toolStrip.Items.Add("Save", IconManager.SAVE, Colleciton_OnSave);
 			toolStrip.Items.Add(new ToolStripSeparator());
 			//todo:
 			//toolStrip.Items.Add("New", IconManager.NEW_FILE, Form_OnNewProject);
-			toolStrip.Items.Add("Add", IconManager.ADD, Form_OnAddProject);
+			toolStrip.Items.Add("Add", IconManager.ADD, Collection_OnAddProject);
 
 			this.Controls.Add(toolStrip);
 		}
@@ -122,7 +123,12 @@ namespace PerpetualPaint
 
 		#region Event Handlers
 
-		private void Form_OnOpenCollection(object sender, EventArgs e)
+		private void Collection_OnNew(object sender, EventArgs e)
+		{
+			NewCollection();
+		}
+
+		private void Collection_OnOpen(object sender, EventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			openFileDialog.Filter = "Collection Files|*" + PPCollection.COLLECTION_EXTENSION;
@@ -134,7 +140,7 @@ namespace PerpetualPaint
 			OpenCollection(openFileDialog.FileName);
 		}
 
-		private void Form_OnAddProject(object sender, EventArgs e)
+		private void Collection_OnAddProject(object sender, EventArgs e)
 		{
 			//todo: is there a way to combine this with the similar from OneImageForm
 			OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -160,23 +166,14 @@ namespace PerpetualPaint
 			}
 		}
 
-		private void Form_OnSaveCollection(object sender, EventArgs e)
+		private void Colleciton_OnSave(object sender, EventArgs e)
 		{
 			Save();
 		}
 
-		private void Form_OnSaveAs(object sender, EventArgs e)
+		private void Collection_OnSaveAs(object sender, EventArgs e)
 		{
 			SaveAs();
-		}
-
-		private void Form_Closing(object sender, FormClosingEventArgs e)
-		{
-			bool continueOperation = PossiblySaveChangesBeforeClosingCollection();
-			if(!continueOperation)
-			{
-				e.Cancel = true;
-			}
 		}
 
 		private void Collection_OnStatusChanged(object sender, EventArgs e)
@@ -186,6 +183,15 @@ namespace PerpetualPaint
 				saveToolStripItem.Image = IconManager.SAVE_RED;
 			else
 				saveToolStripItem.Image = IconManager.SAVE;
+		}
+
+		private void Form_Closing(object sender, FormClosingEventArgs e)
+		{
+			bool continueOperation = PossiblySaveChangesBeforeClosingCollection();
+			if(!continueOperation)
+			{
+				e.Cancel = true;
+			}
 		}
 
 		private void Project_OnMouseEnter(object sender, EventArgs e)
@@ -225,6 +231,17 @@ namespace PerpetualPaint
 
 		#endregion
 
+		private void NewCollection()
+		{
+			bool continueOperation = PossiblySaveChangesBeforeClosingCollection();
+			if(!continueOperation)
+				return;
+
+			collection = new PPCollection();
+			SetupCollection();
+			flowPanel.Controls.Clear();
+		}
+
 		private void SetupCollection()
 		{
 			Collection_OnStatusChanged(collection, new EventArgs());
@@ -233,6 +250,12 @@ namespace PerpetualPaint
 
 		public void OpenCollection(string fileName)
 		{
+			if(String.IsNullOrEmpty(fileName))
+			{
+				NewCollection();
+				return;
+			}
+
 			collection = PPCollection.Load(fileName);
 			SetupCollection();
 
@@ -348,7 +371,7 @@ namespace PerpetualPaint
 		/// <returns>True for continue operation; False for cancel operation.</returns>
 		private bool PossiblySaveChangesBeforeClosingCollection()
 		{
-			if(collection == null)
+			if(collection == null || !collection.EditedSinceLastSave)
 				return true;
 			DialogResult result = MessageBox.Show("You are about to lose your changes.\nDo you want to save changes before closing the image?", "Save Before Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 			switch(result)
