@@ -74,6 +74,9 @@
     <Compile Include="CollectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Controls\PalettePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Dialogs\ErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>

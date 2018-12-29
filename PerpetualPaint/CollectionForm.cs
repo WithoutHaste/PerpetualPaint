@@ -29,6 +29,7 @@ namespace PerpetualPaint
 		private ToolStripItem saveToolStripItem;
 		/// <summary>Layout panel for the images.</summary>
 		private FlowLayoutPanel flowPanel;
+		private ColorPalettePanel colorPalettePanel;
 
 		/// <summary>The collection being displayed.</summary>
 		private PPCollection collection;
@@ -76,8 +77,14 @@ namespace PerpetualPaint
 			fileMenu.MenuItems.Add(saveCollection);
 			fileMenu.MenuItems.Add(saveAsCollection);
 
+			MenuItem paletteMenu = new MenuItem("Palette");
+/*			paletteMenu.MenuItems.Add("New", new EventHandler(Form_OnNewPalette));
+			paletteMenu.MenuItems.Add("Load", new EventHandler(Form_OnLoadPalette));
+			paletteMenu.MenuItems.Add("Edit", new EventHandler(Form_OnEditPalette));
+*/
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
+			this.Menu.MenuItems.Add(paletteMenu);
 
 			projectContextMenu = new ContextMenu();
 			projectContextMenu.MenuItems.Add("Remove", Project_OnRemove);
@@ -91,8 +98,6 @@ namespace PerpetualPaint
 			toolStrip.Items.Add("Open", IconManager.OPEN_FILE, Collection_OnOpen);
 			saveToolStripItem = toolStrip.Items.Add("Save", IconManager.SAVE, Colleciton_OnSave);
 			toolStrip.Items.Add(new ToolStripSeparator());
-			//todo:
-			//toolStrip.Items.Add("New", IconManager.NEW_FILE, Form_OnNewProject);
 			toolStrip.Items.Add("Add", IconManager.ADD, Collection_OnAddProject);
 
 			this.Controls.Add(toolStrip);
@@ -100,10 +105,14 @@ namespace PerpetualPaint
 
 		private void InitControls()
 		{
+			colorPalettePanel = new ColorPalettePanel();
+			LayoutHelper.Below(toolStrip).Left(this).Width(ColorPalettePanel.SWATCH_WIDTH * 4).Bottom(this).Apply(colorPalettePanel);
+			colorPalettePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+
 			flowPanel = new FlowLayoutPanel();
 			flowPanel.AutoScroll = true;
 			flowPanel.BorderStyle = BorderStyle.FixedSingle;
-			LayoutHelper.Left(this, 0).Right(this, 0).Top(this, 0).Bottom(this, 0).Apply(flowPanel);
+			LayoutHelper.RightOf(colorPalettePanel).Right(this).MatchTop(colorPalettePanel).Bottom(this).Apply(flowPanel);
 			flowPanel.Anchor = LayoutHelper.AnchorAll;
 			this.Controls.Add(flowPanel);
 		}
