@@ -557,7 +557,10 @@ namespace PerpetualPaint
 		private void Collection_OnProjectSelected(object sender, ProjectEventArgs e)
 		{
 			UpdateMasterImage(project:e.Project);
-			//todo: possibly load palette from collection, too
+			if(collectionForm.ColorPalette != null)
+			{
+				palettePanel.Set(collectionForm.ColorPalette);
+			}
 		}
 
 		private void MasterImage_OnProjectEdited(object sender, ProjectEventArgs e)

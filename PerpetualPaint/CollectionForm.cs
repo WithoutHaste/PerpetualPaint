@@ -38,6 +38,8 @@ namespace PerpetualPaint
 
 		private int selectedProjectIndex = -1;
 
+		public WithoutHaste.Drawing.Colors.ColorPalette ColorPalette { get { return palettePanel.ColorPalette; } }
+
 		public event ProjectEventHandler ProjectSelected;
 
 		public CollectionForm(string fileName = null)
@@ -342,6 +344,8 @@ namespace PerpetualPaint
 		private void Project_OnClick(object sender, EventArgs e)
 		{
 			Control control = (sender as Control);
+			if(control is PictureBox)
+				control = control.Parent;
 			SetSelection(control.TabIndex);
 		}
 
@@ -401,20 +405,37 @@ namespace PerpetualPaint
 		{
 			int padding = 4;
 
+			Panel panel = new Panel();
+			panel.Cursor = Cursors.Hand;
+			panel.ContextMenu = projectContextMenu;
+
 			PictureBox pictureBox = new PictureBox();
 			pictureBox.Width = THUMBNAIL_SIZE + padding + padding;
 			pictureBox.Height = THUMBNAIL_SIZE + padding + padding;
+			pictureBox.Left = 0;
+			pictureBox.Top = 0;
 			pictureBox.Image = project.GetThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
 			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-
-			pictureBox.Cursor = Cursors.Hand;
 			pictureBox.MouseEnter += new EventHandler(Project_OnMouseEnter);
 			pictureBox.MouseLeave += new EventHandler(Project_OnMouseLeave);
 			pictureBox.Click += new EventHandler(Project_OnClick);
 
-			pictureBox.ContextMenu = projectContextMenu;
+			panel.Controls.Add(pictureBox);
 
-			flowPanel.Controls.Add(pictureBox);
+			Label label = new Label();
+			if(!String.IsNullOrEmpty(project.SaveToFileName))
+			{
+				label.Text = Path.GetFileNameWithoutExtension(project.SaveToFileName);
+			}
+			label.Width = THUMBNAIL_SIZE;
+			label.Height = 20;
+			label.Left = padding;
+			label.Top = pictureBox.Bottom;
+			panel.Controls.Add(label);
+
+			panel.Width = pictureBox.Width;
+			panel.Height = label.Bottom;
+			flowPanel.Controls.Add(panel);
 		}
 
 		/// <summary>

@@ -38,16 +38,16 @@
       </Row>
       <Row>
         <Cell>
-          <Data ss:Type="Number">147</Data>
+          <Data ss:Type="Number">148</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
-          <Data ss:Type="String">collection view: display local filename of each project</Data>
+          <Data ss:Type="String">the highlighting in collection view is screwy</Data>
         </Cell>
         <Cell>
           <Data ss:Type="String">Todo</Data>
         </Cell>
         <Cell>
-          <Data ss:Type="String">Feature - Minor</Data>
+          <Data ss:Type="String">Bug - Minor</Data>
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2018-12-29T00:00:00.000</Data>
@@ -911,6 +911,26 @@ http://colorizer.org/</Data>
         </Cell>
         <Cell ss:StyleID="header">
           <Data ss:Type="String">Done</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">147</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">collection view: display local filename of each project</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Done</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-29T00:00:00.000</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2018-12-29T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2634,7 +2654,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">147</Data>
+          <Data ss:Type="Number">148</Data>
         </Cell>
       </Row>
       <Row>
