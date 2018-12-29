@@ -48,14 +48,13 @@ namespace PerpetualPaintLibrary
 				if(previousValue != value) TriggerStatusChanged();
 			}
 		}
-		private bool editedSinceLastSave;
+		private bool editedSinceLastSave = false;
 
 		/// <summary>
 		/// Create empty collection.
 		/// </summary>
 		public PPCollection()
 		{
-			EditedSinceLastSave = false;
 		}
 
 		/// <summary>
@@ -66,10 +65,9 @@ namespace PerpetualPaintLibrary
 			Config = config;
 			foreach(string projectFileName in projectFileNames)
 			{
-				LoadProject(projectFileName);
+				LoadProject_Internal(projectFileName);
 			}
 			ColorPalette = colorPalette;
-			EditedSinceLastSave = true;
 		}
 
 		private void TriggerStatusChanged()
@@ -88,12 +86,7 @@ namespace PerpetualPaintLibrary
 			return collection;
 		}
 
-		/// <summary>
-		/// Load and add project from file.
-		/// </summary>
-		/// <returns>Returns the new project.</returns>
-		/// <exception cref='DuplicateException'>Tried to add duplicate file to collection.</exception>
-		public PPProject LoadProject(string fullFileName)
+		private PPProject LoadProject_Internal(string fullFileName)
 		{
 			if(String.IsNullOrEmpty(fullFileName))
 				throw new FileNotFoundException("Cannot load from empty file name.");
@@ -111,16 +104,27 @@ namespace PerpetualPaintLibrary
 		}
 
 		/// <summary>
+		/// Load and add project from file.
+		/// </summary>
+		/// <returns>Returns the new project.</returns>
+		/// <exception cref='DuplicateException'>Tried to add duplicate file to collection.</exception>
+		public PPProject LoadProject(string fullFileName)
+		{
+			PPProject project = LoadProject_Internal(fullFileName);
+			EditedSinceLastSave = true;
+			return project;
+		}
+
+		/// <summary>
 		/// Add project to collection.
 		/// </summary>
 		/// <exception cref='DuplicateException'>Tried to add duplicate file to collection.</exception>
-		public void AddProject(PPProject project)
+		private void AddProject(PPProject project)
 		{
 			if(projects.Any(p => p.FromSameFile(project)))
 				throw new DuplicateException("File is already in the collection.");
 
 			projects.Add(project);
-			EditedSinceLastSave = true;
 		}
 
 		/// <summary>
@@ -171,8 +175,35 @@ namespace PerpetualPaintLibrary
 			return projects.Select(p => p.SaveToFileName).ToArray();
 		}
 
+		/// <summary>
+		/// Returns true when options or values have changed.
+		/// </summary>
+		private bool OptionsHaveChanged(PPConfig.PaletteOptions paletteOption, WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
+		{
+			if(Config.PaletteOption == paletteOption)
+			{
+				switch(Config.PaletteOption)
+				{
+					case PPConfig.PaletteOptions.SaveNothing:
+						return false;
+					case PPConfig.PaletteOptions.SaveFile:
+						if(ColorPalette == colorPalette)
+							return false;
+						break;
+					case PPConfig.PaletteOptions.SaveFileName:
+						if(Config.PaletteFileName == paletteFileName)
+							return false;
+						break;
+				}
+			}
+			return true;
+		}
+
 		public void SetPaletteOption(PPConfig.PaletteOptions paletteOption, WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
 		{
+			if(!OptionsHaveChanged(paletteOption, colorPalette, paletteFileName))
+				return;
+
 			Config.PaletteOption = paletteOption;
 			switch(Config.PaletteOption)
 			{
@@ -187,6 +218,25 @@ namespace PerpetualPaintLibrary
 				case PPConfig.PaletteOptions.SaveFileName:
 					Config.PaletteFileName = paletteFileName;
 					ColorPalette = null;
+					break;
+			}
+			EditedSinceLastSave = true;
+		}
+		
+		public void UpdatePaletteOption(WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null, string paletteFileName = null)
+		{
+			if(!OptionsHaveChanged(Config.PaletteOption, colorPalette, paletteFileName))
+				return;
+
+			switch(Config.PaletteOption)
+			{
+				case PPConfig.PaletteOptions.SaveNothing:
+					return;
+				case PPConfig.PaletteOptions.SaveFile:
+					ColorPalette = colorPalette;
+					break;
+				case PPConfig.PaletteOptions.SaveFileName:
+					Config.PaletteFileName = paletteFileName;
 					break;
 			}
 			EditedSinceLastSave = true;

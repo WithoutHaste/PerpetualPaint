@@ -43,6 +43,8 @@ namespace PerpetualPaint
 			InitControls();
 		}
 
+		#region Init
+
 		public void InitControls()
 		{
 			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
@@ -72,6 +74,10 @@ namespace PerpetualPaint
 			this.Controls.Add(colorPalettePanel);
 		}
 
+		#endregion
+
+		#region Event Handlers
+
 		private void Form_OnNarrowPalette(object sender, EventArgs e)
 		{
 			if(SwatchesPerRow == MIN_SWATCHES_PER_ROW) return;
@@ -89,6 +95,8 @@ namespace PerpetualPaint
 			TriggerSettingChanged();
 			DisplayPalette();
 		}
+
+		#endregion
 
 		private void TriggerSettingChanged()
 		{
