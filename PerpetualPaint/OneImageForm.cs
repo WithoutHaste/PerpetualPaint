@@ -19,8 +19,7 @@ namespace PerpetualPaint
 	public class OneImageForm : Form
 	{
 		private ToolStrip toolStrip;
-		private Panel palettePanel;
-		private ColorPalettePanel colorPalettePanel;
+		private PalettePanel palettePanel;
 		private Panel scrollPanel;
 		private StatusPanel statusPanel;
 		private PixelPictureBox pictureBox;
@@ -30,8 +29,6 @@ namespace PerpetualPaint
 		private const int SCALE_FIT = -1;
 		private const int MAX_IMAGE_DIMENSION = 9000;
 		private const int DEFAULT_SWATCHES_PER_ROW = 3;
-		private const int MIN_SWATCHES_PER_ROW = 3;
-		private const int MAX_SWATCHES_PER_ROW = 12;
 		private readonly Cursor ADD_COLOR_CURSOR = Cursors.Hand;
 		private readonly Cursor DROPPER_CURSOR = Cursors.Cross;
 
@@ -49,10 +46,9 @@ namespace PerpetualPaint
 				Properties.Settings.Default.Save();
 			}
 		}
-		private int palettePadding = 15;
 		private Color? SelectedColor {
 			get {
-				return colorPalettePanel.SelectedColor;
+				return palettePanel.SelectedColor;
 			}
 		}
 
@@ -60,16 +56,6 @@ namespace PerpetualPaint
 
 		private Queue<ColorAtPoint> requestColorQueue = new Queue<ColorAtPoint>();
 		private RequestColorWorker requestColorWorker;
-
-		private string PaletteFullFilename {
-			get {
-				return Properties.Settings.Default.PaletteFullFilename;
-			}
-			set {
-				Properties.Settings.Default.PaletteFullFilename = value;
-				Properties.Settings.Default.Save();
-			}
-		}
 
 		private bool Setting_FormFullScreen {
 			get {
@@ -101,9 +87,17 @@ namespace PerpetualPaint
 			}
 		}
 
-		private FormWindowState previousFormWindowState;
+		private string Default_PaletteFileName {
+			get {
+				return Properties.Settings.Default.PaletteFullFilename;
+			}
+			set {
+				Properties.Settings.Default.PaletteFullFilename = value;
+				Properties.Settings.Default.Save();
+			}
+		}
 
-		private WithoutHaste.Drawing.Colors.ColorPalette colorPalette;
+		private FormWindowState previousFormWindowState;
 
 		private bool HasImage { get { return masterImage != null; } }
 
@@ -153,8 +147,6 @@ namespace PerpetualPaint
 			InitImage();
 
 			InitHistory();
-
-			LoadPalette();
 		}
 
 		#region Init
@@ -217,37 +209,18 @@ namespace PerpetualPaint
 			this.Controls.Add(toolStrip);
 		}
 
-		//todo: possibly move palettePanel into its own Panel class with all behavior
 		private void InitPalette()
 		{
-			int scrollBarBuffer = System.Windows.Forms.SystemInformation.VerticalScrollBarWidth + 5;
-			int swatchesWidth = (ColorPalettePanel.SWATCH_WIDTH * Setting_SwatchesPerRow) + scrollBarBuffer;
-			int paletteWidth =  swatchesWidth + (2 * palettePadding);
-
-			palettePanel = new Panel();
-			LayoutHelper.Below(toolStrip).Left(this).Bottom(this).Width(paletteWidth).Apply(palettePanel);
+			palettePanel = new PalettePanel(Setting_SwatchesPerRow);
+			LayoutHelper.Below(toolStrip).Left(this).Bottom(this).Width(palettePanel.Width).Apply(palettePanel);
 			palettePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 
-			Button narrowPaletteButton = new Button();
-			narrowPaletteButton.Text = "<<";
-			LayoutHelper.Bottom(palettePanel, palettePadding).Left(palettePanel, palettePadding).Width(ColorPalettePanel.SWATCH_WIDTH).Height(ColorPalettePanel.SWATCH_WIDTH).Apply(narrowPaletteButton);
-			narrowPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-			narrowPaletteButton.Click += new EventHandler(Form_OnNarrowPalette);
+			palettePanel.SettingChanged += new EventHandler(PalettePanel_OnSettingChanged);
+			palettePanel.SizeChanged += new EventHandler(PalettePanel_OnSizeChanged);
 
-			Button widenPaletteButton = new Button();
-			widenPaletteButton.Text = ">>";
-			LayoutHelper.Bottom(palettePanel, palettePadding).Right(palettePanel, palettePadding).Width(ColorPalettePanel.SWATCH_WIDTH).Height(ColorPalettePanel.SWATCH_WIDTH).Apply(widenPaletteButton);
-			widenPaletteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-			widenPaletteButton.Click += new EventHandler(Form_OnWidenPalette);
-
-			colorPalettePanel = new ColorPalettePanel();
-			LayoutHelper.Top(palettePanel).MatchLeft(narrowPaletteButton).MatchRight(widenPaletteButton).Above(narrowPaletteButton, palettePadding).Apply(colorPalettePanel);
-			colorPalettePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-
-			palettePanel.Controls.Add(colorPalettePanel);
-			palettePanel.Controls.Add(narrowPaletteButton);
-			palettePanel.Controls.Add(widenPaletteButton);
 			this.Controls.Add(palettePanel);
+
+			palettePanel.Set(Default_PaletteFileName);
 		}
 
 		private void InitStatusPanel()
@@ -384,22 +357,6 @@ namespace PerpetualPaint
 			EditProjectOptions();
 		}
 
-		private void Form_OnNarrowPalette(object sender, EventArgs e)
-		{
-			if(Setting_SwatchesPerRow == MIN_SWATCHES_PER_ROW) return;
-
-			Setting_SwatchesPerRow--;
-			DisplayPalette();
-		}
-
-		private void Form_OnWidenPalette(object sender, EventArgs e)
-		{
-			if(Setting_SwatchesPerRow == MAX_SWATCHES_PER_ROW) return;
-
-			Setting_SwatchesPerRow++;
-			DisplayPalette();
-		}
-		
 		private void Form_OnUndo(object sender, EventArgs e)
 		{
 			history.Undo();
@@ -426,11 +383,10 @@ namespace PerpetualPaint
 					return;
 				if(form.FullFilename == null)
 					return;
-				PaletteFullFilename = form.FullFilename;
-				LoadPalette();
+				palettePanel.Set(form.FullFilename);
 				if(masterImage != null)
 				{
-					masterImage.Project.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+					masterImage.Project.UpdatePaletteOption(palettePanel.ColorPalette, palettePanel.PaletteFileName);
 				}
 			}
 		}
@@ -447,8 +403,7 @@ namespace PerpetualPaint
 			}
 			try
 			{
-				PaletteFullFilename = openFileDialog.FileName;
-				LoadPalette();
+				palettePanel.Set(openFileDialog.FileName);
 			}
 			catch(FileNotFoundException exception)
 			{
@@ -456,7 +411,7 @@ namespace PerpetualPaint
 			}
 			if(masterImage != null)
 			{
-				masterImage.Project.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+				masterImage.Project.UpdatePaletteOption(palettePanel.ColorPalette, palettePanel.PaletteFileName);
 			}
 		}
 
@@ -469,7 +424,7 @@ namespace PerpetualPaint
 			}
 			else
 			{
-				dialog = new EditPaletteDialog(PaletteFullFilename);
+				dialog = new EditPaletteDialog(palettePanel.PaletteFileName);
 			}
 			dialog.StartPosition = FormStartPosition.Manual;
 			dialog.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
@@ -478,19 +433,16 @@ namespace PerpetualPaint
 
 			if(masterImage != null && masterImage.Project.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
 			{
-				colorPalette = dialog.ColorPalette;
-				masterImage.Project.UpdatePaletteOption(colorPalette, null);
-				DisplayPalette();
+				palettePanel.Set(dialog.ColorPalette);
 			}
 			else
 			{
-				PaletteFullFilename = dialog.FullFilename;
-				LoadPalette();
+				palettePanel.Set(dialog.FullFilename);
 			}
 
 			if(masterImage != null)
 			{
-				masterImage.Project.UpdatePaletteOption(colorPalette, PaletteFullFilename);
+				masterImage.Project.UpdatePaletteOption(palettePanel.ColorPalette, palettePanel.PaletteFileName);
 			}
 		}
 
@@ -585,7 +537,7 @@ namespace PerpetualPaint
 			if(isDropperOperation)
 			{
 				Color pureColor = masterImage.PureColor(masterImagePoint);
-				colorPalettePanel.SelectedColor = pureColor;
+				palettePanel.SelectedColor = pureColor;
 				isDropperOperation = false;
 				UpdateOperationMode();
 			}
@@ -605,12 +557,34 @@ namespace PerpetualPaint
 		private void Collection_OnProjectSelected(object sender, ProjectEventArgs e)
 		{
 			UpdateMasterImage(project:e.Project);
-			//todo: possibly load palette from collection, too
+			if(collectionForm.ColorPalette != null)
+			{
+				palettePanel.Set(collectionForm.ColorPalette);
+			}
 		}
 
 		private void MasterImage_OnProjectEdited(object sender, ProjectEventArgs e)
 		{
 			collectionForm?.UpdateProject(e.Project);
+		}
+
+		private void PalettePanel_OnSettingChanged(object sender, EventArgs e)
+		{
+			PalettePanel panel = (sender as PalettePanel);
+			Setting_SwatchesPerRow = panel.SwatchesPerRow;
+			if(panel.PaletteFileName != null)
+				Default_PaletteFileName = panel.PaletteFileName;
+		}
+
+		private void PalettePanel_OnSizeChanged(object sender, EventArgs e)
+		{
+			int delta = palettePanel.Right - statusPanel.Left;
+			statusPanel.Left += delta;
+			statusPanel.Width -= delta;
+
+			delta = palettePanel.Right - scrollPanel.Left;
+			scrollPanel.Left += delta;
+			scrollPanel.Width -= delta;
 		}
 
 		private void OnProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -756,12 +730,10 @@ namespace PerpetualPaint
 			switch(masterImage.Project.Config.PaletteOption)
 			{
 				case PPConfig.PaletteOptions.SaveFile:
-					colorPalette = masterImage.Project.ColorPalette;
-					DisplayPalette();
+					palettePanel.Set(masterImage.Project.ColorPalette);
 					break;
 				case PPConfig.PaletteOptions.SaveFileName:
-					PaletteFullFilename = masterImage.Project.Config.PaletteFileName;
-					LoadPalette();
+					palettePanel.Set(masterImage.Project.Config.PaletteFileName);
 					break;
 			}
 		}
@@ -835,7 +807,7 @@ namespace PerpetualPaint
 			{
 				if(form.ShowDialog(this) != DialogResult.OK)
 					return false;
-				masterImage.Project.SetPaletteOption(form.PaletteOption, colorPalette, PaletteFullFilename);
+				masterImage.Project.SetPaletteOption(form.PaletteOption, palettePanel.ColorPalette, palettePanel.PaletteFileName);
 			}
 			return true;
 		}
@@ -949,32 +921,6 @@ namespace PerpetualPaint
 			}
 
 			scrollPanel.AutoScrollPosition = new Point(x, y);
-		}
-
-		private void LoadPalette()
-		{
-			try
-			{
-				colorPalette = WithoutHaste.Drawing.Colors.ColorPalette.Load(PaletteFullFilename);
-			}
-			catch(Exception e)
-			{
-				HandleError("Cannot load palette: " + PaletteFullFilename, e);
-				return;
-			}
-			DisplayPalette();
-		}
-
-		private void DisplayPalette()
-		{
-			int paletteWidth = (Setting_SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + (2 * palettePadding) + ColorPalettePanel.SCROLLBAR_WIDTH;
-
-			palettePanel.Size = new Size(paletteWidth, palettePanel.Size.Height);
-			colorPalettePanel.Size = new Size((Setting_SwatchesPerRow * ColorPalettePanel.SWATCH_WIDTH) + ColorPalettePanel.SCROLLBAR_WIDTH, colorPalettePanel.Size.Height);
-			LayoutHelper.RightOf(palettePanel).Bottom(this).Right(this).Height(statusPanel.Height).Apply(statusPanel);
-			LayoutHelper.RightOf(palettePanel).Below(toolStrip).Above(statusPanel).Right(this).Apply(scrollPanel);
-
-			colorPalettePanel.DisplayColors(colorPalette);
 		}
 
 		private void UpdateStatusText(string text)

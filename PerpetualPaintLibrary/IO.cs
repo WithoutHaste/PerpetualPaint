@@ -160,7 +160,7 @@ namespace PerpetualPaintLibrary
 			{
 				if(!package.PartExists(URI_PART_COLLECTION))
 					throw new FileFormatException("Collection zip file does not include list of projects.");
-				string[] projectFileNames = package.GetPart(URI_PART_COLLECTION).GetStream().StreamToByteArray().ByteArrayToText();
+				string[] projectFileNames = package.GetPart(URI_PART_COLLECTION).GetStream().StreamToByteArray().ByteArrayToText().Where(x => !String.IsNullOrEmpty(x)).ToArray();
 				WithoutHaste.Drawing.Colors.ColorPalette colorPalette = null;
 				if(package.PartExists(URI_PART_PALETTE))
 				{

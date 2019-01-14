@@ -29,6 +29,7 @@ namespace PerpetualPaint
 		private ToolStripItem saveToolStripItem;
 		/// <summary>Layout panel for the images.</summary>
 		private FlowLayoutPanel flowPanel;
+		private PalettePanel palettePanel;
 
 		/// <summary>The collection being displayed.</summary>
 		private PPCollection collection;
@@ -36,6 +37,8 @@ namespace PerpetualPaint
 		private ContextMenu projectContextMenu;
 
 		private int selectedProjectIndex = -1;
+
+		public WithoutHaste.Drawing.Colors.ColorPalette ColorPalette { get { return palettePanel.ColorPalette; } }
 
 		public event ProjectEventHandler ProjectSelected;
 
@@ -76,8 +79,14 @@ namespace PerpetualPaint
 			fileMenu.MenuItems.Add(saveCollection);
 			fileMenu.MenuItems.Add(saveAsCollection);
 
+			MenuItem paletteMenu = new MenuItem("Palette");
+			paletteMenu.MenuItems.Add("New", new EventHandler(Form_OnNewPalette));
+			paletteMenu.MenuItems.Add("Load", new EventHandler(Form_OnLoadPalette));
+			paletteMenu.MenuItems.Add("Edit", new EventHandler(Form_OnEditPalette));
+
 			this.Menu = new MainMenu();
 			this.Menu.MenuItems.Add(fileMenu);
+			this.Menu.MenuItems.Add(paletteMenu);
 
 			projectContextMenu = new ContextMenu();
 			projectContextMenu.MenuItems.Add("Remove", Project_OnRemove);
@@ -91,8 +100,6 @@ namespace PerpetualPaint
 			toolStrip.Items.Add("Open", IconManager.OPEN_FILE, Collection_OnOpen);
 			saveToolStripItem = toolStrip.Items.Add("Save", IconManager.SAVE, Colleciton_OnSave);
 			toolStrip.Items.Add(new ToolStripSeparator());
-			//todo:
-			//toolStrip.Items.Add("New", IconManager.NEW_FILE, Form_OnNewProject);
 			toolStrip.Items.Add("Add", IconManager.ADD, Collection_OnAddProject);
 
 			this.Controls.Add(toolStrip);
@@ -100,10 +107,27 @@ namespace PerpetualPaint
 
 		private void InitControls()
 		{
+			palettePanel = new PalettePanel();
+			LayoutHelper.Below(toolStrip).Left(this).Bottom(this).Width(palettePanel.Width).Apply(palettePanel);
+			palettePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+
+			palettePanel.SettingChanged += new EventHandler(PalettePanel_OnSettingChanged);
+			palettePanel.SizeChanged += new EventHandler(PalettePanel_OnSizeChanged);
+
+			this.Controls.Add(palettePanel);
+
+			if(collection != null)
+			{
+				if(collection.ColorPalette != null)
+					palettePanel.Set(collection.ColorPalette);
+				else if(collection.Config.PaletteFileName != null)
+					palettePanel.Set(collection.Config.PaletteFileName);
+			}
+
 			flowPanel = new FlowLayoutPanel();
 			flowPanel.AutoScroll = true;
 			flowPanel.BorderStyle = BorderStyle.FixedSingle;
-			LayoutHelper.Left(this, 0).Right(this, 0).Top(this, 0).Bottom(this, 0).Apply(flowPanel);
+			LayoutHelper.RightOf(palettePanel).Right(this).MatchTop(palettePanel).Bottom(this).Apply(flowPanel);
 			flowPanel.Anchor = LayoutHelper.AnchorAll;
 			this.Controls.Add(flowPanel);
 		}
@@ -122,6 +146,21 @@ namespace PerpetualPaint
 		#endregion
 
 		#region Event Handlers
+
+		private void PalettePanel_OnSettingChanged(object sender, EventArgs e)
+		{
+			if(collection != null)
+			{
+				collection.UpdatePaletteOption(palettePanel.ColorPalette, palettePanel.PaletteFileName);
+			}
+		}
+
+		private void PalettePanel_OnSizeChanged(object sender, EventArgs e)
+		{
+			int delta = palettePanel.Right - flowPanel.Left;
+			flowPanel.Left += delta;
+			flowPanel.Width -= delta;
+		}
 
 		private void Collection_OnNew(object sender, EventArgs e)
 		{
@@ -179,10 +218,89 @@ namespace PerpetualPaint
 		private void Collection_OnStatusChanged(object sender, EventArgs e)
 		{
 			PPCollection collection = (sender as PPCollection);
+			if(collection == null)
+			{
+				saveToolStripItem.Image = IconManager.SAVE;
+				return;
+			}
+
 			if(collection.EditedSinceLastSave)
 				saveToolStripItem.Image = IconManager.SAVE_RED;
 			else
 				saveToolStripItem.Image = IconManager.SAVE;
+		}
+
+		private void Form_OnNewPalette(object sender, EventArgs e)
+		{
+			using(EditPaletteDialog form = new EditPaletteDialog())
+			{
+				form.StartPosition = FormStartPosition.Manual;
+				form.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
+				if(form.ShowDialog() != DialogResult.OK)
+					return;
+				if(form.FullFilename == null)
+					return;
+				palettePanel.Set(form.FullFilename);
+				if(collection != null)
+				{
+					collection.UpdatePaletteOption(palettePanel.ColorPalette, palettePanel.PaletteFileName);
+				}
+			}
+		}
+
+		private void Form_OnLoadPalette(object sender, EventArgs e)
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Palette Files|*.aco;*.gpl;*.pal";
+			openFileDialog.Title = "Select a Palette File";
+
+			if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			{
+				return;
+			}
+			palettePanel.Set(openFileDialog.FileName);
+			if(collection != null)
+			{
+				collection.UpdatePaletteOption(palettePanel.ColorPalette, palettePanel.PaletteFileName);
+			}
+		}
+
+		private void Form_OnEditPalette(object sender, EventArgs e)
+		{
+			EditPaletteDialog dialog;
+			if(collection != null)
+			{
+				if(collection.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
+				{
+					dialog = new EditPaletteDialog(collection.ColorPalette);
+				}
+				else
+				{
+					dialog = new EditPaletteDialog(collection.Config.PaletteFileName);
+				}
+			}
+			else
+			{
+				dialog = new EditPaletteDialog(palettePanel.PaletteFileName);
+			}
+			dialog.StartPosition = FormStartPosition.Manual;
+			dialog.Location = new Point(this.Location.X + 30, this.Location.Y + 30);
+			if(dialog.ShowDialog() != DialogResult.OK)
+				return;
+
+			if(collection != null && collection.Config.PaletteOption == PPConfig.PaletteOptions.SaveFile)
+			{
+				palettePanel.Set(dialog.ColorPalette);
+			}
+			else
+			{
+				palettePanel.Set(dialog.FullFilename);
+			}
+
+			if(collection != null)
+			{
+				collection.UpdatePaletteOption(palettePanel.ColorPalette, palettePanel.PaletteFileName);
+			}
 		}
 
 		private void Form_Closing(object sender, FormClosingEventArgs e)
@@ -226,6 +344,8 @@ namespace PerpetualPaint
 		private void Project_OnClick(object sender, EventArgs e)
 		{
 			Control control = (sender as Control);
+			if(control is PictureBox)
+				control = control.Parent;
 			SetSelection(control.TabIndex);
 		}
 
@@ -238,6 +358,10 @@ namespace PerpetualPaint
 				return;
 
 			collection = new PPCollection();
+
+			if(palettePanel.PaletteFileName != null)
+				collection.SetPaletteOption(PPConfig.PaletteOptions.SaveFileName, paletteFileName: palettePanel.PaletteFileName);
+
 			SetupCollection();
 			flowPanel.Controls.Clear();
 		}
@@ -246,6 +370,7 @@ namespace PerpetualPaint
 		{
 			Collection_OnStatusChanged(collection, new EventArgs());
 			collection.StatusChanged += new EventHandler(Collection_OnStatusChanged);
+			Collection_OnStatusChanged(collection, new EventArgs());
 		}
 
 		public void OpenCollection(string fileName)
@@ -258,6 +383,16 @@ namespace PerpetualPaint
 
 			collection = PPCollection.Load(fileName);
 			SetupCollection();
+			switch(collection.Config.PaletteOption)
+			{
+				case PPConfig.PaletteOptions.SaveFile:
+					palettePanel.Set(collection.ColorPalette);
+					break;
+				case PPConfig.PaletteOptions.SaveFileName:
+					palettePanel.Set(collection.Config.PaletteFileName);
+					break;
+			}
+
 
 			flowPanel.Controls.Clear();
 			foreach(PPProject project in collection.Projects)
@@ -270,20 +405,37 @@ namespace PerpetualPaint
 		{
 			int padding = 4;
 
+			Panel panel = new Panel();
+			panel.Cursor = Cursors.Hand;
+			panel.ContextMenu = projectContextMenu;
+
 			PictureBox pictureBox = new PictureBox();
 			pictureBox.Width = THUMBNAIL_SIZE + padding + padding;
 			pictureBox.Height = THUMBNAIL_SIZE + padding + padding;
+			pictureBox.Left = 0;
+			pictureBox.Top = 0;
 			pictureBox.Image = project.GetThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
 			pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-
-			pictureBox.Cursor = Cursors.Hand;
 			pictureBox.MouseEnter += new EventHandler(Project_OnMouseEnter);
 			pictureBox.MouseLeave += new EventHandler(Project_OnMouseLeave);
 			pictureBox.Click += new EventHandler(Project_OnClick);
 
-			pictureBox.ContextMenu = projectContextMenu;
+			panel.Controls.Add(pictureBox);
 
-			flowPanel.Controls.Add(pictureBox);
+			Label label = new Label();
+			if(!String.IsNullOrEmpty(project.SaveToFileName))
+			{
+				label.Text = Path.GetFileNameWithoutExtension(project.SaveToFileName);
+			}
+			label.Width = THUMBNAIL_SIZE;
+			label.Height = 20;
+			label.Left = padding;
+			label.Top = pictureBox.Bottom;
+			panel.Controls.Add(label);
+
+			panel.Width = pictureBox.Width;
+			panel.Height = label.Bottom;
+			flowPanel.Controls.Add(panel);
 		}
 
 		/// <summary>
@@ -334,7 +486,7 @@ namespace PerpetualPaint
 			{
 				if(form.ShowDialog(this) != DialogResult.OK)
 					return false;
-				collection.SetPaletteOption(form.PaletteOption);
+				collection.SetPaletteOption(form.PaletteOption, palettePanel.ColorPalette, palettePanel.PaletteFileName);
 			}
 			return true;
 		}

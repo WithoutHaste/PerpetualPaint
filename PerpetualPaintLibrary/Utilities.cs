@@ -247,6 +247,5 @@ namespace PerpetualPaintLibrary
 			}
 			return color;
 		}
-
 	}
 }
