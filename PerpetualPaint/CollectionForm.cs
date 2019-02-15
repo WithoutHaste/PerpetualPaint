@@ -580,6 +580,8 @@ namespace PerpetualPaint
 			int i = 0;
 			foreach(Control control in flowPanel.Controls)
 			{
+				if(!(control is PictureBox))
+					continue;
 				if(i == index)
 				{
 					PictureBox pictureBox = (control as PictureBox);

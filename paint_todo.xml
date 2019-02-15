@@ -38,6 +38,23 @@
       </Row>
       <Row>
         <Cell>
+          <Data ss:Type="Number">150</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">when project is updated, collection thumbnail is not</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Bug - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2019-02-15T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
           <Data ss:Type="Number">147</Data>
         </Cell>
         <Cell ss:StyleID="paragraph">
@@ -75,6 +92,23 @@ instead of a seperate form, move collection view into a pane in the main form
         </Cell>
         <Cell ss:StyleID="cellShortDate">
           <Data ss:Type="DateTime">2019-01-14T00:00:00.000</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+          <Data ss:Type="Number">149</Data>
+        </Cell>
+        <Cell ss:StyleID="paragraph">
+          <Data ss:Type="String">option to see you colored project (or full collection) in greyscale, to easily check the hues you are using relative to each other</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Todo</Data>
+        </Cell>
+        <Cell>
+          <Data ss:Type="String">Feature - Minor</Data>
+        </Cell>
+        <Cell ss:StyleID="cellShortDate">
+          <Data ss:Type="DateTime">2019-01-27T00:00:00.000</Data>
         </Cell>
       </Row>
       <Row>
@@ -2695,7 +2729,7 @@ UPDATED: show status bar message</Data>
           </Data>
         </Cell>
         <Cell>
-          <Data ss:Type="Number">148</Data>
+          <Data ss:Type="Number">150</Data>
         </Cell>
       </Row>
       <Row>
